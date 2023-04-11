@@ -127,8 +127,7 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
     }
 
     @Override
-    public void addIdVProvider(IdVProvider idVProvider, int tenantId)
-            throws IdVProviderMgtException {
+    public void addIdVProvider(IdVProvider idVProvider, int tenantId) throws IdVProviderMgtException {
 
         try (Connection connection = IdentityDatabaseUtil.getDBConnection(false);
              PreparedStatement addIdVProviderStmt = connection.prepareStatement(ADD_IDVP_SQL)) {

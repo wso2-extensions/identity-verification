@@ -118,7 +118,7 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
         validateUserId(userId, tenantId);
         for (IdVClaim idVClaim : idVClaims) {
             // Set uuid for each identity verification claim.
-            idVClaim.setId(UUID.randomUUID().toString());
+            idVClaim.setUuid(UUID.randomUUID().toString());
 
             // Validate the identity verification claim.
             validateIdVClaimInputs(userId, idVClaim, tenantId);

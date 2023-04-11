@@ -72,8 +72,7 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     }
 
     @Override
-    public IdVProvider addIdVProvider(IdVProvider idVProvider,
-                                      int tenantId) throws IdVProviderMgtException {
+    public IdVProvider addIdVProvider(IdVProvider idVProvider, int tenantId) throws IdVProviderMgtException {
 
         String idVPName = idVProvider.getIdVProviderName();
         if (isIdVProviderExistsByName(idVPName, tenantId)) {
