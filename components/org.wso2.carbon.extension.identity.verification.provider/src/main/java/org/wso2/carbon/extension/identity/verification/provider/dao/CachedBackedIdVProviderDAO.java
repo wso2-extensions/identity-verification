@@ -25,7 +25,7 @@ import org.wso2.carbon.extension.identity.verification.provider.cache.IdVProvide
 import org.wso2.carbon.extension.identity.verification.provider.cache.IdVProviderByNameCacheKey;
 import org.wso2.carbon.extension.identity.verification.provider.cache.IdVProviderCacheEntry;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 
 import java.util.List;
 
@@ -53,37 +53,33 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
     }
 
     @Override
-    public IdentityVerificationProvider getIdVProvider(String idVProviderUuid, int tenantId)
-            throws IdVProviderMgtException {
+    public IdVProvider getIdVProvider(String idVProviderUuid, int tenantId) throws IdVProviderMgtException {
 
-        IdentityVerificationProvider identityVerificationProvider = getIdVPFromCacheById(idVProviderUuid, tenantId);
-        if (identityVerificationProvider != null) {
+        IdVProvider idVProvider = getIdVPFromCacheById(idVProviderUuid, tenantId);
+        if (idVProvider != null) {
             if (log.isDebugEnabled()) {
-                String message = String.format("Cache hit for IdVProvider by it's id: %s, Tenant id: %d",
-                        idVProviderUuid, tenantId);
-                log.debug(message);
+                log.debug(String.format("Cache hit for IdVProvider by it's id: %s, Tenant id: %d",
+                        idVProviderUuid, tenantId));
             }
         } else {
             if (log.isDebugEnabled()) {
-                String message = String.format("Cache miss for IdVProvider by it's id: %s. Tenant id: %d",
-                        idVProviderUuid, tenantId);
-                log.debug(message);
+                log.debug(String.format("Cache miss for IdVProvider by it's id: %s. Tenant id: %d",
+                        idVProviderUuid, tenantId));
             }
-            identityVerificationProvider = idVProviderManagerDAO.getIdVProvider(idVProviderUuid, tenantId);
-            addIdVPToCache(identityVerificationProvider, tenantId);
+            idVProvider = idVProviderManagerDAO.getIdVProvider(idVProviderUuid, tenantId);
+            addIdVPToCache(idVProvider, tenantId);
         }
-        return identityVerificationProvider;
+        return idVProvider;
     }
 
     @Override
     public boolean isIdVProviderExists(String idVProviderUuid, int tenantId) throws IdVProviderMgtException {
 
-        IdentityVerificationProvider identityVerificationProvider = getIdVPFromCacheById(idVProviderUuid, tenantId);
-        if (identityVerificationProvider != null) {
+        IdVProvider idVProvider = getIdVPFromCacheById(idVProviderUuid, tenantId);
+        if (idVProvider != null) {
             if (log.isDebugEnabled()) {
-                String message = String.format("Cache hit for IdVProvider by it's id: %s, Tenant id: %d",
-                        idVProviderUuid, tenantId);
-                log.debug(message);
+                log.debug(String.format("Cache hit for IdVProvider by it's id: %s, Tenant id: %d",
+                        idVProviderUuid, tenantId));
             }
             return true;
         }
@@ -91,16 +87,14 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
     }
 
     @Override
-    public void addIdVProvider(IdentityVerificationProvider identityVerificationProvider, int tenantId)
-            throws IdVProviderMgtException {
+    public void addIdVProvider(IdVProvider idVProvider, int tenantId) throws IdVProviderMgtException {
 
-        idVProviderManagerDAO.addIdVProvider(identityVerificationProvider, tenantId);
-        addIdVPToCache(identityVerificationProvider, tenantId);
+        idVProviderManagerDAO.addIdVProvider(idVProvider, tenantId);
+        addIdVPToCache(idVProvider, tenantId);
     }
 
     @Override
-    public void updateIdVProvider(IdentityVerificationProvider oldIdVProvider,
-                                  IdentityVerificationProvider newIdVProvider, int tenantId)
+    public void updateIdVProvider(IdVProvider oldIdVProvider, IdVProvider newIdVProvider, int tenantId)
             throws IdVProviderMgtException {
 
         idVProviderManagerDAO.updateIdVProvider(oldIdVProvider, newIdVProvider, tenantId);
@@ -108,7 +102,7 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
     }
 
     @Override
-    public List<IdentityVerificationProvider> getIdVProviders(Integer limit, Integer offset, int tenantId)
+    public List<IdVProvider> getIdVProviders(Integer limit, Integer offset, int tenantId)
             throws IdVProviderMgtException {
 
         return idVProviderManagerDAO.getIdVProviders(limit, offset, tenantId);
@@ -121,94 +115,98 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
     }
 
     @Override
-    public IdentityVerificationProvider getIdVPByName(String idVPName, int tenantId) throws IdVProviderMgtException {
+    public IdVProvider getIdVPByName(String idVPName, int tenantId) throws IdVProviderMgtException {
 
-        IdentityVerificationProvider identityVerificationProvider = getIdVPFromCacheByName(idVPName, tenantId);
-        if (identityVerificationProvider != null) {
+        IdVProvider idVProvider = getIdVPFromCacheByName(idVPName, tenantId);
+        if (idVProvider != null) {
             if (log.isDebugEnabled()) {
-                String message = String.format("Cache hit for IdVProvider by it's name: %s, Tenant id: %d",
-                        idVPName, tenantId);
-                log.debug(message);
+                log.debug(String.format("Cache hit for IdVProvider by it's name: %s, Tenant id: %d",
+                        idVPName, tenantId));
             }
         } else {
             if (log.isDebugEnabled()) {
-                String message = String.format("Cache miss for secret by it's name: %s. Tenant id: %d",
-                        idVPName, tenantId);
-                log.debug(message);
+                log.debug(String.format("Cache miss for secret by it's name: %s. Tenant id: %d",
+                        idVPName, tenantId));
             }
-            identityVerificationProvider = idVProviderManagerDAO.getIdVPByName(idVPName, tenantId);
-            addIdVPToCache(identityVerificationProvider, tenantId);
+            idVProvider = idVProviderManagerDAO.getIdVPByName(idVPName, tenantId);
+            addIdVPToCache(idVProvider, tenantId);
         }
-        return identityVerificationProvider;
+        return idVProvider;
     }
 
     @Override
     public void deleteIdVProvider(String idVProviderId, int tenantId) throws IdVProviderMgtException {
 
         idVProviderManagerDAO.deleteIdVProvider(idVProviderId, tenantId);
+        deleteIdVPFromCacheByIdVProviderId(idVProviderId, tenantId);
     }
 
-    private IdentityVerificationProvider getIdVPFromCacheById(String idVProviderId, int tenantId) {
+    private IdVProvider getIdVPFromCacheById(String idVProviderId, int tenantId) {
 
         IdVProviderByIdCacheKey idVProviderByIdCacheKey = new IdVProviderByIdCacheKey(idVProviderId);
         IdVProviderCacheEntry idVProviderCacheEntry =
                 idVProviderByIdCache.getValueFromCache(idVProviderByIdCacheKey, tenantId);
         if (idVProviderCacheEntry != null) {
             if (log.isDebugEnabled()) {
-                String message = String.format("Entry found from IdVProvider by id cache. IdVProvider id: %s.",
-                        idVProviderId);
-                log.debug(message);
+                log.debug(String.format("Entry found from IdVProvider by id cache. IdVProvider id: %s.",
+                        idVProviderId));
             }
-            return idVProviderCacheEntry.getIdentityVerificationProvider();
+            return idVProviderCacheEntry.getIdVProvider();
         }
         return null;
     }
 
-    private IdentityVerificationProvider getIdVPFromCacheByName(String idVProviderName, int tenantId) {
+    private IdVProvider getIdVPFromCacheByName(String idVProviderName, int tenantId) {
 
         IdVProviderByNameCacheKey idVProviderByNameCacheKey = new IdVProviderByNameCacheKey(idVProviderName);
         IdVProviderCacheEntry idVProviderCacheEntry =
                 idVProviderByNameCache.getValueFromCache(idVProviderByNameCacheKey, tenantId);
         if (idVProviderCacheEntry != null) {
             if (log.isDebugEnabled()) {
-                String message = String.format("Entry found from IdVProvider by name cache. IdVProvider name: %s.",
-                        idVProviderName);
-                log.debug(message);
+                log.debug(String.format("Entry found from IdVProvider by name cache. IdVProvider name: %s.",
+                        idVProviderName));
             }
-            return idVProviderCacheEntry.getIdentityVerificationProvider();
+            return idVProviderCacheEntry.getIdVProvider();
         }
         return null;
     }
 
-    private void addIdVPToCache(IdentityVerificationProvider identityVerificationProvider, int tenantId) {
+    private void addIdVPToCache(IdVProvider idVProvider, int tenantId) {
 
-        if (identityVerificationProvider == null) {
+        if (idVProvider == null) {
             return;
         }
         IdVProviderByIdCacheKey idVProviderByIdCacheKey =
-                new IdVProviderByIdCacheKey(identityVerificationProvider.getIdVProviderUuid());
-        IdVProviderCacheEntry idVProviderCacheEntry = new IdVProviderCacheEntry(identityVerificationProvider);
+                new IdVProviderByIdCacheKey(idVProvider.getIdVProviderUuid());
+        IdVProviderCacheEntry idVProviderCacheEntry = new IdVProviderCacheEntry(idVProvider);
         if (log.isDebugEnabled()) {
-            String message = String.format("IdVProvider by id cache %s is created",
-                    identityVerificationProvider.getIdVProviderUuid());
-            log.debug(message);
+            log.debug(String.format("IdVProvider by id cache %s is created",
+                    idVProvider.getIdVProviderUuid()));
         }
         idVProviderByIdCache.addToCache(idVProviderByIdCacheKey, idVProviderCacheEntry, tenantId);
     }
 
-    private void deleteIdVPFromCache(IdentityVerificationProvider identityVerificationProvider, int tenantId) {
+    private void deleteIdVPFromCache(IdVProvider idVProvider, int tenantId) {
 
-        if (identityVerificationProvider == null) {
+        if (idVProvider == null) {
             return;
         }
         IdVProviderByIdCacheKey idVProviderByIdCacheKey =
-                new IdVProviderByIdCacheKey(identityVerificationProvider.getIdVProviderUuid());
+                new IdVProviderByIdCacheKey(idVProvider.getIdVProviderUuid());
 
         if (log.isDebugEnabled()) {
-            String message = String.format("IdVProvider by id cache %s is deleted.",
-                    identityVerificationProvider.getIdVProviderUuid());
-            log.debug(message);
+            log.debug(String.format("IdVProvider by id cache %s is deleted.",
+                    idVProvider.getIdVProviderUuid()));
         }
         idVProviderByIdCache.clearCacheEntry(idVProviderByIdCacheKey, tenantId);
+    }
+
+    private void deleteIdVPFromCacheByIdVProviderId(String idVProviderId, int tenantId) {
+
+        IdVProvider idVProvider = getIdVPFromCacheById(idVProviderId, tenantId);
+        if (idVProvider == null) {
+            return;
+        }
+        deleteIdVPFromCache(idVProvider, tenantId);
     }
 }

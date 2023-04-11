@@ -18,7 +18,7 @@
 package org.wso2.carbon.extension.identity.verification.provider.util;
 
 /**
- * This class contains the constants used in the IdentityVerificationProvider.
+ * This class contains the constants used in the IdVProvider.
  */
 public class IdVProviderMgtConstants {
 
@@ -34,9 +34,10 @@ public class IdVProviderMgtConstants {
     public static final String IS_SECRET = "IS_SECRET";
     public static final String CLAIM = "CLAIM";
     public static final String LOCAL_CLAIM = "LOCAL_CLAIM";
+    public static final String SEPERATOR = ":";
 
     /**
-     * This class contains the constants used in the IdentityVerificationProvider.
+     * This class contains the constants used in the IdVProvider.
      */
     public static class SQLQueries {
 
@@ -60,7 +61,7 @@ public class IdVProviderMgtConstants {
         public static final String ADD_IDVP_CLAIM_SQL = "INSERT INTO IDVP_CLAIM_MAPPING " +
                 "(IDVP_ID, TENANT_ID, CLAIM, LOCAL_CLAIM) VALUES (?, ?, ?, ?)";
         public static final String UPDATE_IDVP_SQL = "UPDATE IDVP SET NAME=?, DESCRIPTION=?, " +
-                "IS_ENABLED = ? WHERE UUID=? AND TENANT_ID=?";
+                "IS_ENABLED=? WHERE UUID=? AND TENANT_ID=?";
         public static final String DELETE_IDVP_CONFIG_SQL = "DELETE FROM IDVP_CONFIG " +
                 "WHERE IDVP_ID=? AND TENANT_ID=?";
         public static final String DELETE_IDVP_CLAIM_SQL = "DELETE FROM IDVP_CLAIM_MAPPING " +
@@ -79,34 +80,33 @@ public class IdVProviderMgtConstants {
         ERROR_EMPTY_IDVP_NAME("60002", "Identity Verification Provider Name is empty."),
 
         // Server errors.
-        ERROR_DATABASE_CONNECTION("65001", "Couldn't get a database connection."),
-        ERROR_RETRIEVING_IDV_PROVIDERS("65002",
+        ERROR_RETRIEVING_IDV_PROVIDERS("65000",
                 "An error occurred while retrieving Identity Verification Providers."),
-        ERROR_RETRIEVING_IDV_PROVIDER("65003",
+        ERROR_RETRIEVING_IDV_PROVIDER("65001",
                 "An error occurred while retrieving Identity Verification Provider: %s"),
-        ERROR_RETRIEVING_IDV_PROVIDER_CONFIGS("65004",
+        ERROR_RETRIEVING_IDV_PROVIDER_CONFIGS("65002",
                 "An error occurred while retrieving configs of Identity Verification Provider: %s."),
-        ERROR_RETRIEVING_IDV_PROVIDER_CLAIMS("65005",
+        ERROR_RETRIEVING_IDV_PROVIDER_CLAIMS("65003",
                 "An error occurred while retrieving the claims of Identity Verification Provider: %s."),
-        ERROR_ADDING_IDV_PROVIDER("65006", "Error while adding Identity Verification Provider."),
-        ERROR_DELETING_IDV_PROVIDER("65007",
+        ERROR_ADDING_IDV_PROVIDER("65004", "Error while adding Identity Verification Provider."),
+        ERROR_DELETING_IDV_PROVIDER("65005",
                 "An error occurred while deleting Identity Verification Provider: %s."),
-        ERROR_GETTING_IDV_PROVIDER_COUNT("65008",
+        ERROR_GETTING_IDV_PROVIDER_COUNT("65006",
                 "An error occurred while getting the count of Identity Verification Providers in tenant: %s."),
-        ERROR_RETRIEVING_IDV_PROVIDER_SECRETS("65009",
+        ERROR_RETRIEVING_IDV_PROVIDER_SECRETS("65007",
                 "An error occurred while retrieving secrets of Identity Verification Provider: %s."),
-        ERROR_ADDING_IDV_PROVIDER_CONFIGS("65010",
+        ERROR_ADDING_IDV_PROVIDER_CONFIGS("65008",
                 "An error occurred while adding configs of Identity Verification Provider: %s."),
-        ERROR_STORING_IDV_PROVIDER_SECRETS("65011",
+        ERROR_STORING_IDV_PROVIDER_SECRETS("65009",
                 "An error occurred while storing secrets of Identity Verification Provider: %s."),
-        ERROR_ADDING_IDV_PROVIDER_CLAIMS("65012",
+        ERROR_ADDING_IDV_PROVIDER_CLAIMS("65010",
                 "An error occurred while adding claims of Identity Verification Provider: %s."),
-        ERROR_DELETING_IDV_PROVIDER_CONFIGS("65013",
+        ERROR_DELETING_IDV_PROVIDER_CONFIGS("65011",
                 "An error occurred while deleting configs of Identity Verification Provider: %s."),
-        ERROR_DELETING_IDV_PROVIDER_CLAIMS("65014",
+        ERROR_DELETING_IDV_PROVIDER_CLAIMS("65012",
                 "An error occurred while deleting claims of Identity Verification Provider: %s."),
-        ERROR_UPDATING_IDV_PROVIDER("65015", "Error while updating Identity Verification Provider."),
-        ERROR_CODE_GET_DAO("65016", "No IdV Provider DAOs are registered.");
+        ERROR_UPDATING_IDV_PROVIDER("65013", "Error while updating Identity Verification Provider."),
+        ERROR_CODE_GET_DAO("65014", "No IdV Provider DAOs are registered.");
 
         private final String code;
         private final String message;

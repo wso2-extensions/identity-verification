@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class contains the properties of the IdentityVerificationProvider.
+ * This class contains the properties of the Identity Verification Provider.
  */
-public class IdentityVerificationProvider {
+public class IdVProvider {
 
     private String id;
     private String uuid;
@@ -63,7 +63,7 @@ public class IdentityVerificationProvider {
         this.idVConfigProperties = idVConfigProperties;
     }
 
-    public void setIdVPUUID(String idVProviderId) {
+    public void setIdVProviderUUID(String idVProviderId) {
 
         this.uuid = idVProviderId;
     }

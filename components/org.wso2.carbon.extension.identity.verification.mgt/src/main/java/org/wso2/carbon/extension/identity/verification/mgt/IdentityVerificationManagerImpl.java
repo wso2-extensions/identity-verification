@@ -31,7 +31,7 @@ import org.wso2.carbon.extension.identity.verification.mgt.model.IdentityVerifie
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants;
 import org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationExceptionMgt;
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -39,6 +39,7 @@ import org.wso2.carbon.user.core.UniqueIDUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_CODE_GET_DAO;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_GETTING_USER_STORE;
@@ -64,7 +65,6 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
      * Select highest priority IdVProvider DAO from an already sorted list of IdVClaim DAOs.
      *
      * @return Highest priority IdVClaim DAO.
-     *
      * @throws IdentityVerificationException If an error occurs while getting the IdVClaim DAO.
      */
     private IdentityVerificationClaimDAO getIdVClaimDAO() throws IdentityVerificationException {
@@ -82,7 +82,7 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
 
         validateUserId(userId, tenantId);
 
-        String identityVerifierId = identityVerifierData.getIdentityVerificationProviderId();
+        String identityVerifierId = identityVerifierData.getIdVProviderId();
         if (StringUtils.isBlank(identityVerifierId) || !isValidIdVProviderId(identityVerifierId, tenantId)) {
             throw IdentityVerificationExceptionMgt.
                     handleClientException(ERROR_INVALID_IDV_PROVIDER_ID, identityVerifierId);
@@ -106,7 +106,7 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
     @Override
     public IdVClaim getIdVClaim(String userId, String idvClaimId, int tenantId) throws IdentityVerificationException {
 
-        validateIdVClaimId(idvClaimId,tenantId);
+        validateIdVClaimId(idvClaimId, tenantId);
         validateUserId(userId, tenantId);
         return getIdVClaimDAO().getIDVClaim(userId, idvClaimId, tenantId);
     }
@@ -117,6 +117,10 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
 
         validateUserId(userId, tenantId);
         for (IdVClaim idVClaim : idVClaims) {
+            // Set uuid for each identity verification claim.
+            idVClaim.setId(UUID.randomUUID().toString());
+
+            // Validate the identity verification claim.
             validateIdVClaimInputs(userId, idVClaim, tenantId);
         }
         getIdVClaimDAO().addIdVClaimList(idVClaims, tenantId);
@@ -183,7 +187,8 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
         if (getIdVClaimDAO().isIdVClaimDataExist(userId, idvProviderId, claimUri, tenantId)) {
             throw IdentityVerificationExceptionMgt.handleClientException(
                     IdentityVerificationConstants.ErrorMessage.ERROR_IDV_CLAIM_DATA_ALREADY_EXISTS, userId);
-        };
+        }
+        ;
     }
 
     private boolean isValidIdVProviderId(String idvProviderId, int tenantId) throws IdentityVerificationException {
@@ -257,7 +262,7 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
 
         String identityVerifierName;
         try {
-            IdentityVerificationProvider idvProvider = IdentityVerificationDataHolder.getInstance().
+            IdVProvider idvProvider = IdentityVerificationDataHolder.getInstance().
                     getIdVProviderManager().getIdVProvider(identityVerifierId, tenantId);
             identityVerifierName = idvProvider.getIdVProviderName();
         } catch (IdVProviderMgtException e) {

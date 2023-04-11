@@ -47,23 +47,23 @@ public class IdentityVerificationConstants {
 
         public static final String GET_IDV_CLAIM_SQL =
                 "SELECT ID, UUID, USER_ID, CLAIM_URI, TENANT_ID, IDVP_ID, IS_VERIFIED, METADATA FROM IDV_CLAIM " +
-                        "WHERE USER_ID = ? AND UUID = ? AND TENANT_ID = ?";
+                        "WHERE USER_ID=? AND UUID=? AND TENANT_ID=?";
 
         public static final String GET_IDV_CLAIMS_SQL =
                 "SELECT ID, UUID, USER_ID, CLAIM_URI, IS_VERIFIED, METADATA FROM IDV_CLAIM WHERE " +
-                        "USER_ID = ? AND TENANT_ID = ?";
+                        "USER_ID=? AND TENANT_ID=?";
 
         public static final String UPDATE_IDV_CLAIM_SQL =
-                "UPDATE IDV_CLAIM SET IS_VERIFIED = ?, METADATA = ? WHERE USER_ID = ? AND UUID = ? AND TENANT_ID = ?";
+                "UPDATE IDV_CLAIM SET IS_VERIFIED=?, METADATA=? WHERE USER_ID=? AND UUID=? AND TENANT_ID=?";
 
         public static final String DELETE_IDV_CLAIM_SQL =
-                "DELETE FROM IDV_CLAIM WHERE USER_ID = ? AND UUID = ? AND TENANT_ID = ?";
+                "DELETE FROM IDV_CLAIM WHERE USER_ID=? AND UUID=? AND TENANT_ID=?";
 
         public static final String IS_IDV_CLAIM_DATA_EXIST_SQL =
-                "SELECT ID FROM IDV_CLAIM WHERE USER_ID = ? AND IDVP_ID = ? AND CLAIM_URI = ? AND TENANT_ID = ?";
+                "SELECT ID FROM IDV_CLAIM WHERE USER_ID=? AND IDVP_ID=? AND CLAIM_URI=? AND TENANT_ID=?";
 
         public static final String IS_IDV_CLAIM_EXIST_SQL =
-                "SELECT ID FROM IDV_CLAIM WHERE UUID = ? AND TENANT_ID = ?";
+                "SELECT ID FROM IDV_CLAIM WHERE UUID=? AND TENANT_ID=?";
     }
 
     /**

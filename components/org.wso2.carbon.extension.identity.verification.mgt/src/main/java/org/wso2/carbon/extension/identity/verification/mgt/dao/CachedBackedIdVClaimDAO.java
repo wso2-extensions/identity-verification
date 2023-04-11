@@ -24,7 +24,6 @@ import org.wso2.carbon.extension.identity.verification.mgt.cache.IdVClaimByIdCac
 import org.wso2.carbon.extension.identity.verification.mgt.cache.IdVClaimCacheEntry;
 import org.wso2.carbon.extension.identity.verification.mgt.exception.IdentityVerificationException;
 import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
 
 import java.util.List;
 

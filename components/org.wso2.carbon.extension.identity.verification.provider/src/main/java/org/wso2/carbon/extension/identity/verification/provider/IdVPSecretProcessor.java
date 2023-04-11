@@ -21,7 +21,7 @@ package org.wso2.carbon.extension.identity.verification.provider;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVConfigProperty;
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.identity.secret.mgt.core.SecretManager;
 import org.wso2.carbon.identity.secret.mgt.core.SecretManagerImpl;
 import org.wso2.carbon.identity.secret.mgt.core.SecretResolveManager;
@@ -33,11 +33,12 @@ import org.wso2.carbon.identity.secret.mgt.core.model.Secret;
 import org.wso2.carbon.identity.secret.mgt.core.model.SecretType;
 
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_SECRET_TYPE_IDVP_SECRETS;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SEPERATOR;
 
 /**
  * This class contains the implementation for the Secrets Processor of IdVProviderManager.
  */
-public class IdVPSecretProcessor implements SecretsProcessor<IdentityVerificationProvider> {
+public class IdVPSecretProcessor implements SecretsProcessor<IdVProvider> {
 
     private final SecretManager secretManager;
     private final SecretResolveManager secretResolveManager;
@@ -51,11 +52,11 @@ public class IdVPSecretProcessor implements SecretsProcessor<IdentityVerificatio
     }
 
     @Override
-    public IdentityVerificationProvider decryptAssociatedSecrets(IdentityVerificationProvider idVProvider)
+    public IdVProvider decryptAssociatedSecrets(IdVProvider idVProvider)
             throws SecretManagementException {
 
-        IdentityVerificationProvider clonedIdVP =
-                gson.fromJson(gson.toJson(idVProvider), IdentityVerificationProvider.class);
+        IdVProvider clonedIdVP =
+                gson.fromJson(gson.toJson(idVProvider), IdVProvider.class);
         for (IdVConfigProperty idVConfigProperty : clonedIdVP.getIdVConfigProperties()) {
             if (!idVConfigProperty.isConfidential()) {
                 continue;
@@ -72,11 +73,11 @@ public class IdVPSecretProcessor implements SecretsProcessor<IdentityVerificatio
     }
 
     @Override
-    public IdentityVerificationProvider encryptAssociatedSecrets(IdentityVerificationProvider idVProvider)
+    public IdVProvider encryptAssociatedSecrets(IdVProvider idVProvider)
             throws SecretManagementException {
 
-        IdentityVerificationProvider clonedIdVP =
-                gson.fromJson(gson.toJson(idVProvider), IdentityVerificationProvider.class);
+        IdVProvider clonedIdVP =
+                gson.fromJson(gson.toJson(idVProvider), IdVProvider.class);
         for (IdVConfigProperty idVConfigProperty : clonedIdVP.getIdVConfigProperties()) {
             if (!idVConfigProperty.isConfidential()) {
                 continue;
@@ -99,7 +100,7 @@ public class IdVPSecretProcessor implements SecretsProcessor<IdentityVerificatio
     }
 
     @Override
-    public void deleteAssociatedSecrets(IdentityVerificationProvider idVProvider) throws SecretManagementException {
+    public void deleteAssociatedSecrets(IdVProvider idVProvider) throws SecretManagementException {
 
         for (IdVConfigProperty idVConfigProperty : idVProvider.getIdVConfigProperties()) {
             if (!idVConfigProperty.isConfidential()) {
@@ -114,13 +115,13 @@ public class IdVPSecretProcessor implements SecretsProcessor<IdentityVerificatio
 
     private String buildSecretName(String idpId, String propName) {
 
-        return idpId + ":" + propName;
+        return idpId + SEPERATOR + propName;
     }
 
     private String buildSecretReference(String secretName) throws SecretManagementException {
 
         SecretType secretType = secretManager.getSecretType(IDVP_SECRET_TYPE_IDVP_SECRETS);
-        return secretType.getId() + ":" + secretName;
+        return secretType.getId() + SEPERATOR + secretName;
     }
 
     private void addNewIdVPSecretProperty(String secretName, IdVConfigProperty idVConfigProperty)

@@ -18,11 +18,12 @@
 
 package org.wso2.carbon.extension.identity.verification.provider.cache;
 
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.identity.core.cache.BaseCache;
 
 /**
  * Represents the cache that holds the IdentityVerificationProvider by id
- * {@link org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider}.
+ * {@link IdVProvider}.
  */
 public class IdVProviderByIdCache extends BaseCache<IdVProviderByIdCacheKey, IdVProviderCacheEntry> {
 

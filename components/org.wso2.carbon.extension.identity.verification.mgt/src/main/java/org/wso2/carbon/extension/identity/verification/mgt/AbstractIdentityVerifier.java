@@ -29,7 +29,7 @@ import org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerific
 import org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationExceptionMgt;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVConfigProperty;
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UniqueIDUserStoreManager;
@@ -57,11 +57,11 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
      * @return IdentityVerificationProvider.
      * @throws IdentityVerificationServerException IdentityVerificationServerException.
      */
-    public IdentityVerificationProvider getIdVProvider(IdentityVerifierData identityVerifierData, int tenantId)
+    public IdVProvider getIdVProvider(IdentityVerifierData identityVerifierData, int tenantId)
             throws IdentityVerificationException {
 
         try {
-            String idVProviderId = identityVerifierData.getIdentityVerificationProviderId();
+            String idVProviderId = identityVerifierData.getIdVProviderId();
             return IdentityVerificationDataHolder.getInstance().
                     getIdVProviderManager().getIdVProvider(idVProviderId, tenantId);
         } catch (IdVProviderMgtException e) {
@@ -73,12 +73,12 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
     /**
      * Get Identity Verification Config Properties Map.
      *
-     * @param identityVerificationProvider IdentityVerificationProvider.
+     * @param idVProvider IdentityVerificationProvider.
      * @return Map of IdVConfigProperties.
      */
-    public Map<String, String> getIdVConfigPropertyMap(IdentityVerificationProvider identityVerificationProvider) {
+    public Map<String, String> getIdVConfigPropertyMap(IdVProvider idVProvider) {
 
-        IdVConfigProperty[] idVConfigProperties = identityVerificationProvider.getIdVConfigProperties();
+        IdVConfigProperty[] idVConfigProperties = idVProvider.getIdVConfigProperties();
         Map<String, String> configPropertyMap = new HashMap<>();
         for (IdVConfigProperty idVConfigProperty : idVConfigProperties) {
             configPropertyMap.put(idVConfigProperty.getName(), idVConfigProperty.getValue());
@@ -89,12 +89,12 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
     /**
      * Get Identity Verification Provider's Claim Mappings.
      *
-     * @param identityVerificationProvider IdentityVerificationProvider.
+     * @param idVProvider IdentityVerificationProvider.
      * @return Local and IdVProvider claim Map.
      */
-    public Map<String, String> getClaimMappings(IdentityVerificationProvider identityVerificationProvider) {
+    public Map<String, String> getClaimMappings(IdVProvider idVProvider) {
 
-        return identityVerificationProvider.getClaimMappings();
+        return idVProvider.getClaimMappings();
     }
 
     /**
@@ -131,16 +131,15 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
      * Get Identity Verification Claims as Map with the identity verification provider's claim name as map key
      * claim value as map value.
      *
-     * @param userId                       User Id.
-     * @param identityVerificationProvider IdentityVerificationProvider.
-     * @param tenantId                     Tenant Id.
+     * @param userId      User Id.
+     * @param idVProvider IdentityVerificationProvider.
+     * @param tenantId    Tenant Id.
      * @return Map with the identity verification provider's claim name as map key claim value as map value.
      */
-    public Map<String, String> getIdVClaimsWithValues(String userId,
-                                                       IdentityVerificationProvider identityVerificationProvider,
-                                                       int tenantId) throws IdentityVerificationException {
+    public Map<String, String> getIdVClaimsWithValues(String userId, IdVProvider idVProvider, int tenantId)
+            throws IdentityVerificationException {
 
-        Map<String, String> claimMap = getClaimMappings(identityVerificationProvider);
+        Map<String, String> claimMap = getClaimMappings(idVProvider);
         Map<String, String> verificationClaims = new HashMap<>();
         UniqueIDUserStoreManager uniqueIDUserStoreManager;
         try {

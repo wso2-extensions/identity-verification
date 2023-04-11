@@ -246,7 +246,7 @@ public class IdentityVerificationService {
     private IdentityVerifierData getIdentityVerifierData(VerifyRequest verifyRequest) {
 
         IdentityVerifierData identityVerifier = new IdentityVerifierData();
-        identityVerifier.setIdentityVerificationProviderId(verifyRequest.getIdentityVerificationProviderId());
+        identityVerifier.setIdVProviderId(verifyRequest.getIdentityVerificationProviderId());
         if (verifyRequest.getProperties() == null) {
             return identityVerifier;
         }
@@ -263,7 +263,7 @@ public class IdentityVerificationService {
 
         VerificationPostResponse verificationPostResponse = new VerificationPostResponse();
         verificationPostResponse.setIdentityVerificationProvider(identityVerifierData.
-                getIdentityVerificationProviderId());
+                getIdVProviderId());
         for (IdVClaim idVClaim : identityVerifierData.getIdVClaims()) {
             VerificationClaimResponse verificationClaimResponse = new VerificationClaimResponse();
             verificationClaimResponse.setId(idVClaim.getUuid());

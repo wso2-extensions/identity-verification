@@ -54,14 +54,14 @@ public class IdVProviderMgtServiceComponent {
                 new CachedBackedIdVProviderDAO(idVProviderDAO), null);
         ctxt.getBundleContext().registerService(IdVProviderManager.class.getName(),
                 new IdVProviderManagerImpl(), null);
-        log.info("IdentityVerificationProviderManager bundle activated successfully.");
+        log.info("IdVProviderMgtService bundle activated successfully.");
     }
 
     @Deactivate
     protected void deactivate(ComponentContext ctxt) {
 
         if (log.isDebugEnabled()) {
-            log.debug("IdentityVerificationProviderManager bundle is deactivated.");
+            log.debug("IdVProviderMgtService bundle is deactivated.");
         }
     }
 

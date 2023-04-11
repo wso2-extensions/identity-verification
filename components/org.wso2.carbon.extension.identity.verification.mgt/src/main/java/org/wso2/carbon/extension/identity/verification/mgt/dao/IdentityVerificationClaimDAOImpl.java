@@ -71,7 +71,7 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
         try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
             for (IdVClaim idVClaim : idvClaimList) {
                 try (PreparedStatement addIdVProviderStmt = connection.prepareStatement(ADD_IDV_CLAIM_SQL)) {
-                    addIdVProviderStmt.setString(1, UUID.randomUUID().toString());
+                    addIdVProviderStmt.setString(1, idVClaim.getUuid());
                     addIdVProviderStmt.setString(2, idVClaim.getUserId());
                     addIdVProviderStmt.setString(3, idVClaim.getClaimUri());
                     addIdVProviderStmt.setString(4, idVClaim.getIdVPId());

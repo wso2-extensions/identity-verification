@@ -18,7 +18,7 @@
 package org.wso2.carbon.extension.identity.verification.provider.dao;
 
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public interface IdVProviderDAO {
      * @return Identity Verification Provider.
      * @throws IdVProviderMgtException Error when getting Identity Verification Provider.
      */
-    IdentityVerificationProvider getIdVProvider(String idVProviderUuid, int tenantId)
+    IdVProvider getIdVProvider(String idVProviderUuid, int tenantId)
             throws IdVProviderMgtException;
 
     /**
@@ -55,12 +55,11 @@ public interface IdVProviderDAO {
     /**
      * Add Identity Verification Provider.
      *
-     * @param identityVerificationProvider Identity Verification Provider.
+     * @param idVProvider Identity Verification Provider.
      * @param tenantId                     Tenant ID.
      * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
      */
-    void addIdVProvider(IdentityVerificationProvider identityVerificationProvider, int tenantId)
-            throws IdVProviderMgtException;
+    void addIdVProvider(IdVProvider idVProvider, int tenantId) throws IdVProviderMgtException;
 
     /**
      * Update Identity Verification Provider.
@@ -70,8 +69,8 @@ public interface IdVProviderDAO {
      * @param tenantId       Tenant ID.
      * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
      */
-    void updateIdVProvider(IdentityVerificationProvider oldIdVProvider,
-                           IdentityVerificationProvider newIdVProvider, int tenantId)
+    void updateIdVProvider(IdVProvider oldIdVProvider,
+                           IdVProvider newIdVProvider, int tenantId)
             throws IdVProviderMgtException;
 
     /**
@@ -82,7 +81,7 @@ public interface IdVProviderDAO {
      * @param tenantId Tenant ID.
      * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
      */
-    List<IdentityVerificationProvider> getIdVProviders(Integer limit, Integer offset, int tenantId)
+    List<IdVProvider> getIdVProviders(Integer limit, Integer offset, int tenantId)
             throws IdVProviderMgtException;
 
     /**
@@ -100,7 +99,7 @@ public interface IdVProviderDAO {
      * @param tenantId Tenant ID.
      * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
      */
-    IdentityVerificationProvider getIdVPByName(String idVPName, int tenantId) throws IdVProviderMgtException;
+    IdVProvider getIdVPByName(String idVPName, int tenantId) throws IdVProviderMgtException;
 
     /**
      * Delete Identity Verification Provider by ID.

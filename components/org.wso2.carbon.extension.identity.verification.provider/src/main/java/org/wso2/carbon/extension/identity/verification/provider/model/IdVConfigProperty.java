@@ -18,7 +18,7 @@
 package org.wso2.carbon.extension.identity.verification.provider.model;
 
 /**
- * This class contains the properties of the IdentityVerificationProvider.
+ * This class contains the properties of the Identity Verification Provider.
  */
 public class IdVConfigProperty {
 

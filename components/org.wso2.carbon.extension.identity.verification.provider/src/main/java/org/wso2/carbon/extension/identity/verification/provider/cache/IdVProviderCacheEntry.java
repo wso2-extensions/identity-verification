@@ -18,28 +18,28 @@
 
 package org.wso2.carbon.extension.identity.verification.provider.cache;
 
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.identity.core.cache.CacheEntry;
 
 /**
- * Represents a cache entry for {@link IdentityVerificationProvider}.
+ * Represents a cache entry for {@link IdVProvider}.
  */
 public class IdVProviderCacheEntry extends CacheEntry {
 
-    private IdentityVerificationProvider identityVerificationProvider;
+    private IdVProvider idVProvider;
 
-    public IdVProviderCacheEntry(IdentityVerificationProvider identityVerificationProvider) {
+    public IdVProviderCacheEntry(IdVProvider idVProvider) {
 
-        this.identityVerificationProvider = identityVerificationProvider;
+        this.idVProvider = idVProvider;
     }
 
-    public IdentityVerificationProvider getIdentityVerificationProvider() {
+    public IdVProvider getIdVProvider() {
 
-        return identityVerificationProvider;
+        return idVProvider;
     }
 
-    public void setIdentityVerificationProvider(IdentityVerificationProvider identityVerificationProvider) {
+    public void setIdVProvider(IdVProvider idVProvider) {
 
-        this.identityVerificationProvider = identityVerificationProvider;
+        this.idVProvider = idVProvider;
     }
 }

@@ -18,7 +18,7 @@
 package org.wso2.carbon.extension.identity.verification.provider;
 
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 
 import java.util.List;
 
@@ -35,17 +35,17 @@ public interface IdVProviderManager {
      * @return IdentityVerificationProvider.
      * @throws IdVProviderMgtException IdVProviderMgtException.
      */
-    IdentityVerificationProvider getIdVProvider(String idVProviderId, int tenantId) throws IdVProviderMgtException;
+    IdVProvider getIdVProvider(String idVProviderId, int tenantId) throws IdVProviderMgtException;
 
     /**
      * Add a new IdentityVerificationProvider.
      *
-     * @param identityVerificationProvider IdentityVerificationProvider.
+     * @param idVProvider IdentityVerificationProvider.
      * @param tenantId                     Tenant Id.
      * @return IdentityVerificationProvider.
      * @throws IdVProviderMgtException IdVProviderMgtException.
      */
-    IdentityVerificationProvider addIdVProvider(IdentityVerificationProvider identityVerificationProvider, int tenantId)
+    IdVProvider addIdVProvider(IdVProvider idVProvider, int tenantId)
             throws IdVProviderMgtException;
 
     /**
@@ -66,9 +66,9 @@ public interface IdVProviderManager {
      * @return IdentityVerificationProvider.
      * @throws IdVProviderMgtException IdVProviderMgtException.
      */
-    IdentityVerificationProvider updateIdVProvider(IdentityVerificationProvider oldIdVProvider,
-                                                   IdentityVerificationProvider newIdVProvider,
-                                                   int tenantId) throws IdVProviderMgtException;
+    IdVProvider updateIdVProvider(IdVProvider oldIdVProvider,
+                                  IdVProvider newIdVProvider,
+                                  int tenantId) throws IdVProviderMgtException;
 
     /**
      * Get all the IdentityVerificationProviders.
@@ -79,8 +79,8 @@ public interface IdVProviderManager {
      * @return List of IdentityVerificationProviders.
      * @throws IdVProviderMgtException IdVProviderMgtException.
      */
-    List<IdentityVerificationProvider> getIdVProviders(Integer limit, Integer offset,
-                                                       int tenantId) throws IdVProviderMgtException;
+    List<IdVProvider> getIdVProviders(Integer limit, Integer offset,
+                                      int tenantId) throws IdVProviderMgtException;
 
     /**
      * Get the IdentityVerificationProvider by name.
@@ -90,7 +90,7 @@ public interface IdVProviderManager {
      * @return IdentityVerificationProvider.
      * @throws IdVProviderMgtException IdVProviderMgtException.
      */
-    IdentityVerificationProvider getIdVPByName(String idPName, int tenantId) throws IdVProviderMgtException;
+    IdVProvider getIdVPByName(String idPName, int tenantId) throws IdVProviderMgtException;
 
     /**
      * Get the count of IdentityVerificationProviders.

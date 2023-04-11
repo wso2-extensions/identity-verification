@@ -24,12 +24,13 @@ import org.wso2.carbon.extension.identity.verification.provider.dao.IdVProviderD
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtClientException;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.provider.internal.IdVProviderDataHolder;
-import org.wso2.carbon.extension.identity.verification.provider.model.IdentityVerificationProvider;
+import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants;
 import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtExceptionManagement;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_CODE_GET_DAO;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_NAME;
@@ -63,7 +64,7 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     }
 
     @Override
-    public IdentityVerificationProvider getIdVProvider(String idVProviderId, int tenantId)
+    public IdVProvider getIdVProvider(String idVProviderId, int tenantId)
             throws IdVProviderMgtException {
 
         validateIdVProviderId(idVProviderId);
@@ -71,15 +72,16 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     }
 
     @Override
-    public IdentityVerificationProvider addIdVProvider(IdentityVerificationProvider identityVerificationProvider,
-                                                       int tenantId) throws IdVProviderMgtException {
+    public IdVProvider addIdVProvider(IdVProvider idVProvider,
+                                      int tenantId) throws IdVProviderMgtException {
 
-        String idVPName = identityVerificationProvider.getIdVProviderName();
+        String idVPName = idVProvider.getIdVProviderName();
         if (isIdVProviderExistsByName(idVPName, tenantId)) {
             throw IdVProviderMgtExceptionManagement.handleClientException(ERROR_IDVP_ALREADY_EXISTS, idVPName);
         }
-        this.getIdVProviderDAO().addIdVProvider(identityVerificationProvider, tenantId);
-        return identityVerificationProvider;
+        idVProvider.setIdVProviderUUID(UUID.randomUUID().toString());
+        this.getIdVProviderDAO().addIdVProvider(idVProvider, tenantId);
+        return idVProvider;
     }
 
     @Override
@@ -96,9 +98,9 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     }
 
     @Override
-    public IdentityVerificationProvider updateIdVProvider(IdentityVerificationProvider oldIdVProvider,
-                                                          IdentityVerificationProvider updatedIdVProvider,
-                                                          int tenantId) throws IdVProviderMgtException {
+    public IdVProvider updateIdVProvider(IdVProvider oldIdVProvider,
+                                         IdVProvider updatedIdVProvider,
+                                         int tenantId) throws IdVProviderMgtException {
 
         if (oldIdVProvider == null || updatedIdVProvider == null) {
             throw IdVProviderMgtExceptionManagement.handleServerException(IdVProviderMgtConstants.ErrorMessage.
@@ -113,7 +115,7 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     }
 
     @Override
-    public List<IdentityVerificationProvider> getIdVProviders(Integer limit, Integer offset, int tenantId)
+    public List<IdVProvider> getIdVProviders(Integer limit, Integer offset, int tenantId)
             throws IdVProviderMgtException {
 
         return getIdVProviderDAO().getIdVProviders(validateLimit(limit), validateOffset(offset), tenantId);
@@ -135,7 +137,7 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     }
 
     @Override
-    public IdentityVerificationProvider getIdVPByName(String idVPName, int tenantId)
+    public IdVProvider getIdVPByName(String idVPName, int tenantId)
             throws IdVProviderMgtException {
 
         if (StringUtils.isEmpty(idVPName)) {

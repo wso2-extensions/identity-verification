@@ -71,6 +71,7 @@ public class IdVProviderMgtExceptionManagement {
      * Handle the Server exceptions.
      *
      * @param error The ErrorMessage.
+     * @param data  The data to be added to the message if needed.
      * @param e     The throwable.
      * @return IdVProviderMgtClientException.
      */
