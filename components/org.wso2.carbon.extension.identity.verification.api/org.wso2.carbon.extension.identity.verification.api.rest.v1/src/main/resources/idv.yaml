@@ -843,7 +843,7 @@ components:
       properties:
         identityVerificationProvider:
           type: string
-          example: evidentID
+          example: ONFIDO
         claims:
           type: array
           items:
@@ -908,15 +908,16 @@ components:
     verifyRequest:
       type: object
       properties:
-        identityVerificationProviderId:
+        identityVerificationProvider:
           type: string
-          example: "2cfb6d01-5384-4e30-aa37-f9a519e95ffc"
+          example: "ONFIDO"
         properties:
           type: array
           items:
             $ref: '#/components/schemas/Property'
       required:
-        - identityVerificationProviderId
+        - identityVerificationProvider
+        - properties
     IdVProviderListResponse:
       type: object
       properties:

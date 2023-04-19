@@ -65,10 +65,10 @@ public class IdentityVerificationService {
             if (IdentityVerificationConstants.ErrorMessage.ERROR_INVALID_USER_ID.getCode().equals(e.getErrorCode())) {
                 throw IdentityVerificationUtils.handleIdVException(e,
                         Constants.ErrorMessage.ERROR_CODE_USER_ID_NOT_FOUND, userId);
-            } else if (IdentityVerificationConstants.ErrorMessage.ERROR_INVALID_IDV_PROVIDER_ID.getCode().
+            } else if (IdentityVerificationConstants.ErrorMessage.ERROR_INVALID_IDV_PROVIDER.getCode().
                     equals(e.getErrorCode())) {
                 throw IdentityVerificationUtils.handleIdVException(e,
-                        Constants.ErrorMessage.ERROR_CODE_IDVP_ID_NOT_FOUND, userId);
+                        Constants.ErrorMessage.ERROR_CODE_IDV_PROVIDER_NOT_FOUND, userId);
             } else if (IdentityVerificationConstants.ErrorMessage.ERROR_IDV_CLAIM_DATA_ALREADY_EXISTS.getCode().
                     equals(e.getErrorCode())) {
                 throw handleException(Response.Status.CONFLICT, Constants.ErrorMessage.ERROR_CODE_IDV_CLAIM_CONFLICT,
@@ -246,7 +246,7 @@ public class IdentityVerificationService {
     private IdentityVerifierData getIdentityVerifierData(VerifyRequest verifyRequest) {
 
         IdentityVerifierData identityVerifier = new IdentityVerifierData();
-        identityVerifier.setIdVProviderId(verifyRequest.getIdentityVerificationProviderId());
+        identityVerifier.setIdVProviderName(verifyRequest.getIdentityVerificationProvider());
         if (verifyRequest.getProperties() == null) {
             return identityVerifier;
         }
@@ -263,7 +263,7 @@ public class IdentityVerificationService {
 
         VerificationPostResponse verificationPostResponse = new VerificationPostResponse();
         verificationPostResponse.setIdentityVerificationProvider(identityVerifierData.
-                getIdVProviderId());
+                getIdVProviderName());
         for (IdVClaim idVClaim : identityVerifierData.getIdVClaims()) {
             VerificationClaimResponse verificationClaimResponse = new VerificationClaimResponse();
             verificationClaimResponse.setId(idVClaim.getUuid());

@@ -103,7 +103,7 @@ public class IdentityVerificationProviderService {
         } catch (IdVProviderMgtException e) {
             if (IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_ID.getCode().equals(e.getErrorCode())) {
                 throw IdentityVerificationUtils.handleIdVException(e,
-                        Constants.ErrorMessage.ERROR_CODE_IDVP_ID_NOT_FOUND, idVProviderId);
+                        Constants.ErrorMessage.ERROR_CODE_IDV_PROVIDER_NOT_FOUND, idVProviderId);
             } else if (IdVProviderMgtConstants.ErrorMessage.ERROR_IDVP_ALREADY_EXISTS.getCode()
                     .equals(e.getErrorCode())) {
                 throw handleException(Response.Status.CONFLICT,
@@ -135,7 +135,7 @@ public class IdentityVerificationProviderService {
             return getIdVProviderResponse(idVProvider);
         } catch (IdVProviderMgtException e) {
             if (IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_ID.getCode().equals(e.getErrorCode())) {
-                throw handleIdVException(e, Constants.ErrorMessage.ERROR_CODE_IDVP_ID_NOT_FOUND, idVProviderId);
+                throw handleIdVException(e, Constants.ErrorMessage.ERROR_CODE_IDV_PROVIDER_NOT_FOUND, idVProviderId);
             } else {
                 throw handleIdVException(e, Constants.ErrorMessage.ERROR_RETRIEVING_IDVP, idVProviderId);
             }
@@ -273,6 +273,7 @@ public class IdentityVerificationProviderService {
     private final Function<ConfigProperty, IdVConfigProperty> propertyToInternal = apiProperty -> {
 
         IdVConfigProperty idVConfigProperty = new IdVConfigProperty();
+        // todo: handle null values
         idVConfigProperty.setName(apiProperty.getKey());
         idVConfigProperty.setValue(apiProperty.getValue());
         idVConfigProperty.setConfidential(apiProperty.getIsSecret());

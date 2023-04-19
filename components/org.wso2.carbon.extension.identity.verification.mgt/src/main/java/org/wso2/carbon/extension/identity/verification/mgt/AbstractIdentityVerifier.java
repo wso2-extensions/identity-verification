@@ -61,9 +61,9 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
             throws IdentityVerificationException {
 
         try {
-            String idVProviderId = identityVerifierData.getIdVProviderId();
+            String idVProviderName = identityVerifierData.getIdVProviderName();
             return IdentityVerificationDataHolder.getInstance().
-                    getIdVProviderManager().getIdVProvider(idVProviderId, tenantId);
+                    getIdVProviderManager().getIdVProviderByName(idVProviderName, tenantId);
         } catch (IdVProviderMgtException e) {
             throw IdentityVerificationExceptionMgt.handleServerException(
                     IdentityVerificationConstants.ErrorMessage.ERROR_RETRIEVING_IDV_PROVIDER, e);
@@ -113,18 +113,33 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
     }
 
     /**
-     * Update Identity Verification Claims.
+     * Update Identity Verification Claim.
      *
      * @param userId   User Id.
      * @param idvClaim IdVClaim.
      * @param tenantId Tenant Id.
      * @return Local and IdVProvider claim Map.
      */
-    public IdVClaim updateIdVClaims(String userId, IdVClaim idvClaim, int tenantId)
+    public IdVClaim updateIdVClaim(String userId, IdVClaim idvClaim, int tenantId)
             throws IdentityVerificationException {
 
         IdentityVerificationManager identityVerificationManager = new IdentityVerificationManagerImpl();
         return identityVerificationManager.updateIdVClaim(userId, idvClaim, tenantId);
+    }
+
+    /**
+     * Update Identity Verification Claims of a user.
+     *
+     * @param userId    User Id.
+     * @param idVClaims Identity Verification claims.
+     * @param tenantId  Tenant Id.
+     * @return Local and IdVProvider claim Map.
+     */
+    public List<IdVClaim> updateIdVClaims(String userId, List<IdVClaim> idVClaims, int tenantId)
+            throws IdentityVerificationException {
+
+        IdentityVerificationManager identityVerificationManager = new IdentityVerificationManagerImpl();
+        return identityVerificationManager.updateIdVClaims(userId, idVClaims, tenantId);
     }
 
     /**

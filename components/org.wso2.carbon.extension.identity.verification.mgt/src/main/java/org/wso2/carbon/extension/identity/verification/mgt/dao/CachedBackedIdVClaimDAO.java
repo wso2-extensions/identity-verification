@@ -99,6 +99,16 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
     }
 
     @Override
+    public void deleteIdVClaims(String userId, IdVClaim[] idVClaims, int tenantId)
+            throws IdentityVerificationException {
+
+        identityVerificationClaimDAO.deleteIdVClaims(userId, idVClaims, tenantId);
+        for (IdVClaim idVClaim : idVClaims) {
+            deleteIdVPFromCache(idVClaim, tenantId);
+        }
+    }
+
+    @Override
     public boolean isIdVClaimDataExist(String userId, String idvId, String uri, int tenantId)
             throws IdentityVerificationException {
 

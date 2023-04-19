@@ -75,7 +75,7 @@ public class IdentityVerificationConstants {
         ERROR_IDV_CLAIM_DATA_ALREADY_EXISTS("10000",
                 "Identity Verification Claim data already exists for the user: %s."),
         ERROR_EMPTY_CLAIM_METADATA("10001", "Claim Metadata is empty."),
-        ERROR_INVALID_IDV_PROVIDER_ID("10002", "Identity Verification Provider Id: %s not found."),
+        ERROR_INVALID_IDV_PROVIDER("10002", "Identity Verification Provider: %s not found."),
         ERROR_INVALID_CLAIM_URI("10003", "Claim URI: %s not found."),
         ERROR_INVALID_USER_ID("10004", "User cannot be found with the user Id: %s."),
         ERROR_INVALID_IDV_CLAIM_ID("10005", "Identity verification claim cannot be found with the " +

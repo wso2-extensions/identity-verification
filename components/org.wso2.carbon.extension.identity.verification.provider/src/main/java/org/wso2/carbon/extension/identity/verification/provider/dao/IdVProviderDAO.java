@@ -53,10 +53,20 @@ public interface IdVProviderDAO {
     boolean isIdVProviderExists(String idVProviderUuid, int tenantId) throws IdVProviderMgtException;
 
     /**
+     * Check whether an Identity Verification Provider exists by idv provider name.
+     *
+     * @param idvProviderName Identity Verification Provider UUID.
+     * @param tenantId        Tenant ID.
+     * @return Whether the identity verification provider exists or not.
+     * @throws IdVProviderMgtException Error when checking the Identity Verification Provider existence.
+     */
+    boolean isIdVProviderExistsByName(String idvProviderName, int tenantId) throws IdVProviderMgtException;
+
+    /**
      * Add Identity Verification Provider.
      *
      * @param idVProvider Identity Verification Provider.
-     * @param tenantId                     Tenant ID.
+     * @param tenantId    Tenant ID.
      * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
      */
     void addIdVProvider(IdVProvider idVProvider, int tenantId) throws IdVProviderMgtException;
@@ -99,7 +109,7 @@ public interface IdVProviderDAO {
      * @param tenantId Tenant ID.
      * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
      */
-    IdVProvider getIdVPByName(String idVPName, int tenantId) throws IdVProviderMgtException;
+    IdVProvider getIdVProviderByName(String idVPName, int tenantId) throws IdVProviderMgtException;
 
     /**
      * Delete Identity Verification Provider by ID.

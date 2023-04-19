@@ -35,28 +35,28 @@ import javax.xml.bind.annotation.*;
 
 public class VerifyRequest  {
   
-    private String identityVerificationProviderId;
-    private List<Property> properties = null;
+    private String identityVerificationProvider;
+    private List<Property> properties = new ArrayList<>();
 
 
     /**
     **/
-    public VerifyRequest identityVerificationProviderId(String identityVerificationProviderId) {
+    public VerifyRequest identityVerificationProvider(String identityVerificationProvider) {
 
-        this.identityVerificationProviderId = identityVerificationProviderId;
+        this.identityVerificationProvider = identityVerificationProvider;
         return this;
     }
     
-    @ApiModelProperty(example = "2cfb6d01-5384-4e30-aa37-f9a519e95ffc", required = true, value = "")
-    @JsonProperty("identityVerificationProviderId")
+    @ApiModelProperty(example = "ONFIDO", required = true, value = "")
+    @JsonProperty("identityVerificationProvider")
     @Valid
-    @NotNull(message = "Property identityVerificationProviderId cannot be null.")
+    @NotNull(message = "Property identityVerificationProvider cannot be null.")
 
-    public String getIdentityVerificationProviderId() {
-        return identityVerificationProviderId;
+    public String getIdentityVerificationProvider() {
+        return identityVerificationProvider;
     }
-    public void setIdentityVerificationProviderId(String identityVerificationProviderId) {
-        this.identityVerificationProviderId = identityVerificationProviderId;
+    public void setIdentityVerificationProvider(String identityVerificationProvider) {
+        this.identityVerificationProvider = identityVerificationProvider;
     }
 
     /**
@@ -67,9 +67,11 @@ public class VerifyRequest  {
         return this;
     }
     
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(required = true, value = "")
     @JsonProperty("properties")
     @Valid
+    @NotNull(message = "Property properties cannot be null.")
+
     public List<Property> getProperties() {
         return properties;
     }
@@ -78,9 +80,6 @@ public class VerifyRequest  {
     }
 
     public VerifyRequest addPropertiesItem(Property propertiesItem) {
-        if (this.properties == null) {
-            this.properties = new ArrayList<>();
-        }
         this.properties.add(propertiesItem);
         return this;
     }
@@ -97,13 +96,13 @@ public class VerifyRequest  {
             return false;
         }
         VerifyRequest verifyRequest = (VerifyRequest) o;
-        return Objects.equals(this.identityVerificationProviderId, verifyRequest.identityVerificationProviderId) &&
+        return Objects.equals(this.identityVerificationProvider, verifyRequest.identityVerificationProvider) &&
             Objects.equals(this.properties, verifyRequest.properties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(identityVerificationProviderId, properties);
+        return Objects.hash(identityVerificationProvider, properties);
     }
 
     @Override
@@ -112,7 +111,7 @@ public class VerifyRequest  {
         StringBuilder sb = new StringBuilder();
         sb.append("class VerifyRequest {\n");
         
-        sb.append("    identityVerificationProviderId: ").append(toIndentedString(identityVerificationProviderId)).append("\n");
+        sb.append("    identityVerificationProvider: ").append(toIndentedString(identityVerificationProvider)).append("\n");
         sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
         sb.append("}");
         return sb.toString();

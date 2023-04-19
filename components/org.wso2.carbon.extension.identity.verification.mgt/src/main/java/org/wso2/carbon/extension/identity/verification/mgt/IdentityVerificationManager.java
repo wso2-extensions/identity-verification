@@ -44,9 +44,9 @@ public interface IdentityVerificationManager {
     /**
      * Get the IdVClaim.
      *
-     * @param userId      User Id.
-     * @param idvClaimId  IdVClaim Id.
-     * @param tenantId    Tenant Id.
+     * @param userId     User Id.
+     * @param idvClaimId IdVClaim Id.
+     * @param tenantId   Tenant Id.
      * @return IdVClaim.
      * @throws IdentityVerificationException IdentityVerificationException.
      */
@@ -65,9 +65,9 @@ public interface IdentityVerificationManager {
     /**
      * Add the IdVClaim.
      *
-     * @param userId    User Id.
-     * @param idvClaim   IdVClaim.
-     * @param tenantId   Tenant Id.
+     * @param userId   User Id.
+     * @param idvClaim IdVClaim.
+     * @param tenantId Tenant Id.
      * @return IdVClaim.
      * @throws IdentityVerificationException IdentityVerificationException.
      */
@@ -75,10 +75,22 @@ public interface IdentityVerificationManager {
             throws IdentityVerificationException;
 
     /**
+     * Update user's IdVClaims.
+     *
+     * @param userId    User Id.
+     * @param idVClaims Identity Verification Claims.
+     * @param tenantId  Tenant Id.
+     * @return List of updated IdVClaims.
+     * @throws IdentityVerificationException IdentityVerificationException.
+     */
+    List<IdVClaim> updateIdVClaims(String userId, List<IdVClaim> idVClaims, int tenantId)
+            throws IdentityVerificationException;
+
+    /**
      * Update the IdVClaim.
      *
-     * @param idvClaim   IdVClaim.
-     * @param tenantId   Tenant Id.
+     * @param idvClaim IdVClaim.
+     * @param tenantId Tenant Id.
      * @throws IdentityVerificationException IdentityVerificationException.
      */
     IdVClaim updateIdVClaim(String userId, IdVClaim idvClaim, int tenantId) throws IdentityVerificationException;
@@ -86,9 +98,18 @@ public interface IdentityVerificationManager {
     /**
      * Delete the IdVClaim.
      *
-     * @param idvClaimId  IdVClaim Id.
-     * @param tenantId    Tenant Id.
+     * @param idvClaimId IdVClaim Id.
+     * @param tenantId   Tenant Id.
      * @throws IdentityVerificationException IdentityVerificationException.
      */
     void deleteIDVClaim(String userId, String idvClaimId, int tenantId) throws IdentityVerificationException;
+
+    /**
+     * Delete the IdVClaims of a user.
+     *
+     * @param userId   User Id.
+     * @param tenantId Tenant Id.
+     * @throws IdentityVerificationException IdentityVerificationException.
+     */
+    void deleteIDVClaims(String userId, int tenantId) throws IdentityVerificationException;
 }

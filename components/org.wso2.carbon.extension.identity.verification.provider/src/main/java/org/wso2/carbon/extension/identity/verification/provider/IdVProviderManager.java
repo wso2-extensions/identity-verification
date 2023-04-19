@@ -41,7 +41,7 @@ public interface IdVProviderManager {
      * Add a new IdentityVerificationProvider.
      *
      * @param idVProvider IdentityVerificationProvider.
-     * @param tenantId                     Tenant Id.
+     * @param tenantId    Tenant Id.
      * @return IdentityVerificationProvider.
      * @throws IdVProviderMgtException IdVProviderMgtException.
      */
@@ -90,7 +90,7 @@ public interface IdVProviderManager {
      * @return IdentityVerificationProvider.
      * @throws IdVProviderMgtException IdVProviderMgtException.
      */
-    IdVProvider getIdVPByName(String idPName, int tenantId) throws IdVProviderMgtException;
+    IdVProvider getIdVProviderByName(String idPName, int tenantId) throws IdVProviderMgtException;
 
     /**
      * Get the count of IdentityVerificationProviders.
@@ -109,4 +109,13 @@ public interface IdVProviderManager {
      * @return boolean.
      */
     boolean isIdVProviderExists(String idvProviderId, int tenantId) throws IdVProviderMgtException;
+
+    /**
+     * Check whether the Identity Verification Provider exists by IDV Provider name.
+     *
+     * @param idvProviderName Identity Verification Provider Name.
+     * @param tenantId        Tenant Id.
+     * @return boolean.
+     */
+    boolean isIdVProviderExistsByName(String idvProviderName, int tenantId) throws IdVProviderMgtException;
 }

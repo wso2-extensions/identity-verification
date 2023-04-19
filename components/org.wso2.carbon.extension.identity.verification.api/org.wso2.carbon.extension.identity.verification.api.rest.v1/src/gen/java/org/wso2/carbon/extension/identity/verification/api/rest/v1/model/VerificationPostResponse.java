@@ -47,7 +47,7 @@ public class VerificationPostResponse  {
         return this;
     }
     
-    @ApiModelProperty(example = "evidentID", value = "")
+    @ApiModelProperty(example = "ONFIDO", value = "")
     @JsonProperty("identityVerificationProvider")
     @Valid
     public String getIdentityVerificationProvider() {

@@ -44,6 +44,7 @@ public class IdVProviderMgtConstants {
         public static final String GET_IDVP_SQL = "SELECT ID, UUID, NAME, DESCRIPTION, IS_ENABLED" +
                 " FROM IDVP WHERE UUID=? AND TENANT_ID=?";
         public static final String IS_IDVP_EXIST_SQL = "SELECT ID FROM IDVP WHERE UUID=? AND TENANT_ID=?";
+        public static final String IS_IDVP_EXIST_BY_NAME_SQL = "SELECT ID FROM IDVP WHERE NAME=? AND TENANT_ID=?";
         public static final String GET_IDVP_BY_NAME_SQL = "SELECT ID, UUID, NAME, DESCRIPTION, " +
                 "IS_ENABLED FROM IDVP WHERE NAME=? AND TENANT_ID=?";
         public static final String GET_IDVP_CONFIG_SQL = "SELECT PROPERTY_KEY, PROPERTY_VALUE, IS_SECRET FROM " +
@@ -77,7 +78,7 @@ public class IdVProviderMgtConstants {
         ERROR_IDVP_ALREADY_EXISTS("60000",
                 "An Identity Verification Provider already exists with the name: %s."),
         ERROR_EMPTY_IDVP_ID("60001", "Identity Verification Provider ID value is empty."),
-        ERROR_EMPTY_IDVP_NAME("60002", "Identity Verification Provider Name is empty."),
+        ERROR_EMPTY_IDVP_("60002", "Identity Verification Provider Name is empty."),
 
         // Server errors.
         ERROR_RETRIEVING_IDV_PROVIDERS("65000",

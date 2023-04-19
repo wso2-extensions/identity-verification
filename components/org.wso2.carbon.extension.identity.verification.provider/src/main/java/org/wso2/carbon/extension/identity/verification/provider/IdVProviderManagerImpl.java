@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_CODE_GET_DAO;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_NAME;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_IDVP_ALREADY_EXISTS;
 
 /**
@@ -67,7 +67,10 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     public IdVProvider getIdVProvider(String idVProviderId, int tenantId)
             throws IdVProviderMgtException {
 
-        validateIdVProviderId(idVProviderId);
+        if (StringUtils.isEmpty(idVProviderId)) {
+            throw IdVProviderMgtExceptionManagement.
+                    handleClientException(IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_ID);
+        }
         return getIdVProviderDAO().getIdVProvider(idVProviderId, tenantId);
     }
 
@@ -92,7 +95,10 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     @Override
     public void deleteIdVProvider(String idVProviderId, int tenantId) throws IdVProviderMgtException {
 
-        validateIdVProviderId(idVProviderId);
+        if (StringUtils.isEmpty(idVProviderId)) {
+            throw IdVProviderMgtExceptionManagement.
+                    handleClientException(IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_ID);
+        }
         getIdVProviderDAO().deleteIdVProvider(idVProviderId, tenantId);
     }
 
@@ -123,26 +129,31 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     @Override
     public boolean isIdVProviderExists(String idvProviderId, int tenantId) throws IdVProviderMgtException {
 
-        validateIdVProviderId(idvProviderId);
-        return getIdVProviderDAO().isIdVProviderExists(idvProviderId, tenantId);
-    }
-
-    private static void validateIdVProviderId(String idvProviderId) throws IdVProviderMgtClientException {
-
         if (StringUtils.isEmpty(idvProviderId)) {
             throw IdVProviderMgtExceptionManagement.
                     handleClientException(IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_ID);
         }
+        return getIdVProviderDAO().isIdVProviderExists(idvProviderId, tenantId);
     }
 
     @Override
-    public IdVProvider getIdVPByName(String idVPName, int tenantId)
+    public boolean isIdVProviderExistsByName(String idvProviderName, int tenantId) throws IdVProviderMgtException {
+
+        if (StringUtils.isEmpty(idvProviderName)) {
+            throw IdVProviderMgtExceptionManagement.
+                    handleClientException(IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP_);
+        }
+        return getIdVProviderDAO().isIdVProviderExistsByName(idvProviderName, tenantId);
+    }
+
+    @Override
+    public IdVProvider getIdVProviderByName(String idVPName, int tenantId)
             throws IdVProviderMgtException {
 
         if (StringUtils.isEmpty(idVPName)) {
-            throw IdVProviderMgtExceptionManagement.handleClientException(ERROR_EMPTY_IDVP_NAME);
+            throw IdVProviderMgtExceptionManagement.handleClientException(ERROR_EMPTY_IDVP_);
         }
-        return getIdVProviderDAO().getIdVPByName(idVPName, tenantId);
+        return getIdVProviderDAO().getIdVProviderByName(idVPName, tenantId);
     }
 
     /**
@@ -195,10 +206,5 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
                     handleClientException(IdVProviderMgtConstants.ErrorMessage.ERROR_RETRIEVING_IDV_PROVIDERS, message);
         }
         return offset;
-    }
-
-    private boolean isIdVProviderExistsByName(String idVPName, int tenantId) throws IdVProviderMgtException {
-
-        return getIdVPByName(idVPName, tenantId) != null;
     }
 }

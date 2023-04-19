@@ -180,6 +180,24 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
     }
 
     @Override
+    public void deleteIdVClaims(String userId, IdVClaim[] idVClaims, int tenantId) throws
+            IdentityVerificationException {
+
+        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
+            try (PreparedStatement deleteIdVProviderStmt = connection.prepareStatement(DELETE_IDV_CLAIM_SQL)) {
+                for (IdVClaim idVClaim : idVClaims) {
+                    deleteIdVProviderStmt.setString(1, userId);
+                    deleteIdVProviderStmt.setString(2, idVClaim.getUuid());
+                    deleteIdVProviderStmt.setInt(3, tenantId);
+                    deleteIdVProviderStmt.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw IdentityVerificationExceptionMgt.handleServerException(ERROR_DELETING_IDV_CLAIM, e);
+        }
+    }
+
+    @Override
     public boolean isIdVClaimDataExist(String userId, String idvId, String uri, int tenantId)
             throws IdentityVerificationException {
 

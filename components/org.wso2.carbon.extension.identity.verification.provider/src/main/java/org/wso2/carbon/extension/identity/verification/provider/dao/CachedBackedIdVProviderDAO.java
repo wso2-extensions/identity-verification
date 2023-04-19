@@ -87,6 +87,20 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
     }
 
     @Override
+    public boolean isIdVProviderExistsByName(String idvProviderName, int tenantId) throws IdVProviderMgtException {
+
+        IdVProvider idVProvider = getIdVPFromCacheByName(idvProviderName, tenantId);
+        if (idVProvider != null) {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Cache hit for IdVProvider by it's name: %s, Tenant id: %d",
+                        idvProviderName, tenantId));
+            }
+            return true;
+        }
+        return idVProviderManagerDAO.isIdVProviderExistsByName(idvProviderName, tenantId);
+    }
+
+    @Override
     public void addIdVProvider(IdVProvider idVProvider, int tenantId) throws IdVProviderMgtException {
 
         idVProviderManagerDAO.addIdVProvider(idVProvider, tenantId);
@@ -115,7 +129,7 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
     }
 
     @Override
-    public IdVProvider getIdVPByName(String idVPName, int tenantId) throws IdVProviderMgtException {
+    public IdVProvider getIdVProviderByName(String idVPName, int tenantId) throws IdVProviderMgtException {
 
         IdVProvider idVProvider = getIdVPFromCacheByName(idVPName, tenantId);
         if (idVProvider != null) {
@@ -128,7 +142,7 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
                 log.debug(String.format("Cache miss for secret by it's name: %s. Tenant id: %d",
                         idVPName, tenantId));
             }
-            idVProvider = idVProviderManagerDAO.getIdVPByName(idVPName, tenantId);
+            idVProvider = idVProviderManagerDAO.getIdVProviderByName(idVPName, tenantId);
             addIdVPToCache(idVProvider, tenantId);
         }
         return idVProvider;
