@@ -276,7 +276,8 @@ public class IdentityVerificationProviderService {
         // todo: handle null values
         idVConfigProperty.setName(apiProperty.getKey());
         idVConfigProperty.setValue(apiProperty.getValue());
-        idVConfigProperty.setConfidential(apiProperty.getIsSecret());
+        Boolean isSecret = apiProperty.getIsSecret();
+        idVConfigProperty.setConfidential(isSecret != null && isSecret);
         return idVConfigProperty;
     };
 
