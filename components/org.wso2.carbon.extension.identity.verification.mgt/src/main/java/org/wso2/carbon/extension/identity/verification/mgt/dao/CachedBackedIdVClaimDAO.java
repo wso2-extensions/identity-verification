@@ -75,8 +75,7 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
     @Override
     public IdVClaim getIDVClaim(String userId, String idVClaimId, int tenantId) throws IdentityVerificationException {
 
-        IdVClaim idVClaim =
-                getIdVClaimFromCacheById(idVClaimId, tenantId);
+        IdVClaim idVClaim = getIdVClaimFromCacheById(idVClaimId, tenantId);
         if (idVClaim != null) {
             if (log.isDebugEnabled()) {
                 String message = String.format("Cache hit for IdVClaim by it's id: %s, Tenant id: %d",
@@ -96,7 +95,8 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
     }
 
     @Override
-    public IdVClaim[] getIDVClaims(String userId, String idvProviderId, int tenantId) throws IdentityVerificationException {
+    public IdVClaim[] getIDVClaims(String userId, String idvProviderId, int tenantId)
+            throws IdentityVerificationException {
 
         return identityVerificationClaimDAO.getIDVClaims(userId, idvProviderId, tenantId);
     }
@@ -134,8 +134,7 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
     private IdVClaim getIdVClaimFromCacheById(String idvClaimId, int tenantId) {
 
         IdVClaimByIdCacheKey idVClaimByIdCacheKey = new IdVClaimByIdCacheKey(idvClaimId);
-        IdVClaimCacheEntry idVClaimCacheEntry =
-                idVClaimByIdCache.getValueFromCache(idVClaimByIdCacheKey, tenantId);
+        IdVClaimCacheEntry idVClaimCacheEntry = idVClaimByIdCache.getValueFromCache(idVClaimByIdCacheKey, tenantId);
         if (idVClaimCacheEntry != null) {
             if (log.isDebugEnabled()) {
                 String message = String.format("Entry found from IdVClaim by id cache. IdVClaim id: %s.",
@@ -159,8 +158,7 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
         if (idVClaim == null) {
             return;
         }
-        IdVClaimByIdCacheKey idVClaimByIdCacheKey =
-                new IdVClaimByIdCacheKey(idVClaim.getUuid());
+        IdVClaimByIdCacheKey idVClaimByIdCacheKey = new IdVClaimByIdCacheKey(idVClaim.getUuid());
         IdVClaimCacheEntry idVClaimCacheEntry = new IdVClaimCacheEntry(idVClaim);
         if (log.isDebugEnabled()) {
             String message = String.format("IdVClaim by id cache %s is created", idVClaim.getUuid());
@@ -174,9 +172,7 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
         if (idVClaim == null) {
             return;
         }
-        IdVClaimByIdCacheKey idVClaimByIdCacheKey =
-                new IdVClaimByIdCacheKey(idVClaim.getUuid());
-
+        IdVClaimByIdCacheKey idVClaimByIdCacheKey = new IdVClaimByIdCacheKey(idVClaim.getUuid());
         if (log.isDebugEnabled()) {
             String message = String.format("IdVClaim by id cache %s is deleted.", idVClaim.getUuid());
             log.debug(message);
