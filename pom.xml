@@ -26,10 +26,16 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>components/org.wso2.carbon.extension.identity.verification.api</module>
         <module>components/org.wso2.carbon.extension.identity.verification.provider</module>
         <module>components/org.wso2.carbon.extension.identity.verification.mgt</module>
     </modules>
+
+    <scm>
+        <url>https://github.com/wso2-extensions/identity-verification.git</url>
+        <developerConnection>scm:git:https://github.com/wso2-extensions/identity-verification.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2-extensions/identity-verification.git</connection>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencyManagement>
         <dependencies>
@@ -217,6 +223,14 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <configuration>
+                        <preparationGoals>clean install</preparationGoals>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
