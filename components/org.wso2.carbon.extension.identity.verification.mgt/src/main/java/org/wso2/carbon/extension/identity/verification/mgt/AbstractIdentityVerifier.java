@@ -58,7 +58,7 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
      * @throws IdentityVerificationServerException IdentityVerificationServerException.
      */
     public IdVProvider getIdVProvider(IdentityVerifierData identityVerifierData, int tenantId)
-            throws IdentityVerificationException {
+            throws IdentityVerificationServerException {
 
         try {
             String idVProviderId = identityVerifierData.getIdVProviderId();
