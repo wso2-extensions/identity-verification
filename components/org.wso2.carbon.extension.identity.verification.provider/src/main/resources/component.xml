@@ -18,28 +18,24 @@
 <component xmlns="http://products.wso2.org/carbon">
     <ManagementPermissions>
         <ManagementPermission>
-            <DisplayName>User - Identity Verification Management</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv</ResourceId>
-        </ManagementPermission>
-        <ManagementPermission>
-            <DisplayName>Verify</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/user/verify</ResourceId>
+            <DisplayName>Identity Verification Provider</DisplayName>
+            <ResourceId>/permission/admin/manage/identity/idvp</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Add</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/user/claim/add</ResourceId>
+            <ResourceId>/permission/admin/manage/identity/idvp/add</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
-            <DisplayName>List</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/user/claim/list</ResourceId>
+            <DisplayName>View</DisplayName>
+            <ResourceId>/permission/admin/manage/identity/idvp/view</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Update</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/user/claim/update</ResourceId>
+            <ResourceId>/permission/admin/manage/identity/idvp/update</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Delete</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/user/claim/delete</ResourceId>
+            <ResourceId>/permission/admin/manage/identity/idvp/delete</ResourceId>
         </ManagementPermission>
     </ManagementPermissions>
 </component>
