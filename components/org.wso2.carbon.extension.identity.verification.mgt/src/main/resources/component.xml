@@ -18,24 +18,32 @@
 <component xmlns="http://products.wso2.org/carbon">
     <ManagementPermissions>
         <ManagementPermission>
-            <DisplayName>Identity Verification Provider</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv</ResourceId>
+            <DisplayName>Identity Verification Management</DisplayName>
+            <ResourceId>/permission/admin/manage/identity/user/idv</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Verify</DisplayName>
+            <ResourceId>/permission/admin/manage/identity/user/idv/verify</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>IDV Claim</DisplayName>
+            <ResourceId>/permission/admin/manage/identity/user/idv/claim</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Add</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/add</ResourceId>
+            <ResourceId>/permission/admin/manage/identity/user/idv/claim/add</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>View</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/view</ResourceId>
+            <ResourceId>/permission/admin/manage/identity/user/idv/claim/view</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Update</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/update</ResourceId>
+            <ResourceId>/permission/admin/manage/identity/user/idv/claim/update</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Delete</DisplayName>
-            <ResourceId>/permission/admin/manage/identity/idv/delete</ResourceId>
+            <ResourceId>/permission/admin/manage/identity/user/idv/claim/delete</ResourceId>
         </ManagementPermission>
     </ManagementPermissions>
 </component>

@@ -27,6 +27,8 @@
 
     <artifactId>org.wso2.carbon.extension.identity.verification.mgt</artifactId>
     <packaging>bundle</packaging>
+    <name>WSO2 Carbon - Identity Verification Management</name>
+    <url>http://wso2.org</url>
 
     <dependencies>
         <dependency>

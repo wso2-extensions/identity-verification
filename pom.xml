@@ -42,6 +42,8 @@
     <modules>
         <module>components/org.wso2.carbon.extension.identity.verification.provider</module>
         <module>components/org.wso2.carbon.extension.identity.verification.mgt</module>
+        <module>features/org.wso2.carbon.extension.identity.verification.mgt.feature</module>
+        <module>features/org.wso2.carbon.extension.identity.verification.provider.feature</module>
     </modules>
 
     <dependencyManagement>
@@ -329,6 +331,11 @@
         <org.json.version>20230227</org.json.version>
         <org.osgi.version>7.0.0</org.osgi.version>
         <org.apache.httpcomponents.version>4.5.13</org.apache.httpcomponents.version>
+        <identity.framework.version>5.23.34</identity.framework.version>
+        <carbon.p2.plugin.version>5.1.2</carbon.p2.plugin.version>
+
+        <org.wso2.carbon.extension.identity.verification.mgt.version>${project.version}</org.wso2.carbon.extension.identity.verification.mgt.version>
+        <org.wso2.carbon.extension.identity.verification.provider.version>${project.version}</org.wso2.carbon.extension.identity.verification.provider.version>
 
         <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
         <import.package.version.commons.logging>[1.2.0,2.0.0)</import.package.version.commons.logging>
