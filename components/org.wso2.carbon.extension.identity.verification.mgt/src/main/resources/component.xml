@@ -18,6 +18,14 @@
 <component xmlns="http://products.wso2.org/carbon">
     <ManagementPermissions>
         <ManagementPermission>
+            <DisplayName>Identity</DisplayName>
+            <ResourceId>/permission/admin/manage/identity</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>User</DisplayName>
+            <ResourceId>/permission/admin/manage/identity/user</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
             <DisplayName>Identity Verification Management</DisplayName>
             <ResourceId>/permission/admin/manage/identity/user/idv</ResourceId>
         </ManagementPermission>
