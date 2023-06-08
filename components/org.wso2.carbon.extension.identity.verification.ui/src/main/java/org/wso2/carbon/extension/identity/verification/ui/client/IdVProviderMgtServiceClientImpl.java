@@ -44,7 +44,7 @@ public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceCli
     @Override
     public int getIdVProviderCount(String currentUser) throws IdVProviderMgtClientException {
 
-        handleLoggedInUserAuthorization(currentUser, PERMISSION_IDVP_MGT_VIEW);
+        handleLoggedInUserAuthorization(PERMISSION_IDVP_MGT_VIEW, currentUser);
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             return idVProviderManager.getCountOfIdVProviders(tenantId);
@@ -57,7 +57,7 @@ public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceCli
     public List<IdVProvider> getIdVProviders(Integer limit, Integer offset, String currentUser)
             throws IdVProviderMgtClientException {
 
-        handleLoggedInUserAuthorization(currentUser, PERMISSION_IDVP_MGT_VIEW);
+        handleLoggedInUserAuthorization(PERMISSION_IDVP_MGT_VIEW, currentUser);
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             return idVProviderManager.getIdVProviders(limit, offset, tenantId);
@@ -69,7 +69,7 @@ public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceCli
     @Override
     public IdVProvider getIdVProviderById(String id, String currentUser) throws IdVProviderMgtClientException {
 
-        handleLoggedInUserAuthorization(currentUser, PERMISSION_IDVP_MGT_VIEW);
+        handleLoggedInUserAuthorization(PERMISSION_IDVP_MGT_VIEW, currentUser);
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             return idVProviderManager.getIdVProvider(id, tenantId);
@@ -81,7 +81,7 @@ public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceCli
     @Override
     public IdVProvider addIdVProvider(IdVProvider provider, String currentUser) throws IdVProviderMgtClientException {
 
-        handleLoggedInUserAuthorization(currentUser, PERMISSION_IDVP_MGT_ADD);
+        handleLoggedInUserAuthorization(PERMISSION_IDVP_MGT_ADD, currentUser);
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             return idVProviderManager.addIdVProvider(provider, tenantId);
@@ -91,12 +91,13 @@ public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceCli
     }
 
     @Override
-    public IdVProvider updateIdVProvider(IdVProvider oldProvider, IdVProvider newProvider, String currentUser)
+    public IdVProvider updateIdVProvider(String id, IdVProvider newProvider, String currentUser)
             throws IdVProviderMgtClientException {
 
-        handleLoggedInUserAuthorization(currentUser, PERMISSION_IDVP_MGT_UPDATE);
+        handleLoggedInUserAuthorization(PERMISSION_IDVP_MGT_UPDATE, currentUser);
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
+            IdVProvider oldProvider = idVProviderManager.getIdVProvider(id, tenantId);
             return idVProviderManager.updateIdVProvider(oldProvider, newProvider, tenantId);
         } catch (IdVProviderMgtException e) {
             throw new IdVProviderMgtClientException(e.getErrorCode(), e.getMessage(), e);

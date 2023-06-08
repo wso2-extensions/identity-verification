@@ -54,8 +54,10 @@
 
 <script type="text/javascript">
 
-   const IDVP_DELETE_URL = "idvp-mgt-delete-finish-ajaxprocessor.jsp"
+   const IDVP_DELETE_URL = "idvp-mgt-delete-finish-ajaxprocessor.jsp";
+   const IDVP_EDIT_URL = "idvp-mgt-edit-finish-ajaxprocessor.jsp";
    const TEXT_HTML = "text/html";
+   const STATUS_SUCCESS = "success";
 
    function editIdPName(idpName) {
       location.href = "idp-mgt-edit-load.jsp?idPName=" + encodeURIComponent(idpName);
@@ -70,10 +72,10 @@
             headers: {
                Accept: TEXT_HTML
             },
-            data: "<%=IdVProviderUIConstants.IDVP_ID_KEY%>"+ "=" + encodeURIComponent(id),
+            data: "<%=IdVProviderUIConstants.KEY_IDVP_ID%>"+ "=" + encodeURIComponent(id),
             async: false,
             success: (responseText, status) => {
-               if (status === "success") {
+               if (status === STATUS_SUCCESS) {
                   location.assign("idvp-mgt-list.jsp?pageNumber=" + encodeURIComponent(pageNumber.toString()) +
                           "&region=region1&item=idp_list");
                }
@@ -85,27 +87,26 @@
       CARBON.showConfirmationDialog(message, doDelete, null, null)
    }
 
-   function enableOrDisableIdP(idpName, indicator) {
-      $.ajax({
-         type: 'POST',
-         url: 'idp-mgt-edit-finish-ajaxprocessor.jsp',
-         headers: {
-            Accept: "text/html"
-         },
-         data: 'idPName=' + encodeURIComponent(idpName) + '&enable=' + indicator,
-         async: false,
-         success: function (responseText, status) {
+   function enableOrDisableIdVP(id, status) {
 
-            if (status === "success") {
-               location.assign("idp-mgt-list.jsp");
+      $.ajax({
+         type: "<%=IdVProviderUIConstants.HTTP_POST%>",
+         url: IDVP_EDIT_URL,
+         headers: {
+            Accept: TEXT_HTML
+         },
+         data: "<%=IdVProviderUIConstants.KEY_IDVP_ID%>" + "=" + encodeURIComponent(id) + "&"
+                 + "<%=IdVProviderUIConstants.KEY_ENABLE%>" + "=" + status,
+         async: false,
+         success: (responseText, status) => {
+            if (status === STATUS_SUCCESS) {
+               location.assign("idvp-mgt-list.jsp");
             }
          }
       });
    }
 </script>
-<fmt:bundle
-        basename="<%=RESOURCE_BUNDLE%>"
->
+<fmt:bundle basename="<%=RESOURCE_BUNDLE%>">
    <%--   <carbon:breadcrumb--%>
    <%--           label="identity.verification.providers"--%>
    <%--           resourceBundle="org.wso2.carbon.extension.identity.verification.ui.i18n.Resources"--%>
@@ -140,16 +141,17 @@
                IdVProviderMgtServiceClient client = IdVProviderMgtServiceClientImpl.getInstance();
                String currentUser = (String) session.getAttribute(LOGGED_USER);
                int idVProviderCount = client.getIdVProviderCount(currentUser);
+               pageCount = (int) Math.ceil((double) idVProviderCount / resultsPerPage);
 
                if (idVProviderCount > 0) {
                   int offset = idVProviderCount > resultsPerPage ? pageNumber * resultsPerPage : 0;
                   idVProvidersToDisplay = client.getIdVProviders(resultsPerPage, offset, currentUser);
                }
-               pageCount = (int) Math.ceil((double) idVProviderCount / resultsPerPage);
             } catch (IdVProviderMgtClientException e) {
                String message = MessageFormat.format(resourceBundle.getString("error.loading.idvps"), e.getMessage());
                CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
             }
+
          %>
          <div class="sectionSub">
 
@@ -192,14 +194,15 @@
                            <td style="width: 100px; white-space: nowrap;">
                               <% if (enable) { %>
                               <a title="<fmt:message key='disable.policy'/>"
-                                 onclick="
-                                         enableOrDisableIdP('<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderName())%>', 0);return false;"
-                                 href="#" style="background-image: url(images/disable.gif);" class="icon-link">
+                                 onclick="enableOrDisableIdVP('<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderUuid())%>', 'false');return false;"
+                                 href="#"
+                                 style="background-image: url(images/disable.gif);"
+                                 class="icon-link">
                                  <fmt:message key='disable.policy'/>
                               </a>
                               <% } else { %>
                               <a title="<fmt:message key='enable.policy'/>"
-                                 onclick="enableOrDisableIdP('<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderName())%>', 1);return false;"
+                                 onclick="enableOrDisableIdVP('<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderUuid())%>', 'true');return false;"
                                  href="#" style="background-image: url(images/enable2.gif);" class="icon-link">
                                  <fmt:message key='enable.policy'/>
                               </a>
@@ -210,12 +213,7 @@
                                  <fmt:message key='edit'/>
                               </a>
                               <a title="<fmt:message key='delete'/>"
-                                 onclick="deleteIdVPById(
-                                         '<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderUuid())%>',
-                                         '<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderName())%>',
-                                         '<%=pageNumber%>'
-                                );
-                                 return false;"
+                                 onclick="deleteIdVPById('<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderUuid())%>','<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderName())%>','<%=pageNumber%>');return false;"
                                  href="#"
                                  class="icon-link"
                                  style="background-image: url(images/delete.gif)">

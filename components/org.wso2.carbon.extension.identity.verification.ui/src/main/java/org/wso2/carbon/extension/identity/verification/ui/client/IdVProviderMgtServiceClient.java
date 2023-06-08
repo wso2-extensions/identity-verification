@@ -19,7 +19,7 @@ public interface IdVProviderMgtServiceClient {
 
     IdVProvider addIdVProvider(IdVProvider provider, String currentUser) throws IdVProviderMgtClientException;
 
-    IdVProvider updateIdVProvider(IdVProvider oldProvider, IdVProvider newProvider, String currentUser)
+    IdVProvider updateIdVProvider(String id, IdVProvider newProvider, String currentUser)
             throws IdVProviderMgtClientException;
 
     void deleteIdVProvider(String id, String currentUser) throws IdVProviderMgtClientException;
