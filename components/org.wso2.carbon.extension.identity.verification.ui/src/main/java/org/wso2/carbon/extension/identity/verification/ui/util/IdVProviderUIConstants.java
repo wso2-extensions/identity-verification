@@ -8,8 +8,11 @@ public class IdVProviderUIConstants {
     public static final String IDVP_ERROR_PREFIX = "IDVP-UI-";
     public static final String RESOURCE_BUNDLE = "org.wso2.carbon.extension.identity.verification.ui.i18n.Resources";
     public static final String HTTP_POST = "POST";
-    public static final String IDVP_ID_KEY = "id";
     public static final String PAGE_NUMBER = "pageNumber";
+
+    // Query param keys
+    public static final String KEY_IDVP_ID = "id";
+    public static final String KEY_ENABLE = "enable";
 
     // Permissions
     public static final String PERMISSION_IDVP_MGT_DELETE = "/permission/admin/manage/identity/idvp/delete";

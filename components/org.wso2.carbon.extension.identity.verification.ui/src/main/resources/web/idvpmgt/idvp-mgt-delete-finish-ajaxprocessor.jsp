@@ -27,17 +27,17 @@
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.wso2.carbon.identity.base.IdentityRuntimeException" %>
 <%@ page import="static org.wso2.carbon.CarbonConstants.LOGGED_USER" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIUtils" %>
 
 <%
-    String httpMethod = request.getMethod();
-    if (!IdVProviderUIConstants.HTTP_POST.equalsIgnoreCase(httpMethod)) {
+    if(!IdVProviderUIUtils.isHTTPMethodAllowed(request)){
         response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         return;
-    }
+    };
     ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE, request.getLocale());
     try {
         IdVProviderMgtServiceClient client = IdVProviderMgtServiceClientImpl.getInstance();
-        String idvpId = request.getParameter(IdVProviderUIConstants.IDVP_ID_KEY);
+        String idvpId = request.getParameter(IdVProviderUIConstants.KEY_IDVP_ID);
         if (StringUtils.isBlank(idvpId)) {
             throw new IdentityRuntimeException("Invalid Identity Verification Provider Id");
         }
