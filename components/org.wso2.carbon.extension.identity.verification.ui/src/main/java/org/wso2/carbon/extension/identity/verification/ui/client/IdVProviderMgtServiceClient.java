@@ -24,4 +24,5 @@ public interface IdVProviderMgtServiceClient {
 
     void deleteIdVProvider(String id, String currentUser) throws IdVProviderMgtClientException;
 
+    String[] getAllLocalClaims() throws IdVProviderMgtClientException;
 }

@@ -55,15 +55,16 @@
 <script type="text/javascript">
 
    const IDVP_DELETE_URL = "idvp-mgt-delete-finish-ajaxprocessor.jsp";
-   const IDVP_EDIT_URL = "idvp-mgt-edit-finish-ajaxprocessor.jsp";
+   const IDVP_EDIT_FINISH_URL = "idvp-mgt-edit-finish-ajaxprocessor.jsp";
+   const IDVP_EDIT_URL = "idvp-mgt-edit.jsp";
    const TEXT_HTML = "text/html";
    const STATUS_SUCCESS = "success";
 
-   function editIdPName(idpName) {
-      location.href = "idp-mgt-edit-load.jsp?idPName=" + encodeURIComponent(idpName);
-   }
+   const editIdVP = idVPId => {
+      location.href = IDVP_EDIT_URL + "?" + "<%=IdVProviderUIConstants.KEY_IDVP_ID%>" + "=" + encodeURIComponent(idVPId);
+   };
 
-   function deleteIdVPById(id, name, pageNumber) {
+   const deleteIdVPById = (id, name, pageNumber) => {
 
       const doDelete = () => {
          $.ajax({
@@ -85,13 +86,13 @@
 
       const message = 'Are you sure you want to delete "' + name + '" Identity Verification Provider?';
       CARBON.showConfirmationDialog(message, doDelete, null, null)
-   }
+   };
 
-   function enableOrDisableIdVP(id, status) {
+   const enableOrDisableIdVP = (id, status) => {
 
       $.ajax({
          type: "<%=IdVProviderUIConstants.HTTP_POST%>",
-         url: IDVP_EDIT_URL,
+         url: IDVP_EDIT_FINISH_URL,
          headers: {
             Accept: TEXT_HTML
          },
@@ -104,15 +105,9 @@
             }
          }
       });
-   }
+   };
 </script>
 <fmt:bundle basename="<%=RESOURCE_BUNDLE%>">
-   <%--   <carbon:breadcrumb--%>
-   <%--           label="identity.verification.providers"--%>
-   <%--           resourceBundle="org.wso2.carbon.extension.identity.verification.ui.i18n.Resources"--%>
-   <%--           topPage="true"--%>
-   <%--           request="<%=request%>"--%>
-   <%--   />--%>
    <div id="middle">
       <h2>
          <fmt:message key='identity.verification.providers'/>
@@ -208,7 +203,7 @@
                               </a>
                               <% } %>
                               <a title="<fmt:message key='edit.idvp.info'/>"
-                                 onclick="editIdPName('<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderName())%>');return false;"
+                                 onclick="editIdVP('<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderUuid())%>');return false;"
                                  style="background-image: url(images/edit.gif);" class="icon-link">
                                  <fmt:message key='edit'/>
                               </a>

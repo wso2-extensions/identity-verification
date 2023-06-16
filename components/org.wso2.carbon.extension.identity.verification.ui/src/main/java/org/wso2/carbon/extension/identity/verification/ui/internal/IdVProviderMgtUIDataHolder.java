@@ -1,5 +1,6 @@
 package org.wso2.carbon.extension.identity.verification.ui.internal;
 
+import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataManagementService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
@@ -8,6 +9,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 public class IdVProviderMgtUIDataHolder {
 
     private RealmService realmService;
+    private ClaimMetadataManagementService claimMetadataManagementService;
 
     private static class SingletonHelper {
 
@@ -40,5 +42,17 @@ public class IdVProviderMgtUIDataHolder {
     public void setRealmService(RealmService realmService) {
 
         this.realmService = realmService;
+    }
+
+    public ClaimMetadataManagementService getClaimMetadataManagementService() {
+        if (claimMetadataManagementService == null) {
+            throw new RuntimeException("ClaimMetadataManagementService was not set during the " +
+                    "IdVProviderMgtUIServiceComponent startup");
+        }
+        return claimMetadataManagementService;
+    }
+
+    public void setClaimMetadataManagementService(ClaimMetadataManagementService claimMetadataManagementService) {
+        this.claimMetadataManagementService = claimMetadataManagementService;
     }
 }

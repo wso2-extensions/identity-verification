@@ -35,7 +35,7 @@
             <i18n-key>add</i18n-key>
             <i18n-bundle>org.wso2.carbon.extension.identity.verification.ui.i18n.Resources</i18n-bundle>
             <parent-menu>identity_verification_providers_menu</parent-menu>
-            <link>../idvpmgt/idp-mgt-edit.jsp</link>
+            <link>../idvpmgt/idvp-mgt-edit.jsp</link>
             <region>region1</region>
             <order>1</order>
             <style-class>manage</style-class>

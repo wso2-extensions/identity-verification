@@ -8,6 +8,9 @@ import org.wso2.carbon.extension.identity.verification.provider.exception.IdVPro
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.extension.identity.verification.ui.internal.IdVProviderMgtUIDataHolder;
+import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
+import org.wso2.carbon.identity.claim.metadata.mgt.model.Claim;
+import org.wso2.carbon.identity.claim.metadata.mgt.model.LocalClaim;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -112,6 +115,20 @@ public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceCli
         try {
             idVProviderManager.deleteIdVProvider(id, tenantId);
         } catch (IdVProviderMgtException e) {
+            throw new IdVProviderMgtClientException(e.getErrorCode(), e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public String[] getAllLocalClaims() throws IdVProviderMgtClientException {
+        // TODO: Check if we need to handle the permissions
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        try {
+            List<LocalClaim> localClaims = IdVProviderMgtUIDataHolder.getInstance()
+                    .getClaimMetadataManagementService().
+                    getLocalClaims(tenantDomain);
+            return localClaims.stream().map(Claim::getClaimURI).toArray(String[]::new);
+        } catch (ClaimMetadataException e) {
             throw new IdVProviderMgtClientException(e.getErrorCode(), e.getMessage(), e);
         }
     }

@@ -937,17 +937,6 @@ function doValidation() {
     return true;
 }
 
-var deleteClaimRows = [];
-function deleteClaimRow(obj) {
-    if (jQuery(obj).parent().prev().children()[0].value != '') {
-        deleteClaimRows.push(jQuery(obj).parent().prev().children()[0].value);
-    }
-    jQuery(obj).parent().parent().remove();
-    if ($(jQuery('#claimAddTable tr')).length == 1) {
-        $(jQuery('#claimAddTable')).toggle();
-    }
-    claimURIDropdownPopulator();
-}
 
 function htmlEncode(value) {
     // Create a in-memory div, set it's inner text(which jQuery automatically encodes)
@@ -1004,7 +993,7 @@ jQuery('#authnRequestSigned').click(function () {
 });
 
 jQuery('#claimAddTable .claimrow').blur(function () {
-    claimURIDropdownPopulator();
+    populateClaimURIDropdown();
 });
 jQuery('#claimMappingDeleteLink').click(function () {
     $(jQuery('#claimMappingDiv')).toggle();
@@ -1043,7 +1032,7 @@ jQuery('#choose_dialet_type1').click(function () {
     $(".customClaim").hide();
     $(".role_claim").hide();
     deleteRows();
-    claimURIDropdownPopulator();
+    populateClaimURIDropdown();
     $("#advancedClaimMappingAddTable tbody > tr").remove();
     $('#advancedClaimMappingAddTable').hide();
 
@@ -1054,7 +1043,7 @@ jQuery('#choose_dialet_type2').click(function () {
     $(".role_claim").show();
     $("#advancedClaimMappingAddTable tbody > tr").remove();
     $('#advancedClaimMappingAddTable').hide();
-    claimURIDropdownPopulator();
+    populateClaimURIDropdown();
 });
 
 

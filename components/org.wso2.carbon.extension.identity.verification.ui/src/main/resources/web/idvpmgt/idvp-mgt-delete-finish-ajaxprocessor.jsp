@@ -47,8 +47,6 @@
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
     } catch (Exception e) {
         String message = MessageFormat.format(resourceBundle.getString("error.deleting.idvp"), e.getMessage());
-        System.out.println("Error msg : " + e.getMessage());
-        System.out.println("msg : " + message);
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
     }
 %>
