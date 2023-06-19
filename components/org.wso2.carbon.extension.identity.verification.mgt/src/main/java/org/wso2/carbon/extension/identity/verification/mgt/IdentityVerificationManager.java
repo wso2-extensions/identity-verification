@@ -77,6 +77,19 @@ public interface IdentityVerificationManager {
     IdVClaim[] getIdVClaims(String userId, String idvProviderId, int tenantId) throws IdentityVerificationException;
 
     /**
+     * Get the identity verification claims by specific metadata.
+     *
+     * @param metadataKey   Key of required metadata.
+     * @param metadataValue Value of  of required metadata.
+     * @param idvProviderId IdVProvider Id.
+     * @param tenantId      Tenant Id.
+     * @return Identity verification claims.
+     * @throws IdentityVerificationException Identity verification exception.
+     */
+    IdVClaim[] getIdVClaimsByMetadata(String metadataKey, String metadataValue, String idvProviderId,
+                                      int tenantId) throws IdentityVerificationException;
+
+    /**
      * Add the IdVClaim.
      *
      * @param userId   User Id.

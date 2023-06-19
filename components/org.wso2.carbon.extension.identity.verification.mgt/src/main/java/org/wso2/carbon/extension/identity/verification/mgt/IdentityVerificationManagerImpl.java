@@ -199,6 +199,17 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
         return getIdVClaimDAO().getIDVClaims(userId, idvProviderId, tenantId);
     }
 
+    @Override
+    public IdVClaim[] getIdVClaimsByMetadata(String metadataKey, String metadataValue, String idvProviderId,
+                                             int tenantId) throws IdentityVerificationException {
+
+        if (StringUtils.isBlank(metadataKey)) {
+            throw IdentityVerificationExceptionMgt.handleClientException(
+                    IdentityVerificationConstants.ErrorMessage.ERROR_EMPTY_CLAIM_METADATA);
+        }
+        return getIdVClaimDAO().getIdVClaimsByMetadata(metadataKey, metadataValue, idvProviderId, tenantId);
+    }
+
     private void validateIdVClaimId(String idvClaimId, int tenantId) throws IdentityVerificationException {
 
         if (StringUtils.isBlank(idvClaimId) || !isIdVClaimExists(idvClaimId, tenantId)) {
