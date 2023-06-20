@@ -55,7 +55,7 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
      * @param identityVerifierData Identity verifier data.
      * @param tenantId             Tenant Id.
      * @return IdentityVerificationProvider.
-     * @throws IdentityVerificationServerException IdentityVerificationServerException.
+     * @throws IdentityVerificationException IdentityVerificationServerException.
      */
     public IdVProvider getIdVProvider(IdentityVerifierData identityVerifierData, int tenantId)
             throws IdentityVerificationServerException {
