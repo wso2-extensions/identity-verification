@@ -236,7 +236,6 @@
                 <artifactId>axiom</artifactId>
                 <version>${axiom.wso2.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.wso2.orbit.org.owasp.encoder</groupId>
                 <artifactId>encoder</artifactId>
@@ -253,6 +252,12 @@
                 <artifactId>org.wso2.carbon.ui</artifactId>
                 <!--                <version>${carbon.kernel.version}</version>-->
                 <version>4.9.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.extension.mgt</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+                <scope>provided</scope>
             </dependency>
 
 
@@ -383,7 +388,7 @@
         <springframework.version>5.3.19</springframework.version>
         <slf4j.version>1.7.22</slf4j.version>
         <commons-lang3.version>3.10</commons-lang3.version>
-        <carbon.identity.framework.version>5.25.174</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.25.215</carbon.identity.framework.version>
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
