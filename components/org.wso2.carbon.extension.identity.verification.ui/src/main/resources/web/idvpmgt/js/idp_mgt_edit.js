@@ -662,16 +662,6 @@ function idpMgtCancel() {
     location.href = "idvp-mgt-list.jsp"
 }
 
-function showHidePassword(element, inputId) {
-    if ($(element).text() == 'Show') {
-        document.getElementById(inputId).type = 'text';
-        $(element).text('Hide');
-    } else {
-        document.getElementById(inputId).type = 'password';
-        $(element).text('Show');
-    }
-}
-
 function emailValidator(name) {
     var errorMsg = "";
     var emailPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

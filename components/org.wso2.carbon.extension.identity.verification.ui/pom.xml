@@ -99,6 +99,7 @@
                             org.wso2.carbon.extension.identity.verification.provider;version="${project.version}",
                             org.wso2.carbon.extension.identity.verification.provider.model;version="${project.version}",
                             org.wso2.carbon.extension.identity.verification.provider.exception;version="${project.version}",
+                            org.wso2.carbon.identity.base; version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.claim.metadata.mgt;version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.claim.metadata.mgt.exception;version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.claim.metadata.mgt.model;version="${carbon.identity.package.import.version.range}",

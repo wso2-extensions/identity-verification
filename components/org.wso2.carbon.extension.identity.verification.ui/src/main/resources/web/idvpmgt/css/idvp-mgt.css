@@ -1,0 +1,87 @@
+.showHideBtn {
+	background-color:#599bb3;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family: arial, serif;
+	font-size:12px;
+	font-weight:bold;
+	padding:2px 5px;
+	text-decoration:none;
+}
+.showHideBtn:hover {
+	background-color:#408c99;
+	color:#ffffff;
+}
+
+.showHideBtn:active {
+	position: relative;
+	top: 1px;
+}
+
+a.delete-link {
+	background-image: url("../images/delete.gif");
+}
+
+.passwordFieldContainer {
+	border: 1px solid rgb(88, 105, 125);
+	width: 235px;
+	margin-bottom: 2px;
+	background-image: linear-gradient(to bottom, #f7f7f7 0%, #ffffff 100%);
+}
+
+.passwordFieldContainer input[type="password"] {
+	outline: none;
+	border: none;
+	min-width: 175px;
+	max-width: 180px;
+}
+
+.passwordFieldContainer input[type="text"] {
+	outline: none;
+	border: none;
+	min-width: 175px;
+	max-width: 180px;
+}
+
+.passwordFieldContainer span {
+	float: right;
+	padding-right: 5px;
+}
+
+.passwordFieldContainer .showHideBtn{
+	margin-top: 5px;
+}
+
+.carbonFormTable input[type="url"], input[type="email"], input[type="number"] {
+	background-image: linear-gradient(to bottom, #f7f7f7 0%, #ffffff 100%);
+	background-repeat: repeat-x;
+	border: 1px solid #58697d;
+	min-width: 230px;
+	height: 20px;
+	color: #333333;
+	padding: 3px;
+	margin-right: 4px;
+	margin-bottom: 2px;
+}
+
+.carbonFormTable input[type="checkbox"] {
+	margin-left: 0;
+}
+
+.carbonFormTable select.selectField {
+	margin-bottom: 2px;
+	min-width: 100px;
+}
+
+.carbonFormTable textarea {
+	margin-bottom: 2px;
+	width: 50%;
+}
+
+.sectionCheckbox .sectionHelp {
+	display: inline-block;
+}

@@ -15,31 +15,36 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@ page isELIgnored="false" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%@page import="org.owasp.encoder.Encode" %>
 
 <%@ page import="org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClient" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClientImpl" %>
-<%@ page import="java.util.Map" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants" %>
-<%@ page import="java.util.Set" %>
 <%@ page import="static org.wso2.carbon.CarbonConstants.LOGGED_USER" %>
-<%@ page import="org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtClientException" %>
-<%@ page import="java.util.Arrays" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="java.text.MessageFormat" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page
   import="static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.RESOURCE_BUNDLE" %>
-<%@ page import="java.util.ResourceBundle" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.ExtensionMgtServiceClient" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.ExtensionMgtServiceClientImpl" %>
+<%@ page import="org.wso2.carbon.identity.extension.mgt.model.ExtensionInfo" %>
+<%@ page import="java.util.*" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="java.util.stream.Collectors" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.exception.IdentityVerificationUIException" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.ErrorMessages" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="carbon" uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" %>
 <%@ taglib uri="http://www.owasp.org/index.php/Category:OWASP_CSRFGuard_Project/Owasp.CsrfGuard.tld" prefix="csrf" %>
 <carbon:breadcrumb label="identity.providers" resourceBundle="org.wso2.carbon.idp.mgt.ui.i18n.Resources"
                    topPage="true" request="<%=request%>"/>
 <jsp:include page="../dialog/display_messages.jsp"/>
-<link href="css/idvpmgt.css" rel="stylesheet" type="text/css" media="all"/>
+<link href="css/idvp-mgt.css" rel="stylesheet" type="text/css" media="all"/>
 
 <%
     String idVPId = request.getParameter(IdVProviderUIConstants.KEY_IDVP_ID);
@@ -49,30 +54,68 @@
     Map<String, String> claimMappings = null;
     String[] claimURIs;
     IdVProvider idVProvider = null;
-    IdVProviderMgtServiceClient client = IdVProviderMgtServiceClientImpl.getInstance();
+    JSONObject idVProviderUIMetadata = null;
+    List<ExtensionInfo> infoPerIdVProvider;
+    Map<String, JSONObject> metadataPerIdVProvider;
+    IdVProviderMgtServiceClient idVPMgtClient = IdVProviderMgtServiceClientImpl.getInstance();
+    ExtensionMgtServiceClient extensionMgtClient = ExtensionMgtServiceClientImpl.getInstance();
     String currentUser = (String) session.getAttribute(LOGGED_USER);
     ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE, request.getLocale());
 
     try {
+        infoPerIdVProvider = extensionMgtClient.getExtensionInfoOnIdVProviderTypes();
+
+        if (infoPerIdVProvider == null) {
+            throw new IdentityVerificationUIException(ErrorMessages.ERROR_LOADING_EXTENSION_INFO.getCode(),
+              ErrorMessages.ERROR_LOADING_EXTENSION_INFO.getMessage());
+        }
+
+        List<String> availableIdVPTypes = infoPerIdVProvider.stream().map(ExtensionInfo::getId)
+          .collect(Collectors.toList());
+        metadataPerIdVProvider = extensionMgtClient.getIdVProviderMetadataMap(availableIdVPTypes);
+
+        // If there is an idVPId, the page is loaded in edit mode with existing data. Otherwise, the page is loaded in
+        // create mode with default data.
         if (StringUtils.isNotBlank(idVPId)) {
-            idVProvider = client.getIdVProviderById(idVPId, currentUser);
+            idVProvider = idVPMgtClient.getIdVProviderById(idVPId, currentUser);
             idVPName = idVProvider.getIdVProviderName();
             description = idVProvider.getIdVProviderDescription();
             claimMappings = idVProvider.getClaimMappings();
+            idVProviderUIMetadata = extensionMgtClient.getIdVProviderMetadata(idVProvider.getType());
+        } else {
+            idVProviderUIMetadata = metadataPerIdVProvider.get(availableIdVPTypes.get(0));
         }
 
-        claimURIs = client.getAllLocalClaims();
+        claimURIs = idVPMgtClient.getAllLocalClaims();
+
     } catch (Exception e) {
         claimURIs = new String[0];
+        infoPerIdVProvider = new ArrayList<>();
+        metadataPerIdVProvider = new HashMap<>();
         String message = MessageFormat.format(resourceBundle.getString("error.loading.idvp.info"), e.getMessage());
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
     }
-
+    request.setAttribute("infoPerIdVProvider", infoPerIdVProvider);
+    request.setAttribute("idVProvider", idVProvider);
+    request.setAttribute("idVProviderUIMetadata", idVProviderUIMetadata);
+    request.setAttribute("metadataPerIdVProvider", metadataPerIdVProvider);
 %>
 
 <script>
 
     let claimRowId = <%= claimMappings != null ? (claimMappings.size() - 1) : -1 %>;
+    let idVProviderUIMetadata = <c:out value="${idVProviderUIMetadata.toString()}" escapeXml="false"/>;
+
+    const metadataPerIdVProvider = new Map();
+    <c:forEach var="metadata" items="${metadataPerIdVProvider}">
+    metadataPerIdVProvider.set("<c:out value="${metadata.key}"/>",
+        <c:out value="${metadata.value.toString()}" escapeXml="false"/>);
+    </c:forEach>
+
+    const currentConfigProperties = new Map();
+    <c:forEach var="property" items="${idVProvider.idVConfigProperties}">
+        currentConfigProperties.set("<c:out value='${property.name}'/>", "<c:out value='${property.value}'/>");
+    </c:forEach>
 
     $(document).ready(() => {
 
@@ -108,6 +151,13 @@
             handleClaimAddTableVisibility()
         })
 
+        $("#idvp-type-dropdown")
+            .change(() => {
+                const idVProviderType = $("#idvp-type-dropdown").val();
+                idVProviderUIMetadata = metadataPerIdVProvider.get(idVProviderType);
+                renderConfigurationPropertySection(idVProviderUIMetadata, currentConfigProperties)
+            })
+            .trigger("change");
     })
 
     const idvpMgtUpdate = () => {
@@ -124,7 +174,7 @@
           action="idvp-mgt-edit-finish-ajaxprocessor.jsp?<csrf:tokenname/>=<csrf:tokenvalue/>"
           enctype="multipart/form-data">
 
-                <%-- Basic Info Start --%>
+            <!-- Basic Info Start -->
             <div class="sectionSeperator togglebleTitle">
                 <fmt:message key='basic.info.heading'/>
             </div>
@@ -148,7 +198,7 @@
                     </tr>
                     <tr>
                         <td class="leftCol-med labelField">
-                            <fmt:message key='description'/>
+                            <fmt:message key='description'/>:
                         </td>
                         <td>
                             <input
@@ -162,14 +212,75 @@
                             </div>
                         </td>
                     </tr>
+                    <tr>
+                        <td class="leftCol-med labelField">
+                            <fmt:message key='idvp.type'/>
+                        </td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${not empty idVProvider}">
+                                    <select id="idvp-type-dropdown" class="selectField" disabled>
+                                        <c:forEach
+                                          var="idVProviderInfo"
+                                          items="${infoPerIdVProvider}"
+                                          varStatus="status">
+                                            <option
+                                              value="${idVProviderInfo.id}"
+                                                ${idVProvider.type.equals(idVProviderInfo.id) ? "selected":""}>
+                                                    ${idVProviderInfo.name}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </c:when>
+                                <c:otherwise>
+                                    <select id="idvp-type-dropdown" class="selectField">
+                                        <c:forEach
+                                          var="idVProviderInfo"
+                                          items="${infoPerIdVProvider}"
+                                          varStatus="status">
+                                            <option
+                                              value="${idVProviderInfo.id}"
+                                                ${status.first ? "selected":""}>
+                                                    ${idVProviderInfo.name}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </c:otherwise>
+                            </c:choose>
+                            <div class="sectionHelp">
+                                <fmt:message key='idvp.type.help'/>
+                            </div>
+                        </td>
+                    </tr>
                 </table>
             </div>
-                <%-- Basic Info End --%>
+            <!-- Basic Info End -->
 
-                <%-- Claim Config Start --%>
+            <!-- Configuration Properties Start -->
+            <h2
+              id="config_prop_head"
+              class="sectionSeperator trigger">
+                <a href="#">
+                    <fmt:message key="configuration.properties.head"/>
+                </a>
+            </h2>
+            <div
+              class="toggle_container sectionSub"
+              style="margin-bottom:10px;"
+              id="config-property-section">
+
+                <table id="config-property-table" class="carbonFormTable">
+                    <tr>
+                        <td class="leftCol-med labelField"></td>
+                    </tr>
+                </table>
+            </div>
+            <!-- Configuration Properties End -->
+
+            <!-- Claim Config Start -->
             <h2
               id="claim_config_head"
-              class="sectionSeperator trigger active">
+              class="sectionSeperator trigger">
                 <a href="#">
                     <fmt:message key="claim.config.head"/>
                 </a>
@@ -219,6 +330,7 @@
                                     $('#claimAddTable').toggle();
                                 </script>
                                 <%
+                                    // TODO: Convert this to EL syntax if possible
                                     int i = 0;
                                     for (Map.Entry<String, String> claimMapping : claimMappings.entrySet()) {
                                 %>
@@ -240,9 +352,9 @@
                                             <option value="">
                                                 --- Select Claim URI ---
                                             </option>
-                                            <%
-                                               for(String wso2ClaimName : claimURIs) {
-                                            %>
+                                                    <%
+                                        for(String wso2ClaimName : claimURIs) {
+                                        %>
                                             <option
                                               <%
                                                   if (claimMapping.getKey() != null && claimMapping.getKey().equals(wso2ClaimName)) {
@@ -255,7 +367,7 @@
                                               value="<%= encodedWSO2Claim %>">
                                                 <%= encodedWSO2Claim %>
                                             </option>
-                                            <% } %>
+                                                    <% } %>
                                     </td>
 
                                     <td>
@@ -284,7 +396,7 @@
 
                 </table>
             </div>
-                <%-- Claim Config End --%>
+            <!-- Claim Config End -->
         </form>
     </div>
     <!-- sectionSub Div -->
