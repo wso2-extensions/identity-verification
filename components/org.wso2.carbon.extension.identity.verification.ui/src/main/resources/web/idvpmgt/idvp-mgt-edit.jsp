@@ -16,28 +16,26 @@
 ~ under the License.
 -->
 <%@ page isELIgnored="false" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<%@page import="org.owasp.encoder.Encode" %>
-
+<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider" %>
-<%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClient" %>
-<%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClientImpl" %>
-<%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants" %>
-<%@ page import="static org.wso2.carbon.CarbonConstants.LOGGED_USER" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="java.text.MessageFormat" %>
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
-<%@ page
-  import="static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.RESOURCE_BUNDLE" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.ExtensionMgtServiceClient" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.ExtensionMgtServiceClientImpl" %>
-<%@ page import="org.wso2.carbon.identity.extension.mgt.model.ExtensionInfo" %>
-<%@ page import="java.util.*" %>
-<%@ page import="org.json.JSONObject" %>
-<%@ page import="java.util.stream.Collectors" %>
+<%@ page import="static org.wso2.carbon.CarbonConstants.LOGGED_USER" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClient" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClientImpl" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.exception.IdentityVerificationUIException" %>
+<%@ page
+  import="static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.RESOURCE_BUNDLE" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.ErrorMessages" %>
+<%@ page import="org.wso2.carbon.identity.extension.mgt.model.ExtensionInfo" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="java.text.MessageFormat" %>
+<%@ page import="java.util.*" %>
+<%@ page import="java.util.stream.Collectors" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="carbon" uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" %>
 <%@ taglib uri="http://www.owasp.org/index.php/Category:OWASP_CSRFGuard_Project/Owasp.CsrfGuard.tld" prefix="csrf" %>
@@ -49,8 +47,6 @@
 <%
     String idVPId = request.getParameter(IdVProviderUIConstants.KEY_IDVP_ID);
 
-    String idVPName = "";
-    String description = "";
     String[] claimURIs;
     StringBuilder existingIdVProviderNames;
     IdVProvider idVProvider = null;
@@ -78,8 +74,6 @@
         // create mode with default data.
         if (StringUtils.isNotBlank(idVPId)) {
             idVProvider = idVPMgtClient.getIdVProviderById(idVPId, currentUser);
-            idVPName = idVProvider.getIdVProviderName();
-            description = idVProvider.getIdVProviderDescription();
             idVProviderUIMetadata = extensionMgtClient.getIdVProviderMetadata(idVProvider.getType());
         } else {
             idVProviderUIMetadata = metadataPerIdVProvider.get(availableIdVPTypes.get(0));
@@ -91,7 +85,6 @@
             .collect(Collectors.joining(",")))
           .append("]");
         claimURIs = idVPMgtClient.getAllLocalClaims();
-
     } catch (Exception e) {
         claimURIs = new String[0];
         existingIdVProviderNames = new StringBuilder("[]");
@@ -197,7 +190,7 @@
                               id="idVPName"
                               name="idVPName"
                               type="text"
-                              value="<%=Encode.forHtmlAttribute(idVPName)%>"
+                              value="<c:out value='${idVProvider.idVProviderName}'/>"
                               autofocus/>
                             <div class="sectionHelp">
                                 <fmt:message key='name.help'/>
@@ -213,7 +206,7 @@
                               id="idVPDescription"
                               name="idVPDescription"
                               type="text"
-                              value="<%=Encode.forHtmlAttribute(description)%>"
+                              value="<c:out value='${idVProvider.idVProviderDescription}'/>"
                               autofocus/>
                             <div class="sectionHelp">
                                 <fmt:message key='description.help'/>
@@ -333,6 +326,9 @@
                                 <tbody>
                                 <c:if
                                   test="${not empty idVProvider.claimMappings && idVProvider.claimMappings.size() > 0}">
+                                    <script>
+                                        $('#claimAddTable').toggle();
+                                    </script>
                                     <c:forEach
                                       var="claimMapping"
                                       items="${idVProvider.claimMappings.entrySet()}"
@@ -388,7 +384,7 @@
     <div class="buttonRow">
         <input
           type="button"
-          value="<fmt:message key='<%= idVProvider != null ? "update" : "register"%>'/>"
+          value="<fmt:message key='${idVProvider != null ? "update" : "register"}'/>"
           onclick="handleIdVPMgtUpdate();"
         />
         <input type="button" value="<fmt:message key='cancel'/>" onclick="handleIdVPMgtCancel();"/>

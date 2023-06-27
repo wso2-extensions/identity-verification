@@ -229,8 +229,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
-
-            <!-- UI-->
             <dependency>
                 <groupId>org.apache.ws.commons.axiom.wso2</groupId>
                 <artifactId>axiom</artifactId>
@@ -244,14 +242,12 @@
             <dependency>
                 <groupId>org.owasp.encoder</groupId>
                 <artifactId>encoder-jsp</artifactId>
-                <!--                <version>${encoder-jsp.version}</version>-->
-                <version>1.2.2</version>
+                <version>${encoder-jsp.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.ui</artifactId>
-                <!--                <version>${carbon.kernel.version}</version>-->
-                <version>4.9.0</version>
+                <version>${carbon.kernel.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
