@@ -345,3 +345,59 @@ const renderDropdownField = (property, currentConfigProperties) => {
         </tr>
     `;
 }
+
+/**
+ * Handles the cancel button click event by redirecting to IdVP list page.
+ */
+const handleIdVPMgtCancel = () => {
+    location.href = "idvp-mgt-list.jsp"
+};
+
+/**
+ * Performs the validations on the form.
+ * @param existingIdVProviderNames The names of the existing Identity Verification Providers.
+ * @returns True if the form is valid. False otherwise.
+ */
+const performValidation = (existingIdVProviderNames) => {
+
+    if (!isIdVPNameValid(existingIdVProviderNames)) {
+        return false;
+    }
+
+    // Validate the type of the Identity Verification Provider.
+    if (isFieldEmpty("#idvp-type-dropdown")) {
+        CARBON.showWarningDialog("Identity Verification Provider type cannot be empty");
+        return false;
+    }
+
+   return true;
+}
+
+/**
+ * Validates the name of the Identity Verification Provider.
+ * @param existingIdVProviderNames The names of the existing Identity Verification Providers.
+ * @returns True if the name is valid. False otherwise.
+ */
+const isIdVPNameValid = (existingIdVProviderNames) => {
+
+    const idVPNameFiledId = "#idVPName";
+
+    if (isFieldEmpty(idVPNameFiledId)) {
+        CARBON.showWarningDialog("Name of Identity Verification Provider cannot be empty");
+        return false;
+    } else if (existingIdVProviderNames.includes($(idVPNameFiledId).val())) {
+        CARBON.showWarningDialog("Identity Verification Provider with the same name already exists");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Validate whether the given field is empty.
+ * @param id The id of the field.
+ * @returns True if the field is empty. False otherwise.
+ */
+const isFieldEmpty = (id) => {
+    return $(id).val().trim() === "";
+}

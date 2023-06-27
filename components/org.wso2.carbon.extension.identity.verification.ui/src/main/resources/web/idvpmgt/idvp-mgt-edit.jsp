@@ -53,6 +53,7 @@
     String description = "";
     Map<String, String> claimMappings = null;
     String[] claimURIs;
+    StringBuilder existingIdVProviderNames;
     IdVProvider idVProvider = null;
     JSONObject idVProviderUIMetadata = null;
     List<ExtensionInfo> infoPerIdVProvider;
@@ -85,11 +86,16 @@
         } else {
             idVProviderUIMetadata = metadataPerIdVProvider.get(availableIdVPTypes.get(0));
         }
-
+        existingIdVProviderNames = new StringBuilder("[").append(idVPMgtClient.getIdVProviders(null, null, currentUser)
+            .stream()
+            .map(provider -> "\"" + provider.getIdVProviderName() + "\"")
+            .collect(Collectors.joining(",")))
+          .append("]");
         claimURIs = idVPMgtClient.getAllLocalClaims();
 
     } catch (Exception e) {
         claimURIs = new String[0];
+        existingIdVProviderNames = new StringBuilder("[]");
         infoPerIdVProvider = new ArrayList<>();
         metadataPerIdVProvider = new HashMap<>();
         String message = MessageFormat.format(resourceBundle.getString("error.loading.idvp.info"), e.getMessage());
@@ -97,6 +103,7 @@
     }
     request.setAttribute("infoPerIdVProvider", infoPerIdVProvider);
     request.setAttribute("idVProvider", idVProvider);
+    request.setAttribute("existingIdVProviderNames", existingIdVProviderNames.toString());
     request.setAttribute("idVProviderUIMetadata", idVProviderUIMetadata);
     request.setAttribute("metadataPerIdVProvider", metadataPerIdVProvider);
 %>
@@ -105,11 +112,14 @@
 
     let claimRowId = <%= claimMappings != null ? (claimMappings.size() - 1) : -1 %>;
     let idVProviderUIMetadata = <c:out value="${idVProviderUIMetadata.toString()}" escapeXml="false"/>;
+    const existingIdVProviderNames = <c:out value="${existingIdVProviderNames}" escapeXml="false"/>;
 
     const metadataPerIdVProvider = new Map();
     <c:forEach var="metadata" items="${metadataPerIdVProvider}">
-    metadataPerIdVProvider.set("<c:out value="${metadata.key}"/>",
-        <c:out value="${metadata.value.toString()}" escapeXml="false"/>);
+        metadataPerIdVProvider.set(
+            "<c:out value="${metadata.key}"/>",
+            <c:out value="${metadata.value.toString()}" escapeXml="false"/>
+        );
     </c:forEach>
 
     const currentConfigProperties = new Map();
@@ -160,8 +170,11 @@
             .trigger("change");
     })
 
-    const idvpMgtUpdate = () => {
+    const handleIdVPMgtUpdate = () => {
         //TODO: Implement the update logic
+        if (performValidation(existingIdVProviderNames)) {
+            console.log("Validation successful");
+        }
     };
 
 </script>
@@ -214,7 +227,7 @@
                     </tr>
                     <tr>
                         <td class="leftCol-med labelField">
-                            <fmt:message key='idvp.type'/>
+                            <fmt:message key='idvp.type'/>:<span class="required">*</span>
                         </td>
                         <td>
                             <c:choose>
@@ -404,10 +417,11 @@
         <input
           type="button"
           value="<fmt:message key='<%= idVProvider != null ? "update" : "register"%>'/>"
-          onclick="idvpMgtUpdate();"
+          onclick="handleIdVPMgtUpdate();"
         />
-        <input type="button" value="<fmt:message key='cancel'/>" onclick="idpMgtCancel();"/>
+        <input type="button" value="<fmt:message key='cancel'/>" onclick="handleIdVPMgtCancel();"/>
     </div>
+
     <script type="text/javascript" src="../admin/js/main.js"></script>
     <script type="text/javascript" src="js/idp_mgt_edit.js"></script>
     <script type="text/javascript" src="js/idvp_mgt_edit.js"></script>

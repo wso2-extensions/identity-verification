@@ -658,9 +658,6 @@ function checkProvDefault(obj) {
     }
 }
 
-function idpMgtCancel() {
-    location.href = "idvp-mgt-list.jsp"
-}
 
 function emailValidator(name) {
     var errorMsg = "";

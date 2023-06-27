@@ -243,7 +243,7 @@
                     pageNumberParameterName="pageNumber"
                     resourceBundle="<%=RESOURCE_BUNDLE%>"
                     parameters="<%=Encode.forHtmlAttribute(paginationValue)%>"
-                    prevKey="prev" nextKey="next"
+                    prevKey="navigation.prev" nextKey="navigation.next"
             />
             <br/>
          </div>
