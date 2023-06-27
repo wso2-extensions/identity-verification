@@ -16,6 +16,8 @@ const INPUT_DROPDOWN = "dropdown";
 
 // Other constants
 const CHECKED = "checked";
+const METADATA_KEY_VALIDATION_REGEX = "validationRegex";
+const METADATA_KEY_REGEX_ERROR = "regexValidationError";
 
 const deleteClaimRow = (rowId) => {
     $(`#claim-row_${rowId}`).remove();
@@ -125,7 +127,7 @@ const renderConfigurationPropertySection = (metadata, currentConfigProperties) =
  */
 const renderLabelElement = (label, required) => {
     return `
-        <td class="leftCol-med labelField customClaim">
+        <td class="leftCol-med labelField">
             ${label}:${required ? "<span class='required'>*</span>" : ""}
         </td>
     `;
@@ -195,6 +197,7 @@ const renderPasswordField = (property, currentConfigProperties)=> {
                       type="password"
                       id="${property.name}"
                       name="${property.name}"
+                      class="configPropertyField"
                       placeholder="${property.placeholder ? property.placeholder : ''}"
                       minlength="${property.minLength ? property.minLength : ''}"
                       maxlength="${property.maxLength ? property.maxLength : ''}"
@@ -231,6 +234,7 @@ const renderInputField = (type, property, currentConfigProperties) => {
                   type="${type}"
                   id="${property.name}"
                   name="${property.name}"
+                  class="configPropertyField"
                   placeholder="${property.placeholder ? property.placeholder : ''}"
                   minlength="${property.minLength ? property.minLength : ''}"
                   maxlength="${property.maxLength ? property.maxLength : ''}"
@@ -259,6 +263,7 @@ const renderCheckBoxField = (property, currentConfigProperties) => {
                       type="checkbox"
                       id="${property.name}"
                       name="${property.name}"
+                      class="configPropertyField"
                       ${getDefaultValue(property, currentConfigProperties)}/>
                     <div class="sectionHelp">
                         ${property.hint}
@@ -283,6 +288,7 @@ const renderTextAreaField = (property, currentConfigProperties) => {
                 <textarea
                   id="${property.name}"
                   name="${property.name}"
+                  class="configPropertyField"
                   placeholder="${property.placeholder ? property.placeholder : ''}"
                   minlength="${property.minLength ? property.minLength : ''}"
                   maxlength="${property.maxLength ? property.maxLength : ''}"
@@ -332,7 +338,7 @@ const renderDropdownField = (property, currentConfigProperties) => {
             ${renderLabelElement(property.label, property.required)}
             <td>
                 <select
-                  class="selectField"
+                  class="selectField configPropertyField"
                   id="${property.name}"
                   name="${property.name}">
                   ${getDropdownOptions()}
@@ -359,7 +365,7 @@ const handleIdVPMgtCancel = () => {
  *                        triggering an error in the name validation when the name is not changed.
  * @returns True if the form is valid. False otherwise.
  */
-const performValidation = (existingIdVProviderNames, currentIdVPName) => {
+const performValidation = (existingIdVProviderNames, currentIdVPName, idvProviderUIMetadata) => {
 
     if (!isIdVPNameValid(existingIdVProviderNames, currentIdVPName)) {
         return false;
@@ -368,6 +374,10 @@ const performValidation = (existingIdVProviderNames, currentIdVPName) => {
     // Validate the type of the Identity Verification Provider.
     if (isFieldEmpty("#idvp-type-dropdown")) {
         CARBON.showWarningDialog("Identity Verification Provider type cannot be empty");
+        return false;
+    }
+
+    if (!isConfigurationPropertiesValid(idvProviderUIMetadata)) {
         return false;
     }
 
@@ -391,6 +401,46 @@ const isIdVPNameValid = (existingIdVProviderNames, currentIdVPName) => {
     } else if (existingIdVProviderNames.includes($(idVPNameFiledId).val()) && currentIdVPName !== $(idVPNameFiledId).val()) {
         CARBON.showWarningDialog("Identity Verification Provider with the same name already exists");
         return false;
+    }
+
+    return true;
+}
+
+const isConfigurationPropertiesValid = (metadata) => {
+
+    const configPropertyTable = $("#config-property-table");
+    // Handle the case where there are no configuration properties
+    if (!metadata || !metadata["common"] || !metadata["common"]["configProperties"]) {
+        CARBON.showErrorDialog("No configuration properties found for the identity verification provider.");
+        return false;
+    }
+
+    const propertyMetadata = metadata["common"]["configProperties"];
+    for (const element of configPropertyTable.find(".configPropertyField")) {
+        const elementMetadata = propertyMetadata.find(prop => prop.name === element.name);
+        console.log("required validation of ", element.id, element.name)
+        if (elementMetadata.required && isFieldEmpty(`#${element.id}`)) {
+            CARBON.showWarningDialog(`${elementMetadata.label} cannot be empty`);
+            return false;
+        }
+
+        // TODO: Handle default validations according to the input type.
+        // switch (elementMetadata.type) {
+        //     case INPUT_PASSWORD:
+        //         console.log("password", element.value, element)
+        //         break;
+        // }
+
+        // Perform regex validation if a regex is defined in the metadata.
+        if (elementMetadata[METADATA_KEY_VALIDATION_REGEX] &&
+            !element.value.match(elementMetadata[METADATA_KEY_VALIDATION_REGEX])) {
+            console.log("inside");
+            const errorMsg = elementMetadata[METADATA_KEY_REGEX_ERROR] ? elementMetadata[METADATA_KEY_REGEX_ERROR]
+                : `Input value of the "${elementMetadata.label}" field does not match the expected format`;
+            console.log("error", errorMsg);
+            CARBON.showWarningDialog(errorMsg);
+            return false;
+        }
     }
 
     return true;

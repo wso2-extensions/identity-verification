@@ -103,7 +103,6 @@
 
 <script>
 
-    let claimRowId = ${idVProvider.claimMappings != null ? (idVProvider.claimMappings.size() - 1) : -1};
     let idVProviderUIMetadata = <c:out value="${idVProviderUIMetadata.toString()}" escapeXml="false"/>;
     const existingIdVProviderNames = <c:out value="${existingIdVProviderNames}" escapeXml="false"/>;
 
@@ -137,7 +136,6 @@
 
         $('#claimAddLink').click(() => {
 
-            claimRowId++;
             let options = '<option value="">---Select Claim URI ---</option>';
             <c:forEach var="claimURI" items="${claimURIs}">
                 options += '<option value="${claimURI}"><c:out value="${claimURI}"/></option>';
@@ -159,8 +157,10 @@
     })
 
     const handleIdVPMgtUpdate = () => {
+        const idVProviderType = $("#idvp-type-dropdown").val();
+        idVProviderUIMetadata = metadataPerIdVProvider.get(idVProviderType);
         //TODO: Implement the update logic
-        if (performValidation(existingIdVProviderNames, "${idVProvider.idVProviderName}")) {
+        if (performValidation(existingIdVProviderNames, "${idVProvider.idVProviderName}", idVProviderUIMetadata)) {
             console.log("Validation successful");
         }
     };
@@ -269,12 +269,7 @@
               class="toggle_container sectionSub"
               style="margin-bottom:10px;"
               id="config-property-section">
-
-                <table id="config-property-table" class="carbonFormTable">
-                    <tr>
-                        <td class="leftCol-med labelField"></td>
-                    </tr>
-                </table>
+                <table id="config-property-table" class="carbonFormTable"></table>
             </div>
             <!-- Configuration Properties End -->
 
