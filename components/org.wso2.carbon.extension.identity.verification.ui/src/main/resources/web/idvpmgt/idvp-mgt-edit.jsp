@@ -51,7 +51,6 @@
 
     String idVPName = "";
     String description = "";
-    Map<String, String> claimMappings = null;
     String[] claimURIs;
     StringBuilder existingIdVProviderNames;
     IdVProvider idVProvider = null;
@@ -81,11 +80,11 @@
             idVProvider = idVPMgtClient.getIdVProviderById(idVPId, currentUser);
             idVPName = idVProvider.getIdVProviderName();
             description = idVProvider.getIdVProviderDescription();
-            claimMappings = idVProvider.getClaimMappings();
             idVProviderUIMetadata = extensionMgtClient.getIdVProviderMetadata(idVProvider.getType());
         } else {
             idVProviderUIMetadata = metadataPerIdVProvider.get(availableIdVPTypes.get(0));
         }
+
         existingIdVProviderNames = new StringBuilder("[").append(idVPMgtClient.getIdVProviders(null, null, currentUser)
             .stream()
             .map(provider -> "\"" + provider.getIdVProviderName() + "\"")
@@ -103,6 +102,7 @@
     }
     request.setAttribute("infoPerIdVProvider", infoPerIdVProvider);
     request.setAttribute("idVProvider", idVProvider);
+    request.setAttribute("claimURIs", claimURIs);
     request.setAttribute("existingIdVProviderNames", existingIdVProviderNames.toString());
     request.setAttribute("idVProviderUIMetadata", idVProviderUIMetadata);
     request.setAttribute("metadataPerIdVProvider", metadataPerIdVProvider);
@@ -110,7 +110,7 @@
 
 <script>
 
-    let claimRowId = <%= claimMappings != null ? (claimMappings.size() - 1) : -1 %>;
+    let claimRowId = ${idVProvider.claimMappings != null ? (idVProvider.claimMappings.size() - 1) : -1};
     let idVProviderUIMetadata = <c:out value="${idVProviderUIMetadata.toString()}" escapeXml="false"/>;
     const existingIdVProviderNames = <c:out value="${existingIdVProviderNames}" escapeXml="false"/>;
 
@@ -146,14 +146,9 @@
 
             claimRowId++;
             let options = '<option value="">---Select Claim URI ---</option>';
-
-            <%
-                for(String claimURI : claimURIs) {
-            %>
-            options += '<option value="' + "<%=claimURI%>" + '">' + "<%=claimURI%>" + '</option>';
-            <%
-                }
-            %>
+            <c:forEach var="claimURI" items="${claimURIs}">
+                options += '<option value="${claimURI}"><c:out value="${claimURI}"/></option>';
+            </c:forEach>
 
             const newRow = $(generateHTMLForClaimMappingRows(claimRowId, options));
             $("#claimAddTable").append(newRow);
@@ -323,90 +318,67 @@
                               id="claimAddTable"
                               style="display:none">
                                 <thead>
-                                <tr>
-                                    <th class="leftCol-big">
-                                        <fmt:message key='idvp.claim'/>
-                                    </th>
-                                    <th>
-                                        <fmt:message key='wso2.claim'/>
-                                    </th>
-                                    <th>
-                                        <fmt:message key='actions'/>
-                                    </th>
-                                </tr>
+                                    <tr>
+                                        <th class="leftCol-big">
+                                            <fmt:message key='idvp.claim'/>
+                                        </th>
+                                        <th>
+                                            <fmt:message key='wso2.claim'/>
+                                        </th>
+                                        <th>
+                                            <fmt:message key='actions'/>
+                                        </th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                <%
-                                    if (claimMappings != null && claimMappings.size() > 0) {
-                                %>
-                                <script>
-                                    $('#claimAddTable').toggle();
-                                </script>
-                                <%
-                                    // TODO: Convert this to EL syntax if possible
-                                    int i = 0;
-                                    for (Map.Entry<String, String> claimMapping : claimMappings.entrySet()) {
-                                %>
-                                <tr id="claim-row_<%=i%>">
-                                    <td>
-                                        <input
-                                          type="text"
-                                          style=" width: 90%; "
-                                          class="external-claim"
-                                          value="<%=Encode.forHtmlAttribute(claimMapping.getValue())%>"
-                                          id="external-claim-id_<%=i%>"
-                                          name="external-claim-name_<%=i%>"/>
-                                    </td>
-                                    <td>
-                                        <select
-                                          id="claim-row-id_wso2_<%=i%>"
-                                          class="claim-row-wso2"
-                                          name="claim-row-name-wso2_<%=i%>">
-                                            <option value="">
-                                                --- Select Claim URI ---
-                                            </option>
-                                                    <%
-                                        for(String wso2ClaimName : claimURIs) {
-                                        %>
-                                            <option
-                                              <%
-                                                  if (claimMapping.getKey() != null && claimMapping.getKey().equals(wso2ClaimName)) {
-                                              %>
-                                              selected="selected"
-                                              <%
-                                                  }
-                                                  String encodedWSO2Claim = Encode.forHtmlAttribute(wso2ClaimName);
-                                              %>
-                                              value="<%= encodedWSO2Claim %>">
-                                                <%= encodedWSO2Claim %>
-                                            </option>
-                                                    <% } %>
-                                    </td>
-
-                                    <td>
-                                        <a
-                                          title="<fmt:message key='delete.claim'/>"
-                                          onclick="deleteClaimRow(<%=i%>);return false;"
-                                          href="#"
-                                          class="icon-link"
-                                          style="background-image: url(images/delete.gif)">
-                                            <fmt:message key='delete'/>
-                                        </a>
-                                    </td>
-                                </tr>
-
-                                <%
-                                        i++;
-                                    }
-                                %>
-                                <% } %>
-
+                                <c:if
+                                  test="${not empty idVProvider.claimMappings && idVProvider.claimMappings.size() > 0}">
+                                    <c:forEach
+                                      var="claimMapping"
+                                      items="${idVProvider.claimMappings.entrySet()}"
+                                      varStatus="status">
+                                        <tr id="claim-row_${status.index}">
+                                            <td>
+                                                <input
+                                                  type="text"
+                                                  style=" width: 90%; "
+                                                  class="external-claim"
+                                                  value="<c:out value='${claimMapping.getValue()}'/>"
+                                                  id="external-claim-id_${status.index}"
+                                                  name="external-claim-name_${status.index}"/>
+                                            </td>
+                                            <td>
+                                                <select
+                                                  id="claim-row-id_wso2_${status.index}"
+                                                  class="claim-row-wso2"
+                                                  name="claim-row-name-wso2_${status.index}">
+                                                    <option value=""> --- Select Claim URI --- </option>
+                                                    <c:forEach var="wso2ClaimName" items="${claimURIs}">
+                                                        <option
+                                                          value="${wso2ClaimName}"
+                                                          ${claimMapping.getKey() != null &&
+                                                          claimMapping.getKey().equals(wso2ClaimName) ? "selected":""} >
+                                                            <c:out value="${wso2ClaimName}"/>
+                                                        </option>
+                                                    </c:forEach>
+                                            </td>
+                                            <td>
+                                                <a
+                                                  title="<fmt:message key='delete.claim'/>"
+                                                  onclick="deleteClaimRow(${status.index});return false;"
+                                                  href="#"
+                                                  class="icon-link"
+                                                  style="background-image: url(images/delete.gif)">
+                                                    <fmt:message key='delete'/>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:if>
                                 </tbody>
-
                             </table>
                         </td>
                     </tr>
-
                 </table>
             </div>
             <!-- Claim Config End -->
