@@ -143,7 +143,7 @@
                 options += '<option value="${claimURI}"><c:out value="${claimURI}"/></option>';
             </c:forEach>
 
-            const newRow = $(generateHTMLForClaimMappingRows(claimRowId, options));
+            const newRow = $(generateHTMLForClaimMappingRows(options));
             $("#claimAddTable").append(newRow);
 
             handleClaimAddTableVisibility()
@@ -160,7 +160,7 @@
 
     const handleIdVPMgtUpdate = () => {
         //TODO: Implement the update logic
-        if (performValidation(existingIdVProviderNames)) {
+        if (performValidation(existingIdVProviderNames, "${idVProvider.idVProviderName}")) {
             console.log("Validation successful");
         }
     };
@@ -313,10 +313,10 @@
                                 <thead>
                                     <tr>
                                         <th class="leftCol-big">
-                                            <fmt:message key='idvp.claim'/>
+                                            <fmt:message key='claim.add.table.headings.external'/>
                                         </th>
                                         <th>
-                                            <fmt:message key='wso2.claim'/>
+                                            <fmt:message key='claim.add.table.headings.wso2'/>
                                         </th>
                                         <th>
                                             <fmt:message key='actions'/>
@@ -345,7 +345,7 @@
                                             </td>
                                             <td>
                                                 <select
-                                                  id="claim-row-id_wso2_${status.index}"
+                                                  id="claim-row-id-wso2_${status.index}"
                                                   class="claim-row-wso2"
                                                   name="claim-row-name-wso2_${status.index}">
                                                     <option value=""> --- Select Claim URI --- </option>

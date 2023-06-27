@@ -18,13 +18,12 @@ const INPUT_DROPDOWN = "dropdown";
 const CHECKED = "checked";
 
 const deleteClaimRow = (rowId) => {
-    console.log("Deleting claim row: " + rowId);
     $(`#claim-row_${rowId}`).remove();
     handleClaimAddTableVisibility();
 };
 
-const generateHTMLForClaimMappingRows = (claimRowId, option) => {
-
+const generateHTMLForClaimMappingRows = (options) => {
+    claimRowId = $("#claimAddTable tbody tr").length;
     return `
       <tr id="claim-row_${claimRowId}">
         <td>
@@ -36,8 +35,11 @@ const generateHTMLForClaimMappingRows = (claimRowId, option) => {
             name="external-claim-name_${claimRowId}"/>
         </td>
         <td>
-          <select class="claimrow_wso2" name="claimrow_name_wso2_${claimRowId}">
-            ${option}
+          <select
+            id="claim-row-id-wso2_${claimRowId}" 
+            class="claim-row-wso2" 
+            name="claim-row-name-wso2_${claimRowId}">
+            ${options}
           </select>
         </td>
         <td>
@@ -109,7 +111,6 @@ const renderConfigurationPropertySection = (metadata, currentConfigProperties) =
                 element = renderDropdownField(property);
                 break;
             default:
-                console.log("Unknown configuration property type: " + property.type, INPUT_TEXT_AREA);
                 element = renderInputField(TYPE_TEXT, property, currentConfigProperties);
         }
         configPropertyTable.append(element);
@@ -135,12 +136,10 @@ const showHidePassword = (toggleButtonId, passwordFieldId) => {
     const toggleButton = $(`#${toggleButtonId}`);
 
     if (toggleButton.hasClass("hideMode")) {
-        console.log("Showing password");
         passwordElement.attr("type", "text");
         toggleButton.text("Hide");
         toggleButton.removeClass("hideMode");
     } else {
-        console.log("hide password");
         passwordElement.attr("type", "password");
         toggleButton.text("Show");
         toggleButton.addClass("hideMode");
@@ -356,11 +355,13 @@ const handleIdVPMgtCancel = () => {
 /**
  * Performs the validations on the form.
  * @param existingIdVProviderNames The names of the existing Identity Verification Providers.
+ * @param currentIdVPName In the IdV Provider edit mode, the name of the current IdV provider. This is used to prevent
+ *                        triggering an error in the name validation when the name is not changed.
  * @returns True if the form is valid. False otherwise.
  */
-const performValidation = (existingIdVProviderNames) => {
+const performValidation = (existingIdVProviderNames, currentIdVPName) => {
 
-    if (!isIdVPNameValid(existingIdVProviderNames)) {
+    if (!isIdVPNameValid(existingIdVProviderNames, currentIdVPName)) {
         return false;
     }
 
@@ -370,26 +371,48 @@ const performValidation = (existingIdVProviderNames) => {
         return false;
     }
 
-   return true;
+    return isClaimConfigurationValid();
+
 }
 
 /**
  * Validates the name of the Identity Verification Provider.
- * @param existingIdVProviderNames The names of the existing Identity Verification Providers.
+ * @param existingIdVProviderNames The names of all existing Identity Verification Providers.
+ * @param currentIdVPName In the IdV Provider edit mode, the name of the current IdV provider. This is used to prevent
+ *                        triggering an error in the name validation when the name is not changed.
  * @returns True if the name is valid. False otherwise.
  */
-const isIdVPNameValid = (existingIdVProviderNames) => {
+const isIdVPNameValid = (existingIdVProviderNames, currentIdVPName) => {
 
     const idVPNameFiledId = "#idVPName";
-
     if (isFieldEmpty(idVPNameFiledId)) {
         CARBON.showWarningDialog("Name of Identity Verification Provider cannot be empty");
         return false;
-    } else if (existingIdVProviderNames.includes($(idVPNameFiledId).val())) {
+    } else if (existingIdVProviderNames.includes($(idVPNameFiledId).val()) && currentIdVPName !== $(idVPNameFiledId).val()) {
         CARBON.showWarningDialog("Identity Verification Provider with the same name already exists");
         return false;
     }
 
+    return true;
+}
+
+/**
+ * Validates the claim configuration.
+ * @returns True if the claim configuration is valid. False otherwise.
+ */
+const isClaimConfigurationValid = () => {
+
+    for (let i = 0; i <= $("#claimAddTable tbody tr").length - 1; i++) {
+        if (isFieldEmpty(`#external-claim-id_${i}`)) {
+            CARBON.showWarningDialog("External claims cannot be empty");
+            return false;
+        }
+
+        if (isFieldEmpty(`#claim-row-id-wso2_${i}`)) {
+            CARBON.showWarningDialog("Local claim URIs cannot be empty");
+            return false;
+        }
+    }
     return true;
 }
 
