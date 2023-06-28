@@ -55,7 +55,7 @@
 <script type="text/javascript">
 
    const IDVP_DELETE_URL = "idvp-mgt-delete-finish-ajaxprocessor.jsp";
-   const IDVP_EDIT_FINISH_URL = "idvp-mgt-edit-finish-ajaxprocessor.jsp";
+   const IDVP_ENABLE_URL = "idvp-mgt-enable-finish-ajaxprocessor.jsp";
    const IDVP_EDIT_URL = "idvp-mgt-edit.jsp";
    const TEXT_HTML = "text/html";
    const STATUS_SUCCESS = "success";
@@ -92,7 +92,7 @@
 
       $.ajax({
          type: "<%=IdVProviderUIConstants.HTTP_POST%>",
-         url: IDVP_EDIT_FINISH_URL,
+         url: IDVP_ENABLE_URL,
          headers: {
             Accept: TEXT_HTML
          },
