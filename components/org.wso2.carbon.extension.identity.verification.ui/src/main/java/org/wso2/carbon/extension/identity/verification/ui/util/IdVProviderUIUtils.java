@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class IdVProviderUIUtils {
 
-
     public static boolean isHTTPMethodAllowed(HttpServletRequest request) {
         String httpMethod = request.getMethod();
         return IdVProviderUIConstants.HTTP_POST.equalsIgnoreCase(httpMethod);
@@ -39,7 +38,52 @@ public class IdVProviderUIUtils {
     }
 
     /**
+     * Populates the identity verification provider object from a JSON object.
+     * @param idVProvider Identity verification provider that needs to be populated.
+     * @param request The HTTP request that contains Identity verification provider info.
+     * @param metadata UI metadata for the provider.
+     */
+    public static void populateIdVPInfo(IdVProvider idVProvider, HttpServletRequest request, JSONArray metadata) {
+
+        idVProvider.setIdVProviderName(request.getParameter(IdVProviderUIConstants.KEY_IDVP_NAME));
+        idVProvider.setIdVProviderDescription(request.getParameter(IdVProviderUIConstants.KEY_IDVP_DESCRIPTION));
+        idVProvider.setEnabled(true);
+
+        Map<String, JSONObject> metadataMap = new HashMap<>();
+        for (int i = 0; i < metadata.length(); i++) {
+            JSONObject metadataObject = metadata.getJSONObject(i);
+            metadataMap.put(metadataObject.getString(IdVProviderUIConstants.METADATA_NAME), metadataObject);
+        }
+
+        // Populate config properties.
+        for (IdVConfigProperty idVConfigProperty : idVProvider.getIdVConfigProperties()) {
+            String value = request.getParameter(idVConfigProperty.getName());
+            if (value != null) {
+                idVConfigProperty.setValue(value);
+            } else {
+                String inputType = metadataMap.get(idVConfigProperty.getName())
+                        .getString(IdVProviderUIConstants.METADATA_TYPE);
+                if (IdVProviderUIConstants.INPUT_TYPE_CHECKBOX.equals(inputType) ||
+                        IdVProviderUIConstants.INPUT_TYPE_TOGGLE.equals(inputType)) {
+                    idVConfigProperty.setValue("false");
+                }
+            }
+        }
+
+        // Populate claim mappings.
+        Map<String, String> claimMappings = new HashMap<>();
+        final int claimRowCount = Integer.parseInt(request.getParameter(IdVProviderUIConstants.KEY_CLAIM_ROW_COUNT));
+        for (int i = 0; i < claimRowCount; i++) {
+            String externalClaim = request.getParameter(IdVProviderUIConstants.EXTERNAL_CLAIM_PREFIX + i);
+            String localClaim = request.getParameter(IdVProviderUIConstants.WSO2_CLAIM_PREFIX + i);
+            claimMappings.put(localClaim, externalClaim);
+        }
+        idVProvider.setClaimMappings(claimMappings);
+    }
+
+    /**
      * Create an array of IdVConfigProperty from the config properties JSON array.
+     *
      * @param propertiesArray JSON array of config properties.
      * @return An array of IdVConfigProperty.
      */
@@ -50,7 +94,12 @@ public class IdVProviderUIUtils {
             JSONObject property = propertiesArray.getJSONObject(i);
             IdVConfigProperty idVConfigProperty = new IdVConfigProperty();
             idVConfigProperty.setName(property.getString(IdVProviderUIConstants.PROVIDER_KEY));
-            idVConfigProperty.setValue(property.getString(IdVProviderUIConstants.PROVIDER_VALUE));
+            Object value = property.get(IdVProviderUIConstants.PROVIDER_VALUE);
+            if (value instanceof String) {
+                idVConfigProperty.setValue((String) value);
+            } else if (value instanceof Boolean) {
+                idVConfigProperty.setValue(Boolean.toString((boolean) value));
+            }
             idVConfigProperty.setConfidential(property.getBoolean(IdVProviderUIConstants.PROVIDER_IS_SECRET));
             idVConfigProperties[i] = idVConfigProperty;
         }

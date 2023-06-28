@@ -11,9 +11,25 @@ public class IdVProviderUIConstants {
     public static final String PAGE_NUMBER = "pageNumber";
     public static final String EXTENSION_TYPE = "identity-verification-providers";
 
-    // Query param keys
+    // Query param and form keys
     public static final String KEY_IDVP_ID = "id";
     public static final String KEY_ENABLE = "enable";
+    public static final String KEY_IDVP_NAME = "idVPName";
+    public static final String KEY_IDVP_DESCRIPTION = "idVPDescription";
+    public static final String KEY_IDVP_TYPE = "idVPType";
+    public static final String KEY_CLAIM_ROW_COUNT = "claimRowCount";
+    public static final String EXTERNAL_CLAIM_PREFIX = "external-claim-name_";
+    public static final String WSO2_CLAIM_PREFIX = "claim-row-name-wso2_";
+
+    // Metadata JSON keys
+    public static final String METADATA_NAME = "name";
+    public static final String METADATA_COMMON = "common";
+    public static final String METADATA_CONFIG_PROPERTIES = "configProperties";
+    public static final String METADATA_TYPE = "type";
+
+    // Metadata Input Types
+    public static final String INPUT_TYPE_CHECKBOX = "checkbox";
+    public static final String INPUT_TYPE_TOGGLE = "toggle";
 
     // keys of IdV Template JSON object
     public static final String PROVIDER_NAME = "Name";

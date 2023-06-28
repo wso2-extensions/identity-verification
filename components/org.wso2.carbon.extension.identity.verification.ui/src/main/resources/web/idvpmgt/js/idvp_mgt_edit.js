@@ -25,7 +25,7 @@ const deleteClaimRow = (rowId) => {
 };
 
 const generateHTMLForClaimMappingRows = (options) => {
-    claimRowId = $("#claimAddTable tbody tr").length;
+    const claimRowId = $("#claimAddTable tbody tr").length;
     return `
       <tr id="claim-row_${claimRowId}">
         <td>
@@ -264,6 +264,7 @@ const renderCheckBoxField = (property, currentConfigProperties) => {
                       id="${property.name}"
                       name="${property.name}"
                       class="configPropertyField"
+                      value="true"
                       ${getDefaultValue(property, currentConfigProperties)}/>
                     <div class="sectionHelp">
                         ${property.hint}
@@ -292,8 +293,7 @@ const renderTextAreaField = (property, currentConfigProperties) => {
                   placeholder="${property.placeholder ? property.placeholder : ''}"
                   minlength="${property.minLength ? property.minLength : ''}"
                   maxlength="${property.maxLength ? property.maxLength : ''}"
-                >${getDefaultValue(property, currentConfigProperties)} 
-                </textarea>
+                >${getDefaultValue(property, currentConfigProperties)}</textarea>
                 <div class="sectionHelp">
                     ${property.hint}
                 </div>
@@ -418,7 +418,6 @@ const isConfigurationPropertiesValid = (metadata) => {
     const propertyMetadata = metadata["common"]["configProperties"];
     for (const element of configPropertyTable.find(".configPropertyField")) {
         const elementMetadata = propertyMetadata.find(prop => prop.name === element.name);
-        console.log("required validation of ", element.id, element.name)
         if (elementMetadata.required && isFieldEmpty(`#${element.id}`)) {
             CARBON.showWarningDialog(`${elementMetadata.label} cannot be empty`);
             return false;

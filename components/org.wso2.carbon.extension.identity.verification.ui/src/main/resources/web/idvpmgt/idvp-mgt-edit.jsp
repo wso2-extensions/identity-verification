@@ -151,17 +151,40 @@
             .change(() => {
                 const idVProviderType = $("#idvp-type-dropdown").val();
                 idVProviderUIMetadata = metadataPerIdVProvider.get(idVProviderType);
-                renderConfigurationPropertySection(idVProviderUIMetadata, currentConfigProperties)
+                renderConfigurationPropertySection(idVProviderUIMetadata, currentConfigProperties);
             })
             .trigger("change");
     })
 
+    /**
+     * Handles the form submission for creating or updating an IdVProvider.
+     */
     const handleIdVPMgtUpdate = () => {
-        const idVProviderType = $("#idvp-type-dropdown").val();
-        idVProviderUIMetadata = metadataPerIdVProvider.get(idVProviderType);
-        //TODO: Implement the update logic
+
+        const idVProviderType = $("#idvp-type-dropdown");
+        idVProviderUIMetadata = metadataPerIdVProvider.get(idVProviderType.val());
+
         if (performValidation(existingIdVProviderNames, "${idVProvider.idVProviderName}", idVProviderUIMetadata)) {
-            console.log("Validation successful");
+            const claimMappingCount = $("#claimAddTable tbody tr").length;
+            // Sending the number of claim mappings as a hidden element. It is used to extract the claim mappings from
+            // the form data.
+            let hiddenElements = `<input type="hidden" name="${IdVProviderUIConstants.KEY_CLAIM_ROW_COUNT}"
+                value="\${claimMappingCount}"/>`;
+            // Sending the IdVProvider id as a hidden element when updating an existing IdVProvider.
+            <c:if test="${not empty idVProvider.idVProviderUuid}">
+                hiddenElements += `<input type="hidden" name="${IdVProviderUIConstants.KEY_IDVP_ID}"
+                    value="${idVProvider.idVProviderUuid}"/>`;
+            </c:if>
+
+            // Sending the IdVProvider type as a hidden element when updating an existing IdVProvider.
+            if (idVProviderType.prop("disabled")) {
+                hiddenElements += `<input type="hidden" name="${IdVProviderUIConstants.KEY_IDVP_TYPE}"
+                    value="\${idVProviderType.val()}"/>`;
+            }
+
+            const form = $("#idvp-mgt-edit-form");
+            form.append(hiddenElements);
+            form.submit();
         }
     };
 
@@ -171,9 +194,11 @@
     <div id="middle">
     <div id="workArea">
         <form
-          id="idp-mgt-edit-form" name="idp-mgt-edit-form" method="post"
+          id="idvp-mgt-edit-form"
+          name="idvp-mgt-edit-form"
+          method="post"
           action="idvp-mgt-edit-finish-ajaxprocessor.jsp?<csrf:tokenname/>=<csrf:tokenvalue/>"
-          enctype="multipart/form-data">
+          enctype="application/x-www-form-urlencoded">
 
             <!-- Basic Info Start -->
             <div class="sectionSeperator togglebleTitle">
@@ -220,7 +245,7 @@
                         <td>
                             <c:choose>
                                 <c:when test="${not empty idVProvider}">
-                                    <select id="idvp-type-dropdown" class="selectField" disabled>
+                                    <select id="idvp-type-dropdown" class="selectField" name="idVPType" disabled>
                                         <c:forEach
                                           var="idVProviderInfo"
                                           items="${infoPerIdVProvider}"
@@ -234,7 +259,7 @@
                                     </select>
                                 </c:when>
                                 <c:otherwise>
-                                    <select id="idvp-type-dropdown" class="selectField">
+                                    <select id="idvp-type-dropdown" name="idVPType" class="selectField">
                                         <c:forEach
                                           var="idVProviderInfo"
                                           items="${infoPerIdVProvider}"
