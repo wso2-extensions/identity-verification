@@ -198,7 +198,7 @@
                               <% } else { %>
                               <a title="<fmt:message key='enable.policy'/>"
                                  onclick="enableOrDisableIdVP('<%=Encode.forJavaScriptAttribute(idvp.getIdVProviderUuid())%>', 'true');return false;"
-                                 href="#" style="background-image: url(images/enable2.gif);" class="icon-link">
+                                 href="#" style="background-image: url(images/enable.gif);" class="icon-link">
                                  <fmt:message key='enable.policy'/>
                               </a>
                               <% } %>

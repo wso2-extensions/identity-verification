@@ -411,7 +411,6 @@
     </div>
 
     <script type="text/javascript" src="../admin/js/main.js"></script>
-    <script type="text/javascript" src="js/idp_mgt_edit.js"></script>
     <script type="text/javascript" src="js/idvp_mgt_edit.js"></script>
 
 </fmt:bundle>
