@@ -62,9 +62,9 @@
     try {
         infoPerIdVProvider = extensionMgtClient.getExtensionInfoOnIdVProviderTypes();
 
-        if (infoPerIdVProvider == null) {
-            throw new IdentityVerificationUIException(ErrorMessages.ERROR_LOADING_EXTENSION_INFO.getCode(),
-              ErrorMessages.ERROR_LOADING_EXTENSION_INFO.getMessage());
+        if (infoPerIdVProvider.isEmpty()) {
+            // Redirect to the placeholder page if there are no IdV Providers templates configured
+            response.sendRedirect("idvp-mgt-not-configured.jsp");
         }
 
         List<String> availableIdVPTypes = infoPerIdVProvider.stream().map(ExtensionInfo::getId)

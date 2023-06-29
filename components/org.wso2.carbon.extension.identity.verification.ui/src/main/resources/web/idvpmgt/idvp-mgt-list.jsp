@@ -37,6 +37,9 @@
         import="static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.RESOURCE_BUNDLE" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants" %>
 <%@ page import="static org.wso2.carbon.CarbonConstants.LOGGED_USER" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.ExtensionMgtServiceClient" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.ExtensionMgtServiceClientImpl" %>
+<%@ page import="org.wso2.carbon.identity.extension.mgt.model.ExtensionInfo" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="carbon" uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" %>
 
@@ -132,6 +135,13 @@
 
             int pageCount = 0;
             try {
+               ExtensionMgtServiceClient extensionMgtClient = ExtensionMgtServiceClientImpl.getInstance();
+               List<ExtensionInfo> infoPerIdVProvider = extensionMgtClient.getExtensionInfoOnIdVProviderTypes();
+
+               if (infoPerIdVProvider.isEmpty()) {
+                  // Redirect to the placeholder page if there are no IdV Providers templates configured
+                  response.sendRedirect("idvp-mgt-not-configured.jsp");
+               }
                int resultsPerPage = IdentityUtil.getDefaultItemsPerPage();
                IdVProviderMgtServiceClient client = IdVProviderMgtServiceClientImpl.getInstance();
                String currentUser = (String) session.getAttribute(LOGGED_USER);
@@ -142,14 +152,13 @@
                   int offset = idVProviderCount > resultsPerPage ? pageNumber * resultsPerPage : 0;
                   idVProvidersToDisplay = client.getIdVProviders(resultsPerPage, offset, currentUser);
                }
-            } catch (IdVProviderMgtClientException e) {
+            } catch (Exception e) {
                String message = MessageFormat.format(resourceBundle.getString("error.loading.idvps"), e.getMessage());
                CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
             }
 
          %>
          <div class="sectionSub">
-
             <table style="width: 100%" class="styledLeft">
                <tbody>
                <tr>
