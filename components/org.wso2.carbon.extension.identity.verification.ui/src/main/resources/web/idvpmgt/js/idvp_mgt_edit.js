@@ -32,10 +32,16 @@ const INPUT_TOGGLE = "toggle";
 const INPUT_TEXT_AREA = "text_area";
 const INPUT_DROPDOWN = "dropdown";
 
-// Other constants
-const CHECKED = "checked";
+// Metadata keys
 const METADATA_KEY_VALIDATION_REGEX = "validationRegex";
 const METADATA_KEY_REGEX_ERROR = "regexValidationError";
+const METADATA_COMMON = "common";
+const METADATA_CONFIG_PROPS = "configProperties";
+
+// Other constants
+const CHECKED = "checked";
+const TYPE_TEXT = "text";
+
 
 /**
  * Handles the claim mapping row deletion.
@@ -108,14 +114,14 @@ const renderConfigurationPropertySection = (metadata, currentConfigProperties) =
     configPropertyTable.empty();
 
     // Handle the case where there are no configuration properties
-    if (!metadata || !metadata["common"] || !metadata["common"]["configProperties"]) {
+    if (!metadata || !metadata[METADATA_COMMON] || !metadata[METADATA_COMMON][METADATA_CONFIG_PROPS]) {
         CARBON.showErrorDialog("No configuration properties found for the identity verification provider.");
         return;
     }
 
     // Render the configuration properties
-    const properties = metadata["common"]["configProperties"];
-    const TYPE_TEXT = "text";
+    const properties = metadata[METADATA_COMMON][METADATA_CONFIG_PROPS];
+    properties.sort(compareDisplayOrders);
     for (const property of properties) {
         let element;
         switch (property.type) {
@@ -466,12 +472,12 @@ const isConfigurationPropertiesValid = (metadata) => {
 
     const configPropertyTable = $("#config-property-table");
     // Handle the case where there are no configuration properties
-    if (!metadata || !metadata["common"] || !metadata["common"]["configProperties"]) {
+    if (!metadata || !metadata[METADATA_COMMON] || !metadata[METADATA_COMMON][METADATA_CONFIG_PROPS]) {
         CARBON.showErrorDialog("No configuration properties found for the identity verification provider.");
         return false;
     }
 
-    const propertyMetadata = metadata["common"]["configProperties"];
+    const propertyMetadata = metadata[METADATA_COMMON][METADATA_CONFIG_PROPS];
     for (const element of configPropertyTable.find(".configPropertyField")) {
         const elementMetadata = propertyMetadata.find(prop => prop.name === element.name);
 
@@ -722,4 +728,20 @@ const validateNumber = (value, elementMetadata) => {
         return false;
     }
     return true;
+}
+
+/**
+ * Compare function to decide the display order of the elements.
+ *
+ * @param leftElement left element
+ * @param rightElement right element
+ * @returns 0> if leftElement is greater than rightElement, <0 if leftElement is less than rightElement,
+ *          0 if leftElement and rightElement are equal
+ */
+const compareDisplayOrders = (leftElement, rightElement) => {
+    if (!leftElement.displayOrder)
+        return 1
+    if (!rightElement.displayOrder)
+        return -1
+    return leftElement.displayOrder - rightElement.displayOrder
 }
