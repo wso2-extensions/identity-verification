@@ -139,7 +139,6 @@ public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceCli
 
     @Override
     public String[] getAllLocalClaims() throws IdVProviderMgtClientException {
-        // TODO: Check if we need to handle the permissions
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
             List<LocalClaim> localClaims = IdVProviderMgtUIDataHolder.getInstance()
@@ -153,10 +152,10 @@ public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceCli
 
 
     /**
-     * This is used to handle the authorization. Authentication supports in rest API via a tomcat valve.
+     * This method is used to handle the user authorization.
      *
      * @param permission permission string.
-     * @throws IdVProviderMgtClientException Consent Management Exception.
+     * @throws IdVProviderMgtClientException IdVProviderMgtClientException.
      */
     private void handleLoggedInUserAuthorization(String permission, String loggedInUser)
             throws IdVProviderMgtClientException {

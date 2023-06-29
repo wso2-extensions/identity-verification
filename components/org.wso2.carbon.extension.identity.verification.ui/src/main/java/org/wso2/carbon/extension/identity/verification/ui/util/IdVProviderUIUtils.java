@@ -33,6 +33,16 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class IdVProviderUIUtils {
 
+    private IdVProviderUIUtils() {
+        // Adding a private constructor to hide the implicit public constructor since all methods are static.
+    }
+
+    /**
+     * Checks whether the HTTP method is allowed.
+     *
+     * @param request HTTP request.
+     * @return True if the HTTP method is allowed, False otherwise.
+     */
     public static boolean isHTTPMethodAllowed(HttpServletRequest request) {
         String httpMethod = request.getMethod();
         return IdVProviderUIConstants.HTTP_POST.equalsIgnoreCase(httpMethod);
@@ -40,6 +50,7 @@ public class IdVProviderUIUtils {
 
     /**
      * Creates the identity verification provider object from a JSON object.
+     *
      * @param json JSON object.
      * @return IdVProvider object.
      */
@@ -57,6 +68,7 @@ public class IdVProviderUIUtils {
 
     /**
      * Populates the identity verification provider object from a JSON object.
+     *
      * @param idVProvider Identity verification provider that needs to be populated.
      * @param request The HTTP request that contains Identity verification provider info.
      * @param metadata UI metadata for the provider.
@@ -126,6 +138,7 @@ public class IdVProviderUIUtils {
 
     /**
      * Create the claim mapping from the claims JSON array.
+     *
      * @param claimsArray JSON array of claims.
      * @return Map of claims in the form of {externalClaim, localClaim}.
      */

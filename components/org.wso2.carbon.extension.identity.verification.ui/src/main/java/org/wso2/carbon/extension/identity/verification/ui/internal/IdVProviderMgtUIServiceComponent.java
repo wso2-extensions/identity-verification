@@ -40,6 +40,7 @@ public class IdVProviderMgtUIServiceComponent {
 
     @Activate
     protected void activate(ComponentContext context) {
+
         if (log.isDebugEnabled()) {
             log.debug("Identity Verification Provider Management UI bundle activated!");
         }
@@ -47,6 +48,7 @@ public class IdVProviderMgtUIServiceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
+
         if (log.isDebugEnabled()) {
             log.debug("Identity Verification Provider Management UI bundle is deactivated");
         }

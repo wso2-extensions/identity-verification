@@ -37,11 +37,22 @@ const CHECKED = "checked";
 const METADATA_KEY_VALIDATION_REGEX = "validationRegex";
 const METADATA_KEY_REGEX_ERROR = "regexValidationError";
 
+/**
+ * Handles the claim mapping row deletion.
+ *
+ * @param rowId The ID of the row to be deleted.
+ */
 const deleteClaimRow = (rowId) => {
     $(`#claim-row_${rowId}`).remove();
     handleClaimAddTableVisibility();
 };
 
+/**
+ * Generate a claim mapping row.
+ *
+ * @param options The options that needs to be added to the local claims dropdown
+ * @returns Generated claim mapping row.
+ */
 const generateHTMLForClaimMappingRows = (options) => {
     const claimRowId = $("#claimAddTable tbody tr").length;
     return `
@@ -71,6 +82,9 @@ const generateHTMLForClaimMappingRows = (options) => {
     `;
 }
 
+/**
+ * Handles the visibility of the claim mapping table based on the number of rows.
+ */
 const handleClaimAddTableVisibility = () => {
 
     if ($('#claimAddTable tr').length >= 2) {
@@ -82,6 +96,7 @@ const handleClaimAddTableVisibility = () => {
 
 /**
  * Renders the configuration property section according to the given metadata and current config properties.
+ *
  * @param metadata The UI metadata of the identity verification provider.
  * @param currentConfigProperties The current configuration properties of the identity verification provider. Values of
  * this map will override the default values in the metadata.
@@ -139,6 +154,7 @@ const renderConfigurationPropertySection = (metadata, currentConfigProperties) =
 
 /**
  * Renders the label element for a given label and required status.
+ *
  * @param label The text to be displayed as the label.
  * @param required Whether the field is required or not.
  * @returns Rendered label element.
@@ -151,6 +167,12 @@ const renderLabelElement = (label, required) => {
     `;
 }
 
+/**
+ * Handles the visibility of the text inside a password field.
+ *
+ * @param toggleButtonId Id of the toggle button.
+ * @param passwordFieldId Id of the password field.
+ */
 const showHidePassword = (toggleButtonId, passwordFieldId) => {
     const passwordElement = $(`#${passwordFieldId}`);
     const toggleButton = $(`#${toggleButtonId}`);
@@ -168,6 +190,7 @@ const showHidePassword = (toggleButtonId, passwordFieldId) => {
 
 /**
  * A utility method used to resolve the default value of a given property.
+ *
  * @param property The property of which the default values need to be resolved.
  * @param currentConfigProperties The current configuration properties of the identity verification provider.
  * @returns The resolved default value.
@@ -189,6 +212,7 @@ const getDefaultValue = (property, currentConfigProperties) => {
 
 /**
  * Utility function to convert a value to a boolean.
+ *
  * @param value The value to be converted.
  * @returns Converted boolean value.
  */
@@ -201,6 +225,7 @@ const toBoolean = (value) => {
 
 /**
  * Renders a password input field for the given property.
+ *
  * @param property The property to be rendered.
  * @param currentConfigProperties The current configuration properties of the identity verification provider.
  * @returns Rendered password input field.
@@ -238,6 +263,7 @@ const renderPasswordField = (property, currentConfigProperties)=> {
 
 /**
  * Renders an input field for the given property.
+ *
  * @param type The type of the input field.
  * @param property The property to be rendered.
  * @param currentConfigProperties The current configuration properties as a map.
@@ -267,6 +293,7 @@ const renderInputField = (type, property, currentConfigProperties) => {
 
 /**
  * Renders a dropdown field for the given property.
+ *
  * @param property The property to be rendered.
  * @param currentConfigProperties The current configuration properties as a map.
  * @returns Rendered dropdown field.
@@ -295,6 +322,7 @@ const renderCheckBoxField = (property, currentConfigProperties) => {
 
 /**
  * Renders a text area field for the given property.
+ *
  * @param property The property to be rendered.
  * @param currentConfigProperties The current configuration properties as a map.
  * @returns Rendered text area field.
@@ -322,6 +350,7 @@ const renderTextAreaField = (property, currentConfigProperties) => {
 
 /**
  * Renders a dropdown field for the given property.
+ *
  * @param property The property to be rendered.
  * @param currentConfigProperties The current configuration properties as a map.
  * @returns Rendered dropdown field.
@@ -378,6 +407,7 @@ const handleIdVPMgtCancel = () => {
 
 /**
  * Performs the validations on the form.
+ *
  * @param existingIdVProviderNames The names of the existing Identity Verification Providers.
  * @param currentIdVPName In the IdV Provider edit mode, the name of the current IdV provider. This is used to prevent
  *                        triggering an error in the name validation when the name is not changed.
@@ -406,6 +436,7 @@ const performValidation = (existingIdVProviderNames, currentIdVPName, idvProvide
 
 /**
  * Validates the name of the Identity Verification Provider.
+ *
  * @param existingIdVProviderNames The names of all existing Identity Verification Providers.
  * @param currentIdVPName In the IdV Provider edit mode, the name of the current IdV provider. This is used to prevent
  *                        triggering an error in the name validation when the name is not changed.
@@ -425,6 +456,12 @@ const isIdVPNameValid = (existingIdVProviderNames, currentIdVPName) => {
     return true;
 }
 
+/**
+ * Validates the configuration properties of the Identity Verification Provider.
+ *
+ * @param metadata UI metadata of the Identity Verification Provider.
+ * @returns True if the configuration properties are valid. False otherwise.
+ */
 const isConfigurationPropertiesValid = (metadata) => {
 
     const configPropertyTable = $("#config-property-table");
@@ -466,6 +503,7 @@ const isConfigurationPropertiesValid = (metadata) => {
 
 /**
  * Validates the claim configuration.
+ *
  * @returns True if the claim configuration is valid. False otherwise.
  */
 const isClaimConfigurationValid = () => {
@@ -486,6 +524,7 @@ const isClaimConfigurationValid = () => {
 
 /**
  * Validate whether the given field is empty.
+ *
  * @param id The id of the field.
  * @returns True if the field is empty. False otherwise.
  */

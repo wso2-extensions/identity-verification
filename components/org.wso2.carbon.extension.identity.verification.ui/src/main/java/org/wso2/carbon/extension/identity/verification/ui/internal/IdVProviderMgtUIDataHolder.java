@@ -62,7 +62,13 @@ public class IdVProviderMgtUIDataHolder {
         this.realmService = realmService;
     }
 
+    /**
+     * Get the ClaimMetadataManagementService.
+     *
+     * @return ClaimMetadataManagementService.
+     */
     public ClaimMetadataManagementService getClaimMetadataManagementService() {
+
         if (claimMetadataManagementService == null) {
             throw new RuntimeException("ClaimMetadataManagementService was not set during the " +
                     "IdVProviderMgtUIServiceComponent startup");
@@ -70,7 +76,13 @@ public class IdVProviderMgtUIDataHolder {
         return claimMetadataManagementService;
     }
 
+    /**
+     * Set the ClaimMetadataManagementService.
+     *
+     * @param claimMetadataManagementService ClaimMetadataManagementService.
+     */
     public void setClaimMetadataManagementService(ClaimMetadataManagementService claimMetadataManagementService) {
+
         this.claimMetadataManagementService = claimMetadataManagementService;
     }
 }

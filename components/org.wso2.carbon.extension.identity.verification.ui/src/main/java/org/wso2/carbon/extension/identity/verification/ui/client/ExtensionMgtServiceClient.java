@@ -33,6 +33,7 @@ public interface ExtensionMgtServiceClient {
 
     /**
      * Get the list of extension information for identity verification providers.
+     *
      * @return List of extension information.
      * @throws IdVProviderMgtClientException IdVProviderMgtClientException
      */
@@ -40,6 +41,7 @@ public interface ExtensionMgtServiceClient {
 
     /**
      * Get the identity verification provider template for the given identity verification provider type.
+     *
      * @param idVProviderType Identity verification provider type.
      * @return Identity verification provider template.
      * @throws IdVProviderMgtClientException IdVProviderMgtClientException
@@ -48,6 +50,7 @@ public interface ExtensionMgtServiceClient {
 
     /**
      * Get the identity verification provider metadata for the given identity verification provider type.
+     *
      * @param idVProviderType Identity verification provider type.
      * @return Identity verification provider metadata.
      * @throws IdVProviderMgtClientException IdVProviderMgtClientException
@@ -56,6 +59,7 @@ public interface ExtensionMgtServiceClient {
 
     /**
      * Get the identity verification provider metadata for a list of given identity verification provider types.
+     *
      * @param idVProviderTypes A list of identity verification provider types.
      * @return A map of identity verification provider metadata with IdV Provider types as keys.
      * @throws IdVProviderMgtClientException IdVProviderMgtClientException
