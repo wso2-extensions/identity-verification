@@ -62,7 +62,6 @@ public class IdVProviderUIConstants {
     public static final String PROVIDER_VALUE = "value";
     public static final String PROVIDER_IS_SECRET = "isSecret";
 
-
     // Permissions
     public static final String PERMISSION_IDVP_MGT_DELETE = "/permission/admin/manage/identity/idvp/delete";
     public static final String PERMISSION_IDVP_MGT_ADD = "/permission/admin/manage/identity/idvp/add";
@@ -74,14 +73,13 @@ public class IdVProviderUIConstants {
      */
     public enum ErrorMessages {
 
-        ERROR_UNEXPECTED("15013", "Unexpected Error"),
-        ERROR_NO_AUTH_USER_FOUND("00078", "No authenticated user found to perform the operation"),
-        ERROR_USER_NOT_AUTHORIZED("00076", "User: %s is not authorized to perform this operation."),
-        ERROR_LOADING_EXTENSION_INFO("00077", "Error while loading extension information.");
+        ERROR_UNEXPECTED("10000", "Unexpected error occurred"),
+        ERROR_NO_AUTH_USER_FOUND("10001", "No authenticated user found to perform the operation"),
+        ERROR_USER_NOT_AUTHORIZED("10002", "User: %s is not authorized to perform this operation."),
+        ERROR_LOADING_EXTENSION_INFO("10003", "Error while loading extension information.");
 
         private final String code;
         private final String message;
-
 
         ErrorMessages(String code, String message) {
 
