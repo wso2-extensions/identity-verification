@@ -412,6 +412,7 @@
     </div>
 
     <script type="text/javascript" src="../admin/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/joi@17.9.2/dist/joi-browser.min.js"></script>
     <script type="text/javascript" src="js/idvp_mgt_edit.js"></script>
 
 </fmt:bundle>

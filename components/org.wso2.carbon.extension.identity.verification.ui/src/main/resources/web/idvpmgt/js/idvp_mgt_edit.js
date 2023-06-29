@@ -230,7 +230,7 @@ const toBoolean = (value) => {
  * @param currentConfigProperties The current configuration properties of the identity verification provider.
  * @returns Rendered password input field.
  */
-const renderPasswordField = (property, currentConfigProperties)=> {
+const renderPasswordField = (property, currentConfigProperties) => {
     return `
         <tr>
             ${renderLabelElement(property.label, property.required)}
@@ -474,25 +474,51 @@ const isConfigurationPropertiesValid = (metadata) => {
     const propertyMetadata = metadata["common"]["configProperties"];
     for (const element of configPropertyTable.find(".configPropertyField")) {
         const elementMetadata = propertyMetadata.find(prop => prop.name === element.name);
+
+        // Perform required validation.
         if (elementMetadata.required && isFieldEmpty(`#${element.id}`)) {
             CARBON.showWarningDialog(`${elementMetadata.label} cannot be empty`);
             return false;
         }
 
-        // TODO: Handle default validations according to the input type.
-        // switch (elementMetadata.type) {
-        //     case INPUT_PASSWORD:
-        //         console.log("password", element.value, element)
-        //         break;
-        // }
+        // Perform validations based on input type.
+        let isValid;
+        switch (elementMetadata.type) {
+            case INPUT_URL:
+                isValid = validateURL(element.value, elementMetadata.label);
+                break;
+            case INPUT_EMAIL:
+                isValid = validateEmail(element.value, elementMetadata.label);
+                break;
+            case INPUT_IDENTIFIER:
+                isValid = validateIdentifier(element.value, elementMetadata.label);
+                break;
+            case INPUT_RESOURCE_NAME:
+                isValid = validateResourceName(element.value, elementMetadata.label);
+                break;
+            case INPUT_CLIENT_ID:
+                isValid = validateClientId(element.value, elementMetadata.label);
+                break;
+            case INPUT_DESCRIPTION:
+                isValid = validateDescription(element.value, elementMetadata.label);
+                break;
+            case INPUT_NUMBER:
+                isValid = validateNumber(element.value, elementMetadata);
+                break;
+            default:
+                // skip this validation if the input type is not defined.
+                isValid = true;
+
+        }
+        if (!isValid) {
+            return false;
+        }
 
         // Perform regex validation if a regex is defined in the metadata.
         if (elementMetadata[METADATA_KEY_VALIDATION_REGEX] &&
             !element.value.match(elementMetadata[METADATA_KEY_VALIDATION_REGEX])) {
-            console.log("inside");
             const errorMsg = elementMetadata[METADATA_KEY_REGEX_ERROR] ? elementMetadata[METADATA_KEY_REGEX_ERROR]
                 : `Input value of the "${elementMetadata.label}" field does not match the expected format`;
-            console.log("error", errorMsg);
             CARBON.showWarningDialog(errorMsg);
             return false;
         }
@@ -529,5 +555,171 @@ const isClaimConfigurationValid = () => {
  * @returns True if the field is empty. False otherwise.
  */
 const isFieldEmpty = (id) => {
+
     return $(id).val().trim() === "";
+}
+
+/**
+ * Validates whether the given value is a valid URL.
+ *
+ * Refer to {@link https://github.com/wso2/identity-apps/blob/master/modules/validation/src/validation.ts}
+ * more information.
+ *
+ * @param value Input to be validated.
+ * @param label Label of the input field.
+ * @returns True if the value is a valid URL. False otherwise.
+ */
+const validateURL = (value, label) => {
+
+    if (value && joi.string().uri().validate(value).error) {
+        CARBON.showWarningDialog(`The URL in ${label} is not valid`);
+        return false;
+    }
+    return true;
+};
+
+/**
+ * Validates whether the given value is a valid email address.
+ *
+ * Refer to {@link https://github.com/wso2/identity-apps/blob/master/modules/validation/src/validation.ts}
+ * more information.
+ *
+ * @param value Input to be validated.
+ * @param label Label of the input field.
+ * @returns True if the value is a valid email address. False otherwise.
+ */
+const validateEmail = (value, label) => {
+
+    if (value && joi.string().email({tlds: false}).validate(value).error) {
+        CARBON.showWarningDialog(`The email address in ${label} is not valid`);
+        return false;
+    }
+    return true;
+};
+
+/**
+ * Validates whether the given value is a valid client ID.
+ *
+ * Refer to {@link https://github.com/wso2/identity-apps/blob/master/modules/validation/src/validation.ts}
+ * more information.
+ *
+ * @param value Input to be validated.
+ * @param label Label of the input field.
+ * @returns True if the value is a valid identifier. False otherwise.
+ */
+const validateIdentifier = (value, label) => {
+
+    if (value && joi.string().alphanum().min(3).validate(value).error) {
+        CARBON.showWarningDialog(`The identifier in ${label} is not valid`);
+        return false;
+    }
+    return true;
+};
+
+/**
+ * Validates whether the given value is a valid client ID.
+ *
+ * Refer to {@link https://github.com/wso2/identity-apps/blob/master/modules/validation/src/validation.ts}
+ * more information.
+ *
+ * @param value Input to be validated.
+ * @param label Label of the input field.
+ * @returns True if the value is a valid resource name. False otherwise.
+ */
+const validateResourceName = (value, label) => {
+
+    try {
+        const result = joi.string().regex(new RegExp("^[a-zA-Z][a-zA-Z0-9-_. ]+$")).validate(value);
+        if (value && result.error) {
+            CARBON.showWarningDialog(`The resource name in ${label} is not valid`);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+
+/**
+ * The specification [1] does not have an exact format for client IDs.
+ * They can be different from provider to provider. However,
+ * we have enforced this validation a bit by saying , a client id
+ * must not have line breaks or spaces.
+ *
+ * `Disallowed characters ∊ {\r\n\t\f\v\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff}`
+ *
+ * [1] {@link https://datatracker.ietf.org/doc/html/rfc6749#section-2.2}
+ *
+ * Refer to {@link https://github.com/wso2/identity-apps/blob/master/modules/validation/src/validation.ts}
+ * more information.
+ *
+ * @param value  Input to be validated.
+ * @param label Label of the input field.
+ * @returns True if the client id is valid. False otherwise.
+ */
+const validateClientId = (value, label) => {
+    try {
+        const result = joi.string().regex(new RegExp("^[^\\s]*$")).validate(value);
+        if (value && result.error) {
+            CARBON.showWarningDialog(`The client id in ${label} is not valid`);
+            return false;
+        }
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
+/**
+ * This function validates long or short descriptions.This is useful
+ * for text areas and other generic input description fields.
+ *
+ * Refer to {@link https://github.com/wso2/identity-apps/blob/master/modules/validation/src/validation.ts}
+ * more information.
+ *
+ * @param value Input to be validated.
+ * @param label Label of the input field.
+ * @returns True if the description is valid. False otherwise.
+ */
+const validateDescription = (value, label) => {
+    try {
+        const result = joi.string().min(3).max(1024).validate(value);
+        if (value && result.error) {
+            CARBON.showWarningDialog(`The description in ${label} is not valid`);
+            return false;
+        }
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
+/**
+ * This function checks whether the given value is a valid number.
+ *
+ * @param value Input to be validated.
+ * @param elementMetadata Metadata of the input field.
+ * @returns True if the value is a valid number. False otherwise.
+ */
+const validateNumber = (value, elementMetadata) => {
+
+    // If the value is empty, do not validate.
+    if (!value) {
+        return true;
+    }
+
+    if (joi.number().validate(value).error) {
+        CARBON.showWarningDialog(`The value in ${elementMetadata.label} is not a number`);
+        return false;
+    }
+
+    if (elementMetadata.minValue && elementMetadata.maxValue &&
+        (value < elementMetadata.minValue || value > elementMetadata.maxValue)) {
+
+        CARBON.showWarningDialog(`The number in ${elementMetadata.label} should be between 
+            ${elementMetadata.minValue} and ${elementMetadata.maxValue}.`);
+        return false;
+    }
+    return true;
 }
