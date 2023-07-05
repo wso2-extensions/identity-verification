@@ -56,26 +56,44 @@ public class IdVProviderUIUtils {
     public static void handleLoggedInUserAuthorization(String permission, String loggedInUser)
             throws IdVProviderMgtUIException {
 
+        if (StringUtils.isBlank(loggedInUser)) {
+            throw new IdVProviderMgtUIClientException(ErrorMessages.ERROR_NO_AUTH_USER_FOUND.getCode(),
+                    ErrorMessages.ERROR_NO_AUTH_USER_FOUND.getMessage());
+        }
+
+        if (!isUserAuthorized(permission, loggedInUser)) {
+            throw new IdVProviderMgtUIClientException(ErrorMessages.ERROR_USER_NOT_AUTHORIZED.getCode(),
+                    String.format(ErrorMessages.ERROR_USER_NOT_AUTHORIZED.getMessage(), loggedInUser));
+        }
+    }
+
+    /**
+     * This method is used to check if the user has a particular permission.
+     *
+     * @param permission permission string.
+     * @return True if user has the provided permission, false otherwise
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
+     */
+    public static boolean isUserAuthorized(String permission, String loggedInUser)
+            throws IdVProviderMgtUIException {
+
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
             if (StringUtils.isBlank(loggedInUser)) {
-                throw new IdVProviderMgtUIClientException(ErrorMessages.ERROR_NO_AUTH_USER_FOUND.getCode(),
-                        ErrorMessages.ERROR_NO_AUTH_USER_FOUND.getMessage());
+                return false;
             }
 
             AuthorizationManager authorizationManager = IdVProviderMgtUIDataHolder.getInstance()
                     .getRealmService()
                     .getTenantUserRealm(tenantId)
                     .getAuthorizationManager();
-            if (!authorizationManager.isUserAuthorized(loggedInUser, permission, UI_PERMISSION_ACTION)) {
-                throw new IdVProviderMgtUIClientException(ErrorMessages.ERROR_USER_NOT_AUTHORIZED.getCode(),
-                        String.format(ErrorMessages.ERROR_USER_NOT_AUTHORIZED.getMessage(), loggedInUser));
-            }
+            return authorizationManager.isUserAuthorized(loggedInUser, permission, UI_PERMISSION_ACTION);
         } catch (UserStoreException e) {
             throw IdVProviderUIExceptionMgt.handleException(e);
         }
     }
+
 
     /**
      * Checks whether the HTTP method is allowed.

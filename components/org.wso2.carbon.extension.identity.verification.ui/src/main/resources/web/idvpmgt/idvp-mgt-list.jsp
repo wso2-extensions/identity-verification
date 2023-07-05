@@ -34,6 +34,7 @@
 <%@ page
   import="static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.RESOURCE_BUNDLE" %>
 <%@ page import="static org.wso2.carbon.CarbonConstants.LOGGED_USER" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIUtils" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="carbon" uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -61,7 +62,8 @@
          // This exception can be safely ignored since we have already set the default value
       }
    }
-
+   boolean canEditIdVP;
+   boolean canDeleteIdVP;
    int pageCount = 0;
    try {
       ExtensionMgtServiceClient extensionMgtClient = ExtensionMgtServiceClientImpl.getInstance();
@@ -81,7 +83,11 @@
          int offset = idVProviderCount > resultsPerPage ? pageNumber * resultsPerPage : 0;
          idVProvidersToDisplay = client.getIdVProviders(resultsPerPage, offset, currentUser);
       }
+      canEditIdVP = IdVProviderUIUtils.isUserAuthorized(IdVProviderUIConstants.PERMISSION_IDVP_MGT_UPDATE, currentUser);
+      canDeleteIdVP = IdVProviderUIUtils.isUserAuthorized(IdVProviderUIConstants.PERMISSION_IDVP_MGT_DELETE, currentUser);
    } catch (Exception e) {
+      canEditIdVP = false;
+      canDeleteIdVP = false;
       String message = MessageFormat.format(resourceBundle.getString("error.loading.idvps"), e.getMessage());
       CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
    }
@@ -89,6 +95,8 @@
    request.setAttribute("idVProvidersToDisplay", idVProvidersToDisplay);
    request.setAttribute("pageNumber", pageNumber);
    request.setAttribute("pageCount", pageCount);
+   request.setAttribute("canEditIdVP", canEditIdVP);
+   request.setAttribute("canDeleteIdVP", canDeleteIdVP);
 %>
 
 <script type="text/javascript" src="../admin/js/main.js"></script>
@@ -188,40 +196,44 @@
                                        <c:out value="${idvp.idVProviderDescription}" default=""/>
                                     </td>
                                     <td style="width: 100px; white-space: nowrap;">
-                                       <c:choose>
-                                          <c:when test="${idvp.enabled}">
-                                             <a title="<fmt:message key='disable.policy'/>"
-                                                onclick="enableOrDisableIdVP('<c:out
-                                                  value="${idvp.idVProviderUuid}"/>', 'false');return false;"
-                                                href="#"
-                                                style="background-image: url(images/disable.gif);"
-                                                class="icon-link">
-                                                <fmt:message key='disable.policy'/>
-                                             </a>
-                                          </c:when>
-                                          <c:otherwise>
-                                             <a title="<fmt:message key='enable.policy'/>"
-                                                onclick="enableOrDisableIdVP('<c:out
-                                                  value="${idvp.idVProviderUuid}"/>', 'true');return false;"
-                                                href="#" style="background-image: url(images/enable.gif);"
-                                                class="icon-link">
-                                                <fmt:message key='enable.policy'/>
-                                             </a>
-                                          </c:otherwise>
-                                       </c:choose>
-                                       <a title="<fmt:message key='edit.idvp.info'/>"
-                                          onclick="editIdVP('<c:out value="${idvp.idVProviderUuid}"/>');return false;"
-                                          style="background-image: url(images/edit.gif);" class="icon-link">
-                                          <fmt:message key='edit'/>
-                                       </a>
-                                       <a title="<fmt:message key='delete'/>"
-                                          onclick="deleteIdVPById('<c:out value="${idvp.idVProviderUuid}"/>','<c:out
-                                            value="${idvp.idVProviderName}"/>','${pageNumber}');return false;"
-                                          href="#"
-                                          class="icon-link"
-                                          style="background-image: url(images/delete.gif)">
-                                          <fmt:message key='delete'/>
-                                       </a>
+                                       <c:if test="${canEditIdVP}">
+                                          <c:choose>
+                                             <c:when test="${idvp.enabled}">
+                                                <a title="<fmt:message key='disable.policy'/>"
+                                                   onclick="enableOrDisableIdVP('<c:out
+                                                     value="${idvp.idVProviderUuid}"/>', 'false');return false;"
+                                                   href="#"
+                                                   style="background-image: url(images/disable.gif);"
+                                                   class="icon-link">
+                                                   <fmt:message key='disable.policy'/>
+                                                </a>
+                                             </c:when>
+                                             <c:otherwise>
+                                                <a title="<fmt:message key='enable.policy'/>"
+                                                   onclick="enableOrDisableIdVP('<c:out
+                                                     value="${idvp.idVProviderUuid}"/>', 'true');return false;"
+                                                   href="#" style="background-image: url(images/enable.gif);"
+                                                   class="icon-link">
+                                                   <fmt:message key='enable.policy'/>
+                                                </a>
+                                             </c:otherwise>
+                                          </c:choose>
+                                          <a title="<fmt:message key='edit.idvp.info'/>"
+                                             onclick="editIdVP('<c:out value="${idvp.idVProviderUuid}"/>');return false;"
+                                             style="background-image: url(images/edit.gif);" class="icon-link">
+                                             <fmt:message key='edit'/>
+                                          </a>
+                                       </c:if>
+                                       <c:if test="${canDeleteIdVP}">
+                                          <a title="<fmt:message key='delete'/>"
+                                             onclick="deleteIdVPById('<c:out value="${idvp.idVProviderUuid}"/>','<c:out
+                                               value="${idvp.idVProviderName}"/>','${pageNumber}');return false;"
+                                             href="#"
+                                             class="icon-link"
+                                             style="background-image: url(images/delete.gif)">
+                                             <fmt:message key='delete'/>
+                                          </a>
+                                       </c:if>
                                     </td>
                                  </tr>
                                  </tbody>
