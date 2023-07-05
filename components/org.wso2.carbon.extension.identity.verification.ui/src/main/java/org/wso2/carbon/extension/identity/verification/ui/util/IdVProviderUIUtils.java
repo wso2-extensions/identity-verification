@@ -135,7 +135,6 @@ public class IdVProviderUIUtils {
 
         idVProvider.setIdVProviderName(request.getParameter(IdVProviderUIConstants.KEY_IDVP_NAME));
         idVProvider.setIdVProviderDescription(request.getParameter(IdVProviderUIConstants.KEY_IDVP_DESCRIPTION));
-        idVProvider.setEnabled(true);
 
         Map<String, JSONObject> metadataMap = new HashMap<>();
         for (int i = 0; i < metadata.length(); i++) {

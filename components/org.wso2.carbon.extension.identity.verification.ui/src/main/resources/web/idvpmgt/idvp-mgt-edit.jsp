@@ -26,11 +26,9 @@
 <%@ page import="static org.wso2.carbon.CarbonConstants.LOGGED_USER" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClient" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClientImpl" %>
-<%@ page import="org.wso2.carbon.extension.identity.verification.ui.exception.IdentityVerificationUIException" %>
 <%@ page
   import="static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.RESOURCE_BUNDLE" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants" %>
-<%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.ErrorMessages" %>
 <%@ page import="org.wso2.carbon.identity.extension.mgt.model.ExtensionInfo" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="java.text.MessageFormat" %>

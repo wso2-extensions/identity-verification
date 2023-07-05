@@ -36,7 +36,7 @@
                                 <tr>
                                     <td colspan="3">
                                         <i>
-                                            <fmt:message key="idvp.not.configured"/>
+                                            <fmt:message key="idvp.not.configured.placeholder"/>
                                             <a href="https://store.wso2.com/store/assets/isconnector/list">
                                                 WSO2 Connector Store
                                             </a>
