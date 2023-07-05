@@ -18,15 +18,25 @@
 
 package org.wso2.carbon.extension.identity.verification.ui.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVConfigProperty;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
+import org.wso2.carbon.extension.identity.verification.ui.exception.IdVProviderMgtUIClientException;
+import org.wso2.carbon.extension.identity.verification.ui.exception.IdVProviderMgtUIException;
+import org.wso2.carbon.extension.identity.verification.ui.internal.IdVProviderMgtUIDataHolder;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static org.wso2.carbon.CarbonConstants.UI_PERMISSION_ACTION;
+import static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.ErrorMessages;
 
 /**
  * Contains utility methods for IdVProviderUI.
@@ -35,6 +45,36 @@ public class IdVProviderUIUtils {
 
     private IdVProviderUIUtils() {
         // Adding a private constructor to hide the implicit public constructor since all methods are static.
+    }
+
+    /**
+     * This method is used to handle the user authorization.
+     *
+     * @param permission permission string.
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
+     */
+    public static void handleLoggedInUserAuthorization(String permission, String loggedInUser)
+            throws IdVProviderMgtUIException {
+
+        try {
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+            if (StringUtils.isBlank(loggedInUser)) {
+                throw new IdVProviderMgtUIClientException(ErrorMessages.ERROR_NO_AUTH_USER_FOUND.getCode(),
+                        ErrorMessages.ERROR_NO_AUTH_USER_FOUND.getMessage());
+            }
+
+            AuthorizationManager authorizationManager = IdVProviderMgtUIDataHolder.getInstance()
+                    .getRealmService()
+                    .getTenantUserRealm(tenantId)
+                    .getAuthorizationManager();
+            if (!authorizationManager.isUserAuthorized(loggedInUser, permission, UI_PERMISSION_ACTION)) {
+                throw new IdVProviderMgtUIClientException(ErrorMessages.ERROR_USER_NOT_AUTHORIZED.getCode(),
+                        String.format(ErrorMessages.ERROR_USER_NOT_AUTHORIZED.getMessage(), loggedInUser));
+            }
+        } catch (UserStoreException e) {
+            throw IdVProviderUIExceptionMgt.handleException(e);
+        }
     }
 
     /**

@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.extension.identity.verification.ui.client;
 
-import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtClientException;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
+import org.wso2.carbon.extension.identity.verification.ui.exception.IdVProviderMgtUIException;
 
 import java.util.List;
 
@@ -33,9 +33,9 @@ public interface IdVProviderMgtServiceClient {
      *
      * @param currentUser Currently logged-in user.
      * @return Count of Identity Verification Providers.
-     * @throws IdVProviderMgtClientException IdVProviderMgtClientException.
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
-    int getIdVProviderCount(String currentUser) throws IdVProviderMgtClientException;
+    int getIdVProviderCount(String currentUser) throws IdVProviderMgtUIException;
 
     /**
      * Get the list of Identity Verification Providers.
@@ -44,10 +44,10 @@ public interface IdVProviderMgtServiceClient {
      * @param offset Start index of the Identity Verification Providers to return.
      * @param currentUser Currently logged-in user.
      * @return List of Identity Verification Providers.
-     * @throws IdVProviderMgtClientException IdVProviderMgtClientException.
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
     List<IdVProvider> getIdVProviders(Integer limit, Integer offset, String currentUser)
-            throws IdVProviderMgtClientException;
+            throws IdVProviderMgtUIException;
 
     /**
      * Get the Identity Verification Provider by id.
@@ -55,9 +55,9 @@ public interface IdVProviderMgtServiceClient {
      * @param id IdentityVerificationProvider Id.
      * @param currentUser Currently logged-in user.
      * @return IdentityVerificationProvider.
-     * @throws IdVProviderMgtClientException IdVProviderMgtClientException.
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
-    IdVProvider getIdVProviderById(String id, String currentUser) throws IdVProviderMgtClientException;
+    IdVProvider getIdVProviderById(String id, String currentUser) throws IdVProviderMgtUIException;
 
     /**
      * Add a new Identity Verification Provider.
@@ -65,9 +65,9 @@ public interface IdVProviderMgtServiceClient {
      * @param provider Identity Verification Provider to be added.
      * @param currentUser Currently logged-in user.
      * @return Added Identity Verification Provider.
-     * @throws IdVProviderMgtClientException IdVProviderMgtClientException.
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
-    IdVProvider addIdVProvider(IdVProvider provider, String currentUser) throws IdVProviderMgtClientException;
+    IdVProvider addIdVProvider(IdVProvider provider, String currentUser) throws IdVProviderMgtUIException;
 
     /**
      * Update the Identity Verification Provider.
@@ -76,25 +76,25 @@ public interface IdVProviderMgtServiceClient {
      * @param newProvider Identity Verification Provider to be updated.
      * @param currentUser Currently logged-in user.
      * @return Updated Identity Verification Provider.
-     * @throws IdVProviderMgtClientException IdVProviderMgtClientException.
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
     IdVProvider updateIdVProvider(String id, IdVProvider newProvider, String currentUser)
-            throws IdVProviderMgtClientException;
+            throws IdVProviderMgtUIException;
 
     /**
      * Delete the Identity Verification Provider by id.
      *
      * @param id IdentityVerificationProvider Id.
      * @param currentUser Currently logged-in user.
-     * @throws IdVProviderMgtClientException IdVProviderMgtClientException.
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
-    void deleteIdVProvider(String id, String currentUser) throws IdVProviderMgtClientException;
+    void deleteIdVProvider(String id, String currentUser) throws IdVProviderMgtUIException;
 
     /**
      * Returns all the local claims.
      *
      * @return String array of local claims.
-     * @throws IdVProviderMgtClientException IdVProviderMgtClientException.
+     * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
-    String[] getAllLocalClaims() throws IdVProviderMgtClientException;
+    String[] getAllLocalClaims() throws IdVProviderMgtUIException;
 }
