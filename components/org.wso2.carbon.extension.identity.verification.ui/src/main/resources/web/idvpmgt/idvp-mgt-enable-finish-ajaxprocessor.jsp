@@ -20,6 +20,7 @@
 <%@ page import="java.text.MessageFormat" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIUtils" %>
+<%@ page import="org.wso2.carbon.extension.identity.verification.ui.exception.IdVProviderMgtUIClientException" %>
 <%@ page
 		import="static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.RESOURCE_BUNDLE" %>
 <%@ page import="org.wso2.carbon.extension.identity.verification.ui.client.IdVProviderMgtServiceClient" %>
@@ -38,7 +39,7 @@
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE, request.getLocale());
     try {
 		IdVProviderMgtServiceClient client = IdVProviderMgtServiceClientImpl.getInstance();
-        IdVProvider idVProvider;
+		IdVProvider idVProvider;
 		String idVProviderId = request.getParameter(IdVProviderUIConstants.KEY_IDVP_ID);
 		String isEnable = request.getParameter(IdVProviderUIConstants.KEY_ENABLE);
 		String currentUser = (String) session.getAttribute(LOGGED_USER);
@@ -46,15 +47,18 @@
 		if (StringUtils.isNotBlank(idVProviderId) && StringUtils.isNotBlank(isEnable)) {
 			idVProvider = client.getIdVProviderById(idVProviderId, currentUser);
 			idVProvider.setEnabled(isEnable.equals("true"));
+			client.updateIdVProvider(idVProviderId, idVProvider, currentUser);
 		} else {
-			idVProvider = new IdVProvider();
+			throw new IdVProviderMgtUIClientException(
+				IdVProviderUIConstants.ErrorMessages.INVALID_REQUEST_PARAMETERS.getCode(),
+				IdVProviderUIConstants.ErrorMessages.INVALID_REQUEST_PARAMETERS.getMessage()
+			);
 		}
 
-		client.updateIdVProvider(idVProviderId, idVProvider, currentUser);
 	} catch (Exception e) {
 		String message = MessageFormat.format(resourceBundle.getString("error.updating.idvp"), e.getMessage());
 		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
-    }
+	}
 %>
 
 <script type="text/javascript">

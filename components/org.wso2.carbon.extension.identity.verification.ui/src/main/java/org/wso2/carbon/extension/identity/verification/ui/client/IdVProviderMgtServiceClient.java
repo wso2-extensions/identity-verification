@@ -24,7 +24,7 @@ import org.wso2.carbon.extension.identity.verification.ui.exception.IdVProviderM
 import java.util.List;
 
 /**
- * Client interface for IdVProviderMgtService.
+ * Client interface for Identity Verification Provider Management Service.
  */
 public interface IdVProviderMgtServiceClient {
 

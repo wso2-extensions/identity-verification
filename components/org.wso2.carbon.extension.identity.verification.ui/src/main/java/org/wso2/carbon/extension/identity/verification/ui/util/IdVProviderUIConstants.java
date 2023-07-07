@@ -76,7 +76,8 @@ public class IdVProviderUIConstants {
         ERROR_UNEXPECTED("10000", "Unexpected error occurred"),
         ERROR_NO_AUTH_USER_FOUND("10001", "No authenticated user found to perform the operation"),
         ERROR_USER_NOT_AUTHORIZED("10002", "User: %s is not authorized to perform this operation."),
-        ERROR_LOADING_EXTENSION_INFO("10003", "Error while loading extension information.");
+        ERROR_LOADING_EXTENSION_INFO("10003", "Error while loading extension information."),
+        INVALID_REQUEST_PARAMETERS("10004", "Invalid request parameters.");
 
         private final String code;
         private final String message;

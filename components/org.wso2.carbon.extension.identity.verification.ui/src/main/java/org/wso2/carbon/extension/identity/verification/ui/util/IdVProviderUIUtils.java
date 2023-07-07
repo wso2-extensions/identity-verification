@@ -51,6 +51,7 @@ public class IdVProviderUIUtils {
      * This method is used to handle the user authorization.
      *
      * @param permission permission string.
+     * @param loggedInUser Username of the logged-in user.
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
     public static void handleLoggedInUserAuthorization(String permission, String loggedInUser)
@@ -71,6 +72,7 @@ public class IdVProviderUIUtils {
      * This method is used to check if the user has a particular permission.
      *
      * @param permission permission string.
+     * @param loggedInUser Username of the logged-in user.
      * @return True if user has the provided permission, false otherwise
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
@@ -79,7 +81,6 @@ public class IdVProviderUIUtils {
 
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-
             if (StringUtils.isBlank(loggedInUser)) {
                 return false;
             }
@@ -93,7 +94,6 @@ public class IdVProviderUIUtils {
             throw IdVProviderUIExceptionMgt.handleException(e);
         }
     }
-
 
     /**
      * Checks whether the HTTP method is allowed.
