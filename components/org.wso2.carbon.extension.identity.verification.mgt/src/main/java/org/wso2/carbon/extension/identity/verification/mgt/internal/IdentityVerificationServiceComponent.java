@@ -32,7 +32,9 @@ import org.wso2.carbon.extension.identity.verification.mgt.IdentityVerifierFacto
 import org.wso2.carbon.extension.identity.verification.mgt.dao.CachedBackedIdVClaimDAO;
 import org.wso2.carbon.extension.identity.verification.mgt.dao.IdentityVerificationClaimDAO;
 import org.wso2.carbon.extension.identity.verification.mgt.dao.IdentityVerificationClaimDAOImpl;
+import org.wso2.carbon.extension.identity.verification.mgt.listeners.IdVUserOperationEventListener;
 import org.wso2.carbon.extension.identity.verification.provider.IdVProviderManager;
+import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.Comparator;
@@ -56,9 +58,15 @@ public class IdentityVerificationServiceComponent {
             IdentityVerificationClaimDAO identityVerificationClaimDAO = new IdentityVerificationClaimDAOImpl();
             ctxt.getBundleContext().registerService(IdentityVerificationClaimDAO.class.getName(),
                     new CachedBackedIdVClaimDAO(identityVerificationClaimDAO), null);
-            IdentityVerificationManager identityVerificationService = new IdentityVerificationManagerImpl();
+
+            IdentityVerificationManager identityVerificationService = IdentityVerificationManagerImpl.getInstance();
             ctxt.getBundleContext().registerService(IdentityVerificationManager.class.getName(),
                     identityVerificationService, null);
+
+            IdVUserOperationEventListener idVUserOperationEventListener = new IdVUserOperationEventListener();
+            ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(),
+                    idVUserOperationEventListener, null);
+
             log.info("IdentityVerificationService bundle activated successfully.");
             if (log.isDebugEnabled()) {
                 log.debug("IdentityVerificationService bundle is activated");

@@ -34,6 +34,7 @@ import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,6 +42,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -85,7 +89,7 @@ public class CachedBackedIdVClaimDAOTest {
     public void setUp() {
 
         setUpCarbonHome();
-        identityVerificationClaimDAO = new  IdentityVerificationClaimDAOImpl();
+        identityVerificationClaimDAO = new IdentityVerificationClaimDAOImpl();
         IdentityVerificationDataHolder.getInstance().setIdVClaimDAOs(Collections.
                 singletonList(identityVerificationClaimDAO));
 
@@ -189,7 +193,7 @@ public class CachedBackedIdVClaimDAOTest {
             when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim[] retrievedIdVClaimList = cachedBackedIdVClaimDAO.
-                    getIDVClaims(USER_ID, IDV_PROVIDER_ID, TENANT_ID);
+                    getIDVClaims(USER_ID, IDV_PROVIDER_ID, null, TENANT_ID);
             Assert.assertEquals(retrievedIdVClaimList.length, idVClaimList.size());
         }
     }
@@ -240,19 +244,32 @@ public class CachedBackedIdVClaimDAOTest {
     @Test(priority = 8)
     public void testDeleteIdVClaims() throws Exception {
 
-        try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+        IdentityVerificationClaimDAO identityVerificationClaimDAO = mock(IdentityVerificationClaimDAO.class);
 
-            cachedBackedIdVClaimDAO.deleteIdVClaims(USER_ID, getIdVClaims(), TENANT_ID);
-        }
-        try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
-            IdVClaim[] retrievedIdVClaimList = cachedBackedIdVClaimDAO.
-                    getIDVClaims(USER_ID, IDV_PROVIDER_ID, TENANT_ID);
-            Assert.assertEquals(retrievedIdVClaimList.length, 0);
-        }
+        // Prepare test data
+        IdVClaim[] idVClaims = new IdVClaim[] { getIdVClaim() };
+
+        // Configure the behavior of the mocked method
+        when(identityVerificationClaimDAO.getIDVClaims(USER_ID, null, null, TENANT_ID)).
+                thenReturn(idVClaims);
+
+        // Create an instance of CachedBackedIdVClaimDAO using the mocked IdentityVerificationClaimDAO
+        CachedBackedIdVClaimDAO cachedBackedIdVClaimDAO = new CachedBackedIdVClaimDAO(identityVerificationClaimDAO);
+
+        // Mock the necessary dependencies for the database connection
+        Connection connection = mock(Connection.class);
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+
+        // Stub the necessary method calls to return the mocked connection and prepared statement
+        when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+        when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
+
+        // Call the deleteIdVClaims method
+        cachedBackedIdVClaimDAO.deleteIdVClaims(USER_ID, null, null, TENANT_ID);
+
+        // Verify the expected interactions
+        verify(identityVerificationClaimDAO, times(1))
+                .deleteIdVClaims(USER_ID, null, null, TENANT_ID);
     }
 
     @Test
@@ -277,13 +294,6 @@ public class CachedBackedIdVClaimDAOTest {
         List<IdVClaim> idVClaims = new ArrayList<>();
         IdVClaim idVClaim = getIdVClaim();
         idVClaims.add(idVClaim);
-        return idVClaims;
-    }
-
-    private IdVClaim[] getIdVClaims() {
-
-        IdVClaim[] idVClaims = new IdVClaim[1];
-        idVClaims[0] = getIdVClaim();
         return idVClaims;
     }
 

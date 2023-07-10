@@ -55,10 +55,16 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
 
     private static final Log log = LogFactory.getLog(IdentityVerificationManagerImpl.class);
     private final List<IdentityVerificationClaimDAO> idVClaimDAOs;
+    private static final IdentityVerificationManagerImpl instance = new IdentityVerificationManagerImpl();
 
-    public IdentityVerificationManagerImpl() {
+    private IdentityVerificationManagerImpl() {
 
         this.idVClaimDAOs = IdentityVerificationDataHolder.getInstance().getIdVClaimDAOs();
+    }
+
+    public static IdentityVerificationManagerImpl getInstance() {
+
+        return instance;
     }
 
     /**
@@ -124,6 +130,19 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
     }
 
     @Override
+    public IdVClaim[] getIdVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
+            throws IdentityVerificationException {
+
+        validateUserId(userId, tenantId);
+        if (StringUtils.isNotBlank(idvProviderId)) {
+            if (!isValidIdVProviderId(idvProviderId, tenantId)) {
+                throw IdentityVerificationExceptionMgt.handleClientException(ERROR_INVALID_IDV_PROVIDER, idvProviderId);
+            }
+        }
+        return getIdVClaimDAO().getIDVClaims(userId, idvProviderId, claimUri, tenantId);
+    }
+
+    @Override
     public List<IdVClaim> addIdVClaims(String userId, List<IdVClaim> idVClaims, int tenantId)
             throws IdentityVerificationException {
 
@@ -144,15 +163,10 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
             throws IdentityVerificationException {
 
         validateUserId(userId, tenantId);
-        deleteIDVClaims(userId, tenantId);
         for (IdVClaim idVClaim : idVClaims) {
-            // Set uuid for each identity verification claim.
-            idVClaim.setUuid(UUID.randomUUID().toString());
-
-            // Validate the identity verification claim.
             validateIdVClaimInputs(userId, idVClaim, tenantId);
+            getIdVClaimDAO().updateIdVClaim(idVClaim, tenantId);
         }
-        getIdVClaimDAO().addIdVClaimList(idVClaims, tenantId);
         return idVClaims;
     }
 
@@ -163,10 +177,6 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
         String idvClaimId = idvClaim.getUuid();
         validateIdVClaimId(idvClaimId, tenantId);
         validateUserId(userId, tenantId);
-        if (idvClaim.getMetadata() == null) {
-            throw IdentityVerificationExceptionMgt.handleClientException(
-                    IdentityVerificationConstants.ErrorMessage.ERROR_EMPTY_CLAIM_METADATA);
-        }
         getIdVClaimDAO().updateIdVClaim(idvClaim, tenantId);
         return idvClaim;
     }
@@ -179,24 +189,10 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
     }
 
     @Override
-    public void deleteIDVClaims(String userId, int tenantId) throws IdentityVerificationException {
-
-        validateUserId(userId, tenantId);
-        IdVClaim[] idVClaims = getIdVClaims(userId, null, tenantId);
-        getIdVClaimDAO().deleteIdVClaims(userId, idVClaims, tenantId);
-    }
-
-    @Override
-    public IdVClaim[] getIdVClaims(String userId, String idvProviderId, int tenantId)
+    public void deleteIDVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
             throws IdentityVerificationException {
 
-        validateUserId(userId, tenantId);
-        if (StringUtils.isNotBlank(idvProviderId)) {
-            if (!isValidIdVProviderId(idvProviderId, tenantId)) {
-                throw IdentityVerificationExceptionMgt.handleClientException(ERROR_INVALID_IDV_PROVIDER, idvProviderId);
-            }
-        }
-        return getIdVClaimDAO().getIDVClaims(userId, idvProviderId, tenantId);
+        getIdVClaimDAO().deleteIdVClaims(userId, idvProviderId, claimUri, tenantId);
     }
 
     @Override

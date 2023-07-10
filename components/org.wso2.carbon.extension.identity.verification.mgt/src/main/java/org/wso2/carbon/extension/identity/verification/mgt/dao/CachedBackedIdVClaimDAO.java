@@ -94,10 +94,10 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
     }
 
     @Override
-    public IdVClaim[] getIDVClaims(String userId, String idvProviderId, int tenantId)
+    public IdVClaim[] getIDVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
             throws IdentityVerificationException {
 
-        return identityVerificationClaimDAO.getIDVClaims(userId, idvProviderId, tenantId);
+        return identityVerificationClaimDAO.getIDVClaims(userId, idvProviderId, claimUri, tenantId);
     }
 
     @Override
@@ -115,13 +115,17 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
     }
 
     @Override
-    public void deleteIdVClaims(String userId, IdVClaim[] idVClaims, int tenantId)
+    public void deleteIdVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
             throws IdentityVerificationException {
 
+        IdVClaim[] idVClaims = identityVerificationClaimDAO.getIDVClaims(userId, idvProviderId, claimUri, tenantId);
+        if (idVClaims == null) {
+            return;
+        }
         for (IdVClaim idVClaim : idVClaims) {
             deleteIdVPFromCache(idVClaim, tenantId);
         }
-        identityVerificationClaimDAO.deleteIdVClaims(userId, idVClaims, tenantId);
+        identityVerificationClaimDAO.deleteIdVClaims(userId, idvProviderId, claimUri, tenantId);
     }
 
     @Override

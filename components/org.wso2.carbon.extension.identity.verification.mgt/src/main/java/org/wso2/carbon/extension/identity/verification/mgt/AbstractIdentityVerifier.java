@@ -55,7 +55,7 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
      * @param identityVerifierData Identity verifier data.
      * @param tenantId             Tenant Id.
      * @return IdentityVerificationProvider.
-     * @throws IdentityVerificationException IdentityVerificationServerException.
+     * @throws IdentityVerificationServerException IdentityVerificationServerException.
      */
     public IdVProvider getIdVProvider(IdentityVerifierData identityVerifierData, int tenantId)
             throws IdentityVerificationServerException {
@@ -134,8 +134,7 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
     public List<IdVClaim> storeIdVClaims(String userId, List<IdVClaim> idVClaims, int tenantId)
             throws IdentityVerificationException {
 
-        IdentityVerificationManager identityVerificationManager = new IdentityVerificationManagerImpl();
-        return identityVerificationManager.addIdVClaims(userId, idVClaims, tenantId);
+        return IdentityVerificationManagerImpl.getInstance().addIdVClaims(userId, idVClaims, tenantId);
     }
 
     /**
@@ -149,8 +148,7 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
     public IdVClaim updateIdVClaim(String userId, IdVClaim idvClaim, int tenantId)
             throws IdentityVerificationException {
 
-        IdentityVerificationManager identityVerificationManager = new IdentityVerificationManagerImpl();
-        return identityVerificationManager.updateIdVClaim(userId, idvClaim, tenantId);
+        return IdentityVerificationManagerImpl.getInstance().updateIdVClaim(userId, idvClaim, tenantId);
     }
 
     /**
@@ -164,8 +162,7 @@ public abstract class AbstractIdentityVerifier implements IdentityVerifier {
     public List<IdVClaim> updateIdVClaims(String userId, List<IdVClaim> idVClaims, int tenantId)
             throws IdentityVerificationException {
 
-        IdentityVerificationManager identityVerificationManager = new IdentityVerificationManagerImpl();
-        return identityVerificationManager.updateIdVClaims(userId, idVClaims, tenantId);
+        return IdentityVerificationManagerImpl.getInstance().updateIdVClaims(userId, idVClaims, tenantId);
     }
 
     private UniqueIDUserStoreManager getUniqueIdEnabledUserStoreManager(int tenantId)

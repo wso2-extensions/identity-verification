@@ -70,11 +70,13 @@ public interface IdentityVerificationManager {
      *
      * @param userId        User Id.
      * @param idvProviderId IdVProvider Id.
+     * @param claimUri      Claim uri.
      * @param tenantId      Tenant Id.
      * @return IdVClaims.
      * @throws IdentityVerificationException IdentityVerificationException.
      */
-    IdVClaim[] getIdVClaims(String userId, String idvProviderId, int tenantId) throws IdentityVerificationException;
+    IdVClaim[] getIdVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
+            throws IdentityVerificationException;
 
     /**
      * Get the identity verification claims by specific metadata.
@@ -116,6 +118,7 @@ public interface IdentityVerificationManager {
     /**
      * Update the IdVClaim.
      *
+     * @param userId   User Id.
      * @param idvClaim IdVClaim.
      * @param tenantId Tenant Id.
      * @throws IdentityVerificationException IdentityVerificationException.
@@ -134,9 +137,12 @@ public interface IdentityVerificationManager {
     /**
      * Delete the IdVClaims of a user.
      *
-     * @param userId   User Id.
-     * @param tenantId Tenant Id.
+     * @param userId        User Id.
+     * @param idvProviderId IDV Provider Id.
+     * @param claimUri      Claim uri.
+     * @param tenantId      Tenant Id.
      * @throws IdentityVerificationException IdentityVerificationException.
      */
-    void deleteIDVClaims(String userId, int tenantId) throws IdentityVerificationException;
+    void deleteIDVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
+            throws IdentityVerificationException;
 }
