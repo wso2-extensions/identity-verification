@@ -525,15 +525,4 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
         return prepStmt;
     }
 
-    private String resolveSQLFilter(String filter) {
-
-        //To avoid any issues when the filter string is blank or null, assigning "%" to SQLFilter.
-        String sqlFilter = "%";
-        if (StringUtils.isNotBlank(filter)) {
-            sqlFilter = filter.trim()
-                    .replace("*", "%")
-                    .replace("?", "_");
-        }
-        return sqlFilter;
-    }
 }

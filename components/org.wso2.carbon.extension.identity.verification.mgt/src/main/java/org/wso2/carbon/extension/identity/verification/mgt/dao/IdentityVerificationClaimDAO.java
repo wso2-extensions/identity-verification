@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.extension.identity.verification.mgt.dao;
 
-import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
 import org.wso2.carbon.extension.identity.verification.mgt.exception.IdentityVerificationException;
+import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
 
 import java.util.List;
 
@@ -83,10 +83,23 @@ public interface IdentityVerificationClaimDAO {
      * @param userId        User id.
      * @param idvProviderId Identity verification provider id.
      * @param tenantId      Identity verification claim id.
-     * @return Identity verification claim.
+     * @return Identity verification claims.
      * @throws IdentityVerificationException Identity verification exception.
      */
     IdVClaim[] getIDVClaims(String userId, String idvProviderId, int tenantId) throws IdentityVerificationException;
+
+    /**
+     * Get the identity verification claims by specific metadata.
+     *
+     * @param metadataKey   Key of required metadata.
+     * @param metadataValue Value of  of required metadata.
+     * @param idvProviderId Identity verification provider id.
+     * @param tenantId      Tenant id.
+     * @return Identity verification claims.
+     * @throws IdentityVerificationException Identity verification exception.
+     */
+    IdVClaim[] getIdVClaimsByMetadata(String metadataKey, String metadataValue, String idvProviderId,
+                                      int tenantId) throws IdentityVerificationException;
 
     /**
      * Delete the identity verification claim.

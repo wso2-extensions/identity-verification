@@ -66,7 +66,6 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
     public IdVClaim getIDVClaim(String userId, String idvClaimUri, String idVProviderId, int tenantId)
             throws IdentityVerificationException {
 
-
         IdVClaim idVClaim = identityVerificationClaimDAO.getIDVClaim(userId, idvClaimUri, idVProviderId, tenantId);
         addIdVClaimToCache(idVClaim, tenantId);
         return idVClaim;
@@ -99,6 +98,13 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
             throws IdentityVerificationException {
 
         return identityVerificationClaimDAO.getIDVClaims(userId, idvProviderId, tenantId);
+    }
+
+    @Override
+    public IdVClaim[] getIdVClaimsByMetadata(String metadataKey, String metadataValue, String idvProviderId,
+                                             int tenantId) throws IdentityVerificationException {
+
+        return identityVerificationClaimDAO.getIdVClaimsByMetadata(metadataKey, metadataValue, idvProviderId, tenantId);
     }
 
     @Override

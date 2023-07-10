@@ -57,6 +57,10 @@ public class IdentityVerificationConstants {
                 "SELECT ID, UUID, USER_ID, CLAIM_URI, IS_VERIFIED, METADATA FROM IDV_CLAIM WHERE " +
                         "USER_ID=? AND TENANT_ID=?";
 
+        public static final String GET_IDV_CLAIMS_BY_METADATA_SQL =
+                "SELECT ID, UUID, USER_ID, CLAIM_URI, IS_VERIFIED, METADATA FROM IDV_CLAIM " +
+                        "WHERE IDVP_ID=? AND TENANT_ID=? AND METADATA LIKE '%?:?%'";
+
         public static final String UPDATE_IDV_CLAIM_SQL =
                 "UPDATE IDV_CLAIM SET IS_VERIFIED=?, METADATA=? WHERE USER_ID=? AND UUID=? AND TENANT_ID=?";
 
@@ -104,7 +108,9 @@ public class IdentityVerificationConstants {
         ERROR_RETRIEVING_IDV_PROVIDER("15010", "Error while retrieving identity verification provider."),
         ERROR_RETRIEVING_IDV_CLAIM_MAPPINGS("15011",
                 "Error while retrieving identity verification claim mappings."),
-        ERROR_CODE_GET_DAO("15012", "No IdV Claim DAOs are registered.");
+        ERROR_CODE_GET_DAO("15012", "No IdV Claim DAOs are registered."),
+        ERROR_RETRIEVING_IDV_CLAIMS_BY_METADATA("15013",
+                "Error retrieving the Identity Verification Claims by metadata.");
 
         private final String code;
         private final String message;

@@ -22,6 +22,8 @@ import org.json.JSONObject;
 import org.wso2.carbon.extension.identity.verification.mgt.exception.IdentityVerificationException;
 import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
 import org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationExceptionMgt;
+import org.wso2.carbon.extension.identity.verification.provider.exception.IdvProviderMgtServerException;
+import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtExceptionManagement;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -41,6 +43,7 @@ import static org.wso2.carbon.extension.identity.verification.mgt.utils.Identity
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_DELETING_IDV_CLAIM;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_RETRIEVING_IDV_CLAIM;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_RETRIEVING_IDV_CLAIMS;
+import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_RETRIEVING_IDV_CLAIMS_BY_METADATA;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_UPDATING_IDV_CLAIM;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ID;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.IDVP_ID;
@@ -48,6 +51,7 @@ import static org.wso2.carbon.extension.identity.verification.mgt.utils.Identity
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.METADATA;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.ADD_IDV_CLAIM_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.DELETE_IDV_CLAIM_SQL;
+import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIMS_BY_METADATA_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIMS_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIM_BY_CLAIM_URI_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIM_SQL;
@@ -57,6 +61,10 @@ import static org.wso2.carbon.extension.identity.verification.mgt.utils.Identity
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.UPDATE_IDV_CLAIM_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.USER_ID;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.IDV_CLAIM_UUID;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_RETRIEVING_IDV_PROVIDERS;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_MSSQL;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_MYSQL;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_POSTGRESQL;
 
 /**
  * Identity verification claim DAO class.
@@ -202,6 +210,36 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
             }
         } catch (SQLException e) {
             throw IdentityVerificationExceptionMgt.handleServerException(ERROR_RETRIEVING_IDV_CLAIMS, e);
+        }
+        return idVClaims.toArray(new IdVClaim[0]);
+    }
+
+    @Override
+    public IdVClaim[] getIdVClaimsByMetadata(String metadataKey, String metadataValue, String idvProviderId,
+                                             int tenantId) throws IdentityVerificationException {
+
+        List<IdVClaim> idVClaims = new ArrayList<>();
+        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false);
+             PreparedStatement getIdVProviderStmt = connection.prepareStatement(GET_IDV_CLAIMS_BY_METADATA_SQL)) {
+            getIdVProviderStmt.setString(1, idvProviderId);
+            getIdVProviderStmt.setInt(2, tenantId);
+            getIdVProviderStmt.setString(3, metadataKey);
+            getIdVProviderStmt.setString(4, metadataValue);
+            getIdVProviderStmt.execute();
+            try (ResultSet idVProviderResultSet = getIdVProviderStmt.executeQuery()) {
+                while (idVProviderResultSet.next()) {
+                    IdVClaim idVClaim = new IdVClaim();
+                    idVClaim.setId(idVProviderResultSet.getString(ID));
+                    idVClaim.setUuid(idVProviderResultSet.getString(IDV_CLAIM_UUID));
+                    idVClaim.setUserId(idVProviderResultSet.getString(USER_ID));
+                    idVClaim.setClaimUri(idVProviderResultSet.getString(CLAIM_URI));
+                    idVClaim.setIsVerified(idVProviderResultSet.getBoolean(IS_VERIFIED));
+                    idVClaim.setMetadata(getMetadataJsonObject(idVProviderResultSet.getBytes(METADATA)));
+                    idVClaims.add(idVClaim);
+                }
+            }
+        } catch (SQLException e) {
+            throw IdentityVerificationExceptionMgt.handleServerException(ERROR_RETRIEVING_IDV_CLAIMS_BY_METADATA, e);
         }
         return idVClaims.toArray(new IdVClaim[0]);
     }
