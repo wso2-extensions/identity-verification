@@ -150,8 +150,8 @@ public class IdVProviderUIUtils {
             } else {
                 String inputType = metadataMap.get(idVConfigProperty.getName())
                         .getString(IdVProviderUIConstants.METADATA_TYPE);
-                if (IdVProviderUIConstants.INPUT_TYPE_CHECKBOX.equals(inputType) ||
-                        IdVProviderUIConstants.INPUT_TYPE_TOGGLE.equals(inputType)) {
+                if (StringUtils.equals(IdVProviderUIConstants.INPUT_TYPE_CHECKBOX, inputType) ||
+                        StringUtils.equals(IdVProviderUIConstants.INPUT_TYPE_TOGGLE, inputType)) {
                     idVConfigProperty.setValue("false");
                 }
             }
