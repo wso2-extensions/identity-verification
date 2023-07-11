@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An OSGI client for Extension Management Service.
+ * An OSGI client for Extension Management Service. This client is used to retrieve metadata related to Identity
+ * Verification Provider Management UI.
  */
 public class ExtensionMgtServiceClientImpl implements ExtensionMgtServiceClient {
     private final ExtensionManager extensionManager;

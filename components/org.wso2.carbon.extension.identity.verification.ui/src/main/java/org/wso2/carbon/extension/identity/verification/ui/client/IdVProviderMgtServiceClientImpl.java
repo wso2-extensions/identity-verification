@@ -39,7 +39,8 @@ import static org.wso2.carbon.extension.identity.verification.ui.util.IdVProvide
 import static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.PERMISSION_IDVP_MGT_VIEW;
 
 /**
- * OSGI Client for Identity Verification Provider Management Service.
+ * OSGI Client for Identity Verification Provider Management Service. This client is used for managing the Identity
+ * Verification Providers.
  */
 public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceClient {
     private final IdVProviderManager idVProviderManager;
