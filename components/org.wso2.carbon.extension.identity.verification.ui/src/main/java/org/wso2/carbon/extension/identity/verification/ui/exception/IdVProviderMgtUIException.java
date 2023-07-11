@@ -21,7 +21,7 @@ package org.wso2.carbon.extension.identity.verification.ui.exception;
 import org.wso2.carbon.identity.base.IdentityException;
 
 /**
- * This class represents the base exceptions thrown from the Identity Verification UI component.
+ * This class represents the base exceptions thrown from the Identity Verification Provider Management UI component.
  */
 public class IdVProviderMgtUIException extends IdentityException {
 

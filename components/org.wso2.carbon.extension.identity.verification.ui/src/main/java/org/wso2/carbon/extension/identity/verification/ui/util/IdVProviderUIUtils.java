@@ -39,7 +39,7 @@ import static org.wso2.carbon.CarbonConstants.UI_PERMISSION_ACTION;
 import static org.wso2.carbon.extension.identity.verification.ui.util.IdVProviderUIConstants.ErrorMessages;
 
 /**
- * Contains utility methods for IdVProviderUI.
+ * Contains utility methods used in Identity Verification Provider Management UI component.
  */
 public class IdVProviderUIUtils {
 

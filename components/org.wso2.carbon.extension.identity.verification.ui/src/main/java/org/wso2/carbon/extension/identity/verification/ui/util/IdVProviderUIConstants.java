@@ -19,7 +19,7 @@
 package org.wso2.carbon.extension.identity.verification.ui.util;
 
 /**
- * This class contains the constants used in the IdentityVerificationProvider UI.
+ * This class contains the constants used in the Identity Verification Provider Management UI component.
  */
 public class IdVProviderUIConstants {
 

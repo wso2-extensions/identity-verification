@@ -11,7 +11,7 @@ import org.wso2.carbon.user.api.UserStoreClientException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 /**
- * This class is used to manage the exceptions thrown from the Identity Verification UI component.
+ * This class is used to manage the exceptions thrown from the Identity Verification Provider Management UI component.
  */
 public class IdVProviderUIExceptionMgt {
 

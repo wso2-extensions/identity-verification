@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Client interface for ExtensionMgtService.
+ * Client interface for Extension Management Service.
  */
 public interface ExtensionMgtServiceClient {
 
