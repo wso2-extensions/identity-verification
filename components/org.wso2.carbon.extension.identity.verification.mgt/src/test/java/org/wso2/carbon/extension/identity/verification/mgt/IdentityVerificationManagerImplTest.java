@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -42,10 +43,12 @@ import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENA
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.testng.PowerMockTestCase;
+import org.powermock.reflect.Whitebox;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.extension.identity.verification.mgt.dao.IdentityVerificationClaimDAO;
 import org.wso2.carbon.extension.identity.verification.mgt.dao.IdentityVerificationClaimDAOImpl;
 import org.wso2.carbon.extension.identity.verification.mgt.internal.IdentityVerificationDataHolder;
 import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
@@ -72,7 +75,7 @@ import java.util.Map;
         IdentityTenantUtil.class, IdentityVerificationDataHolder.class, IdVProviderManager.class})
 public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
 
-    private IdentityVerificationManager identityVerification;
+    private IdentityVerificationManagerImpl identityVerificationManager;
     @Mock
     private IdentityVerificationClaimDAOImpl identityVerificationClaimDAO;
     @Mock
@@ -99,8 +102,14 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
         mockCarbonContextForTenant();
         mockIdentityTenantUtility();
         mockIsExistingUserCheck();
-        mockIdentityVerificationClaimDAO();
-        identityVerification = new IdentityVerificationManagerImpl();
+
+        mockStatic(IdentityVerificationDataHolder.class);
+        when(IdentityVerificationDataHolder.getInstance()).thenReturn(identityVerificationDataHolder);
+        List<IdentityVerificationClaimDAO> daoList = new ArrayList<>();
+        daoList.add(identityVerificationClaimDAO);
+        when(identityVerificationDataHolder.getIdVClaimDAOs()).thenReturn(daoList);
+        identityVerificationManager = IdentityVerificationManagerImpl.getInstance();
+        Whitebox.setInternalState(identityVerificationManager, "idVClaimDAOs", daoList);
     }
 
     @Test
@@ -118,7 +127,7 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
         when(identityVerifier.verifyIdentity(anyString(), any(IdentityVerifierData.class), anyInt())).
                 thenReturn(identityVerifierData);
 
-        IdentityVerifierData idVData = identityVerification.verifyIdentity(USER_ID, identityVerifierData, TENANT_ID);
+        IdentityVerifierData idVData = identityVerificationManager.verifyIdentity(USER_ID, identityVerifierData, TENANT_ID);
         Assert.assertEquals(idVData.getIdVProviderId(), IDV_PROVIDER_ID);
         Assert.assertEquals(idVData.getIdVProperties().get(0).getName(), TOKEN);
         Assert.assertEquals(idVData.getIdVProperties().get(0).getValue(), TOKEN_VALUE);
@@ -134,7 +143,7 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
         when(identityVerificationDataHolder.getIdVProviderManager()).thenReturn(mockIdVProviderManager);
         when(mockIdVProviderManager.isIdVProviderExists(anyString(), anyInt())).thenReturn(true);
 
-        IdVClaim idVClaim = identityVerification.getIdVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
+        IdVClaim idVClaim = identityVerificationManager.getIdVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
         Assert.assertEquals(idVClaim.getClaimUri(), "http://wso2.org/claims/dob");
         Assert.assertEquals(idVClaim.getClaimValue(), "1990-01-01");
         Assert.assertNotNull(idVClaim.getId());
@@ -150,7 +159,7 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
         when(identityVerificationDataHolder.getIdVProviderManager()).thenReturn(mockIdVProviderManager);
         when(mockIdVProviderManager.isIdVProviderExists(anyString(), anyInt())).thenReturn(true);
 
-        IdVClaim idVClaim = identityVerification.getIdVClaim(USER_ID, IDV_CLAIM_URI, IDV_CLAIM_UUID, TENANT_ID);
+        IdVClaim idVClaim = identityVerificationManager.getIdVClaim(USER_ID, IDV_CLAIM_URI, IDV_CLAIM_UUID, TENANT_ID);
         Assert.assertEquals(idVClaim.getClaimUri(), "http://wso2.org/claims/dob");
     }
 
@@ -165,19 +174,17 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaims = new ArrayList<>();
         idVClaims.add(getIdVClaim());
-        List<IdVClaim> addedIdVClaims = identityVerification.addIdVClaims(USER_ID, idVClaims, TENANT_ID);
+        List<IdVClaim> addedIdVClaims = identityVerificationManager.addIdVClaims(USER_ID, idVClaims, TENANT_ID);
         Assert.assertEquals(addedIdVClaims.get(0).getClaimUri(), "http://wso2.org/claims/dob");
     }
 
     @Test
     public void testUpdateIdVClaim() throws Exception {
 
-        when(identityVerificationClaimDAO.isIdVClaimExist(anyString(), anyInt())).
-                thenReturn(true);
+        when(identityVerificationClaimDAO.isIdVClaimExist(anyString(), anyInt())).thenReturn(true);
         doNothing().when(identityVerificationClaimDAO).updateIdVClaim(any(IdVClaim.class), anyInt());
-
         IdVClaim idVClaim = getIdVClaim();
-        IdVClaim updatedIdVClaim = identityVerification.updateIdVClaim(USER_ID, idVClaim, TENANT_ID);
+        IdVClaim updatedIdVClaim = identityVerificationManager.updateIdVClaim(USER_ID, idVClaim, TENANT_ID);
         Assert.assertEquals(updatedIdVClaim.getClaimUri(), "http://wso2.org/claims/dob");
     }
 
@@ -194,7 +201,7 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
         idVClaim.setIsVerified(false);
         idVClaims.add(idVClaim);
 
-        List<IdVClaim> updatedIdVClaim = identityVerification.updateIdVClaims(USER_ID, idVClaims, TENANT_ID);
+        List<IdVClaim> updatedIdVClaim = identityVerificationManager.updateIdVClaims(USER_ID, idVClaims, TENANT_ID);
         Assert.assertFalse(updatedIdVClaim.get(0).isVerified());
     }
 
@@ -202,28 +209,25 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
     public void testDeleteIDVClaim() throws Exception {
 
         doNothing().when(identityVerificationClaimDAO).deleteIdVClaim(anyString(), anyString(), anyInt());
-        identityVerification.deleteIDVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
-        //todo: assert
+        identityVerificationManager.deleteIDVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
+
+        // Verify that the deleteIdVClaim method is called with the expected arguments
+        verify(identityVerificationClaimDAO).deleteIdVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
+
     }
 
     @Test
     public void testGetIDVClaims() throws Exception {
 
         when(identityVerificationClaimDAO.isIdVClaimExist(anyString(), anyInt())).thenReturn(true);
-        when(identityVerificationClaimDAO.getIDVClaims(anyString(), anyString(), anyInt())).thenReturn(getIdVClaims());
+        when(identityVerificationClaimDAO.getIDVClaims(anyString(), anyString(), anyString(),
+                anyInt())).thenReturn(getIdVClaims());
         when(identityVerificationDataHolder.getIdVProviderManager()).thenReturn(mockIdVProviderManager);
         when(mockIdVProviderManager.isIdVProviderExists(anyString(), anyInt())).thenReturn(true);
-        IdVClaim[] idVClaims = identityVerification.getIdVClaims(USER_ID, IDV_PROVIDER_ID, TENANT_ID);
+        IdVClaim[] idVClaims = identityVerificationManager.
+                getIdVClaims(USER_ID, IDV_PROVIDER_ID, IDV_CLAIM_URI, TENANT_ID);
         Assert.assertEquals(idVClaims.length, 1);
         Assert.assertEquals(idVClaims[0].getClaimUri(), "http://wso2.org/claims/dob");
-    }
-
-    private void mockIdentityVerificationClaimDAO() {
-
-        mockStatic(IdentityVerificationDataHolder.class);
-        when(IdentityVerificationDataHolder.getInstance()).thenReturn(identityVerificationDataHolder);
-        when(identityVerificationDataHolder.getIdVClaimDAOs()).
-                thenReturn(Collections.singletonList(identityVerificationClaimDAO));
     }
 
     private void mockIsExistingUserCheck() throws UserStoreException {

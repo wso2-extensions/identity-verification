@@ -54,7 +54,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -78,6 +77,8 @@ public class AbstractIdentityVerifierTest extends PowerMockTestCase {
     UserRealm mockUserRealmFromRealmService;
     @Mock
     UniqueIDUserStoreManager mockUniqueIDUserStoreManager;
+    @Mock
+    IdentityVerificationManagerImpl mockIdentityVerificationManager;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -134,14 +135,13 @@ public class AbstractIdentityVerifierTest extends PowerMockTestCase {
     @Test
     public void testStoreIdVClaims() throws Exception {
 
-        when(identityVerificationClaimDAO.isIdVClaimDataExist(anyString(), anyString(), anyString(), anyInt())).
-                thenReturn(false);
-        doNothing().when(identityVerificationClaimDAO).addIdVClaimList(anyList(), anyInt());
-        when(identityVerificationDataHolder.getIdVProviderManager()).thenReturn(mockIdVProviderManager);
-        when(mockIdVProviderManager.isIdVProviderExists(anyString(), anyInt())).thenReturn(true);
-
+        List<IdVClaim> idvClaimList = Arrays.asList(getIdVClaims());
+        mockStatic(IdentityVerificationManagerImpl.class);
+        when(IdentityVerificationManagerImpl.getInstance()).thenReturn(mockIdentityVerificationManager);
+        when(mockIdentityVerificationManager.
+                addIdVClaims(anyString(), anyList(), anyInt())).thenReturn(idvClaimList);
         List<IdVClaim> storedIdVClaims =
-                abstractIdentityVerifier.storeIdVClaims(USER_ID, Arrays.asList(getIdVClaims()), TENANT_ID);
+                abstractIdentityVerifier.storeIdVClaims(USER_ID, idvClaimList, TENANT_ID);
         Assert.assertEquals(storedIdVClaims.size(), 1);
         Assert.assertNotNull(storedIdVClaims.get(0).getUuid());
         Assert.assertEquals(storedIdVClaims.get(0).getUserId(), USER_ID);
@@ -150,23 +150,26 @@ public class AbstractIdentityVerifierTest extends PowerMockTestCase {
     @Test
     public void testUpdateIdVClaim() throws Exception {
 
-        when(identityVerificationClaimDAO.isIdVClaimExist(anyString(), anyInt())).thenReturn(true);
-        doNothing().when(identityVerificationClaimDAO).updateIdVClaim(any(IdVClaim.class), anyInt());
-
-        IdVClaim updatedIdVClaim = abstractIdentityVerifier.updateIdVClaim(USER_ID, getIdVClaim(), TENANT_ID);
+        IdVClaim idVClaim = getIdVClaim();
+        mockStatic(IdentityVerificationManagerImpl.class);
+        when(IdentityVerificationManagerImpl.getInstance()).thenReturn(mockIdentityVerificationManager);
+        when(mockIdentityVerificationManager.
+                updateIdVClaim(anyString(), any(IdVClaim.class), anyInt())).thenReturn(idVClaim);
+        IdVClaim updatedIdVClaim = abstractIdentityVerifier.updateIdVClaim(USER_ID, idVClaim, TENANT_ID);
         Assert.assertTrue(updatedIdVClaim.isVerified());
     }
 
     @Test
     public void testUpdateIdVClaims() throws Exception {
 
-        when(identityVerificationClaimDAO.isIdVClaimExist(anyString(), anyInt())).thenReturn(true);
-        doNothing().when(identityVerificationClaimDAO).updateIdVClaim(any(IdVClaim.class), anyInt());
-        when(identityVerificationDataHolder.getIdVProviderManager()).thenReturn(mockIdVProviderManager);
-        when(mockIdVProviderManager.isIdVProviderExists(anyString(), anyInt())).thenReturn(true);
+        List<IdVClaim> idvClaimList = Arrays.asList(getIdVClaims());
+        mockStatic(IdentityVerificationManagerImpl.class);
+        when(IdentityVerificationManagerImpl.getInstance()).thenReturn(mockIdentityVerificationManager);
+        when(mockIdentityVerificationManager.
+                updateIdVClaims(anyString(), anyList(), anyInt())).thenReturn(idvClaimList);
 
         List<IdVClaim> updatedIdVClaims =
-                abstractIdentityVerifier.updateIdVClaims(USER_ID, Arrays.asList(getIdVClaims()), TENANT_ID);
+                abstractIdentityVerifier.updateIdVClaims(USER_ID, idvClaimList, TENANT_ID);
         Assert.assertTrue(updatedIdVClaims.get(0).isVerified());
     }
 

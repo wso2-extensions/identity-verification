@@ -67,6 +67,9 @@ public class IdentityVerificationConstants {
         public static final String DELETE_IDV_CLAIM_SQL =
                 "DELETE FROM IDV_CLAIM WHERE USER_ID=? AND UUID=? AND TENANT_ID=?";
 
+        public static final String DELETE_IDV_CLAIMS_SQL =
+                "DELETE FROM IDV_CLAIM WHERE USER_ID=? AND TENANT_ID=?";
+
         public static final String IS_IDV_CLAIM_DATA_EXIST_SQL =
                 "SELECT ID FROM IDV_CLAIM WHERE USER_ID=? AND IDVP_ID=? AND CLAIM_URI=? AND TENANT_ID=?";
 
@@ -74,6 +77,7 @@ public class IdentityVerificationConstants {
                 "SELECT ID FROM IDV_CLAIM WHERE UUID=? AND TENANT_ID=?";
 
         public static final String IDVP_FILTER = " AND IDVP_ID=?";
+        public static final String CLAIM_URI_FILTER = " AND CLAIM_URI=?";
     }
 
     /**
@@ -110,7 +114,15 @@ public class IdentityVerificationConstants {
                 "Error while retrieving identity verification claim mappings."),
         ERROR_CODE_GET_DAO("15012", "No IdV Claim DAOs are registered."),
         ERROR_RETRIEVING_IDV_CLAIMS_BY_METADATA("15013",
-                "Error retrieving the Identity Verification Claims by metadata.");
+                "Error retrieving the Identity Verification Claims by metadata."),
+        ERROR_UPDATING_CLAIM_IDV_DATA("15014",
+                "Error while updating IDV data of the user %s."),
+        ERROR_UPDATING_IDV_CLAIMS("15015",
+                "Error while updating IDV data of claims of the user %s."),
+        ERROR_DELETING_IDV_CLAIMS("15016",
+                "Error deleting IDV claims of the user %s."),
+        ERROR_DELETING_IDV_DATA("15017",
+                "Error deleting IDV data of a claim of the user %s.");
 
         private final String code;
         private final String message;

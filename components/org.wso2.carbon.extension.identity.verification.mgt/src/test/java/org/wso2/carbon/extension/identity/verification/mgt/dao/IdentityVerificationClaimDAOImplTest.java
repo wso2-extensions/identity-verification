@@ -184,7 +184,7 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
             when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim[] retrievedIdVClaimList = identityVerificationClaimDAO.
-                    getIDVClaims(USER_ID, IDV_PROVIDER_ID, TENANT_ID);
+                    getIDVClaims(USER_ID, IDV_PROVIDER_ID, null, TENANT_ID);
             Assert.assertEquals(retrievedIdVClaimList.length, idVClaimList.size());
         }
     }
@@ -265,13 +265,13 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
 
-            identityVerificationClaimDAO.deleteIdVClaims(USER_ID, getIdVClaims(), TENANT_ID);
+            identityVerificationClaimDAO.deleteIdVClaims(USER_ID, null, null, TENANT_ID);
         }
         try (Connection connection = getConnection(DB_NAME)) {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim[] retrievedIdVClaimList = identityVerificationClaimDAO.
-                    getIDVClaims(USER_ID, IDV_PROVIDER_ID, TENANT_ID);
+                    getIDVClaims(USER_ID, IDV_PROVIDER_ID, null, TENANT_ID);
             Assert.assertEquals(retrievedIdVClaimList.length, 0);
         }
     }

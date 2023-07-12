@@ -82,11 +82,13 @@ public interface IdentityVerificationClaimDAO {
      *
      * @param userId        User id.
      * @param idvProviderId Identity verification provider id.
+     * @param claimUri      Claim URI.
      * @param tenantId      Identity verification claim id.
      * @return Identity verification claims.
      * @throws IdentityVerificationException Identity verification exception.
      */
-    IdVClaim[] getIDVClaims(String userId, String idvProviderId, int tenantId) throws IdentityVerificationException;
+    IdVClaim[] getIDVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
+            throws IdentityVerificationException;
 
     /**
      * Get the identity verification claims by specific metadata.
@@ -114,12 +116,14 @@ public interface IdentityVerificationClaimDAO {
     /**
      * Delete identity verification claims of a user.
      *
-     * @param userId    User id.
-     * @param idVClaims Identity verification claims.
-     * @param tenantId  Tenant id.
+     * @param userId        User id.
+     * @param idvProviderId Identity verification provider id.
+     * @param claimUri      Claim URI.
+     * @param tenantId      Tenant id.
      * @throws IdentityVerificationException Identity verification exception.
      */
-    void deleteIdVClaims(String userId, IdVClaim[] idVClaims, int tenantId) throws IdentityVerificationException;
+    void deleteIdVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
+            throws IdentityVerificationException;
 
     /**
      * Check whether the identity verification claim exist.

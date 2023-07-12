@@ -17,13 +17,11 @@
  */
 package org.wso2.carbon.extension.identity.verification.mgt.dao;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.wso2.carbon.extension.identity.verification.mgt.exception.IdentityVerificationException;
 import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
 import org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationExceptionMgt;
-import org.wso2.carbon.extension.identity.verification.provider.exception.IdvProviderMgtServerException;
-import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtExceptionManagement;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -47,9 +45,12 @@ import static org.wso2.carbon.extension.identity.verification.mgt.utils.Identity
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_UPDATING_IDV_CLAIM;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ID;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.IDVP_ID;
+import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.IDV_CLAIM_UUID;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.IS_VERIFIED;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.METADATA;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.ADD_IDV_CLAIM_SQL;
+import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.CLAIM_URI_FILTER;
+import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.DELETE_IDV_CLAIMS_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.DELETE_IDV_CLAIM_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIMS_BY_METADATA_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIMS_SQL;
@@ -60,11 +61,6 @@ import static org.wso2.carbon.extension.identity.verification.mgt.utils.Identity
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.IS_IDV_CLAIM_EXIST_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.UPDATE_IDV_CLAIM_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.USER_ID;
-import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.IDV_CLAIM_UUID;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_RETRIEVING_IDV_PROVIDERS;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_MSSQL;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_MYSQL;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_POSTGRESQL;
 
 /**
  * Identity verification claim DAO class.
@@ -130,7 +126,6 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
             getIdVProviderStmt.setString(1, userId);
             getIdVProviderStmt.setString(2, idVClaimId);
             getIdVProviderStmt.setInt(3, tenantId);
-            getIdVProviderStmt.execute();
             try (ResultSet idVProviderResultSet = getIdVProviderStmt.executeQuery()) {
                 while (idVProviderResultSet.next()) {
                     idVClaim = new IdVClaim();
@@ -160,7 +155,6 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
             getIdVProviderStmt.setString(2, idvClaimUri);
             getIdVProviderStmt.setString(3, idVProviderId);
             getIdVProviderStmt.setInt(4, tenantId);
-            getIdVProviderStmt.execute();
             try (ResultSet idVProviderResultSet = getIdVProviderStmt.executeQuery()) {
                 while (idVProviderResultSet.next()) {
                     idVClaim = new IdVClaim();
@@ -180,22 +174,30 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
     }
 
     @Override
-    public IdVClaim[] getIDVClaims(String userId, String idvProviderId, int tenantId)
+    public IdVClaim[] getIDVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
             throws IdentityVerificationException {
 
         List<IdVClaim> idVClaims = new ArrayList<>();
         String query = GET_IDV_CLAIMS_SQL;
+        int index = 2;
         if (StringUtils.isNotBlank(idvProviderId)) {
-            query = GET_IDV_CLAIMS_SQL + IDVP_FILTER;
+            query = query + IDVP_FILTER;
+            index = index + 1;
+        }
+        if (StringUtils.isNotBlank(claimUri)) {
+            query = query + CLAIM_URI_FILTER;
+            index = index + 1;
         }
         try (Connection connection = IdentityDatabaseUtil.getDBConnection(false);
              PreparedStatement getIdVProviderStmt = connection.prepareStatement(query)) {
             getIdVProviderStmt.setString(1, userId);
             getIdVProviderStmt.setInt(2, tenantId);
             if (StringUtils.isNotBlank(idvProviderId)) {
-                getIdVProviderStmt.setString(3, idvProviderId);
+                getIdVProviderStmt.setString(index, idvProviderId);
             }
-            getIdVProviderStmt.execute();
+            if (StringUtils.isNotBlank(claimUri)) {
+                getIdVProviderStmt.setString(index, claimUri);
+            }
             try (ResultSet idVProviderResultSet = getIdVProviderStmt.executeQuery()) {
                 while (idVProviderResultSet.next()) {
                     IdVClaim idVClaim = new IdVClaim();
@@ -260,17 +262,30 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
     }
 
     @Override
-    public void deleteIdVClaims(String userId, IdVClaim[] idVClaims, int tenantId) throws
-            IdentityVerificationException {
+    public void deleteIdVClaims(String userId, String idvProviderId, String claimUri, int tenantId)
+            throws IdentityVerificationException {
 
+        String query = DELETE_IDV_CLAIMS_SQL;
+        int index = 2;
+        if (StringUtils.isNotBlank(idvProviderId)) {
+            query = query + IDVP_FILTER;
+            index = index + 1;
+        }
+        if (StringUtils.isNotBlank(claimUri)) {
+            query = query + CLAIM_URI_FILTER;
+            index = index + 1;
+        }
         try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
-            try (PreparedStatement deleteIdVProviderStmt = connection.prepareStatement(DELETE_IDV_CLAIM_SQL)) {
-                for (IdVClaim idVClaim : idVClaims) {
-                    deleteIdVProviderStmt.setString(1, userId);
-                    deleteIdVProviderStmt.setString(2, idVClaim.getUuid());
-                    deleteIdVProviderStmt.setInt(3, tenantId);
-                    deleteIdVProviderStmt.executeUpdate();
+            try (PreparedStatement deleteIdVProviderStmt = connection.prepareStatement(query)) {
+                deleteIdVProviderStmt.setString(1, userId);
+                deleteIdVProviderStmt.setInt(2, tenantId);
+                if (StringUtils.isNotBlank(idvProviderId)) {
+                    deleteIdVProviderStmt.setString(index, idvProviderId);
                 }
+                if (StringUtils.isNotBlank(claimUri)) {
+                    deleteIdVProviderStmt.setString(index, claimUri);
+                }
+                deleteIdVProviderStmt.executeUpdate();
             }
         } catch (SQLException e) {
             throw IdentityVerificationExceptionMgt.handleServerException(ERROR_DELETING_IDV_CLAIM, e);
