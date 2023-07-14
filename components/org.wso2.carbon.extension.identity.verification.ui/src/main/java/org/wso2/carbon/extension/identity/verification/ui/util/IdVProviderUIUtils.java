@@ -102,6 +102,7 @@ public class IdVProviderUIUtils {
      * @return True if the HTTP method is allowed, False otherwise.
      */
     public static boolean isHTTPMethodAllowed(HttpServletRequest request) {
+
         String httpMethod = request.getMethod();
         return IdVProviderUIConstants.HTTP_POST.equalsIgnoreCase(httpMethod);
     }
@@ -113,6 +114,7 @@ public class IdVProviderUIUtils {
      * @return IdVProvider object.
      */
     public static IdVProvider getIdVProviderFromJSON(JSONObject json) {
+
         IdVProvider idVProvider = new IdVProvider();
         idVProvider.setIdVProviderName(json.getString(IdVProviderUIConstants.PROVIDER_NAME));
         idVProvider.setType(json.getString(IdVProviderUIConstants.PROVIDER_TYPE));

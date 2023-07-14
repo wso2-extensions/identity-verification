@@ -25,7 +25,6 @@ import org.wso2.carbon.identity.base.IdentityException;
  */
 public class IdVProviderMgtUIException extends IdentityException {
 
-
     public IdVProviderMgtUIException(String errorCode, String message) {
 
         super(errorCode, message);

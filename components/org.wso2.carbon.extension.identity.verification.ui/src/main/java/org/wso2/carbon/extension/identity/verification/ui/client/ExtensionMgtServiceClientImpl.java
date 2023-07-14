@@ -37,6 +37,7 @@ import java.util.Map;
  * Verification Provider Management UI.
  */
 public class ExtensionMgtServiceClientImpl implements ExtensionMgtServiceClient {
+
     private final ExtensionManager extensionManager;
 
     private ExtensionMgtServiceClientImpl() {

@@ -6,6 +6,7 @@ package org.wso2.carbon.extension.identity.verification.ui.exception;
 public class IdVProviderMgtUIClientException extends IdVProviderMgtUIException {
 
     public IdVProviderMgtUIClientException(String errorCode, String message) {
+
         super(errorCode, message);
     }
 

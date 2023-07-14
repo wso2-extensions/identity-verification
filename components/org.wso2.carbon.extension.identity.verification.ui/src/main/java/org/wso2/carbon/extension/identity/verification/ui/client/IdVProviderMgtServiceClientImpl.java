@@ -43,6 +43,7 @@ import static org.wso2.carbon.extension.identity.verification.ui.util.IdVProvide
  * Verification Providers.
  */
 public class IdVProviderMgtServiceClientImpl implements IdVProviderMgtServiceClient {
+
     private final IdVProviderManager idVProviderManager;
 
     private IdVProviderMgtServiceClientImpl() {
