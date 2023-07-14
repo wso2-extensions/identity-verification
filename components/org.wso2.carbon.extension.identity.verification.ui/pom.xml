@@ -88,7 +88,6 @@
                         <Import-Package>
                             javax.servlet,
                             javax.servlet.http; version="${imp.pkg.version.javax.servlet}",
-                            org.apache.axis2.*; version="${axis2.osgi.version.range}",
                             org.apache.axiom.om.util; version="${axiom.osgi.version.range}",
                             org.apache.commons.logging; version="${import.package.version.commons.logging}",
                             org.apache.commons.collections; version="${commons-collections.wso2.osgi.version.range}",

@@ -120,8 +120,6 @@
 
     $(document).ready(() => {
 
-        $('#claimConfig').hide();
-
         // Handle the toggling of sections when H2 elements are clicked
         $('h2.trigger').click(function () {
             if ($(this).next().is(":visible")) {
