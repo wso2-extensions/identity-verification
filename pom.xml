@@ -42,8 +42,10 @@
     <modules>
         <module>components/org.wso2.carbon.extension.identity.verification.provider</module>
         <module>components/org.wso2.carbon.extension.identity.verification.mgt</module>
+        <module>components/org.wso2.carbon.extension.identity.verification.ui</module>
         <module>features/org.wso2.carbon.extension.identity.verification.mgt.feature</module>
         <module>features/org.wso2.carbon.extension.identity.verification.provider.feature</module>
+        <module>features/org.wso2.carbon.extension.identity.verification.ui.feature</module>
     </modules>
 
     <dependencyManagement>
@@ -159,6 +161,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.extension.identity.verification</groupId>
+                <artifactId>org.wso2.carbon.extension.identity.verification.ui</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson-databind.version}</version>
@@ -202,6 +209,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.claim.metadata.mgt</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${org.apache.httpcomponents.version}</version>
@@ -216,6 +229,33 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom.wso2</groupId>
+                <artifactId>axiom</artifactId>
+                <version>${axiom.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.owasp.encoder</groupId>
+                <artifactId>encoder</artifactId>
+                <version>${encoder.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.owasp.encoder</groupId>
+                <artifactId>encoder-jsp</artifactId>
+                <version>${encoder-jsp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.ui</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.extension.mgt</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
 
             <!--Test dependencies-->
             <dependency>
@@ -283,6 +323,11 @@
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>${build.helper.maven.plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven.checkstyle.plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -339,7 +384,7 @@
         <springframework.version>5.3.19</springframework.version>
         <slf4j.version>1.7.22</slf4j.version>
         <commons-lang3.version>3.10</commons-lang3.version>
-        <carbon.identity.framework.version>5.25.174</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.25.215</carbon.identity.framework.version>
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -383,6 +428,15 @@
         <testng.version>6.9.10</testng.version>
         <mockito.version>3.8.0</mockito.version>
         <powermock.version>2.0.9</powermock.version>
+        <maven.checkstyle.plugin.version>3.1.0</maven.checkstyle.plugin.version>
+        <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
+        <imp.pkg.version.javax.servlet>[2.6.0, 3.0.0)</imp.pkg.version.javax.servlet>
+        <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
+        <axiom.osgi.version.range>[1.2.11, 2.0.0)</axiom.osgi.version.range>
+        <commons-fileupload.imp.pkg.version.range>[1.2.2,2.0.0)</commons-fileupload.imp.pkg.version.range>
+        <encoder-jsp.version>1.2.2</encoder-jsp.version>
+        <carbon.kernel.version>4.9.0</carbon.kernel.version>
+        <encoder.wso2.version>1.2.0.wso2v1</encoder.wso2.version>
     </properties>
 
 </project>
