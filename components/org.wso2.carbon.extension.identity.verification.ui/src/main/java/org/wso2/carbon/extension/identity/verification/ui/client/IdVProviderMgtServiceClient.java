@@ -40,9 +40,9 @@ public interface IdVProviderMgtServiceClient {
     /**
      * Get the list of Identity Verification Providers.
      *
-     * @param limit Maximum number of Identity Verification Providers to return.
-     * @param offset Start index of the Identity Verification Providers to return.
-     * @param currentUser Currently logged-in user.
+     * @param limit         Maximum number of Identity Verification Providers to return.
+     * @param offset        Start index of the Identity Verification Providers to return.
+     * @param currentUser   Currently logged-in user.
      * @return List of Identity Verification Providers.
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
@@ -52,8 +52,8 @@ public interface IdVProviderMgtServiceClient {
     /**
      * Get the Identity Verification Provider by id.
      *
-     * @param id IdentityVerificationProvider Id.
-     * @param currentUser Currently logged-in user.
+     * @param id            IdentityVerificationProvider Id.
+     * @param currentUser   Currently logged-in user.
      * @return IdentityVerificationProvider.
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
@@ -62,8 +62,8 @@ public interface IdVProviderMgtServiceClient {
     /**
      * Add a new Identity Verification Provider.
      *
-     * @param provider Identity Verification Provider to be added.
-     * @param currentUser Currently logged-in user.
+     * @param provider      Identity Verification Provider to be added.
+     * @param currentUser   Currently logged-in user.
      * @return Added Identity Verification Provider.
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
@@ -72,9 +72,9 @@ public interface IdVProviderMgtServiceClient {
     /**
      * Update the Identity Verification Provider.
      *
-     * @param id IdentityVerificationProvider Id.
-     * @param newProvider Identity Verification Provider to be updated.
-     * @param currentUser Currently logged-in user.
+     * @param id            IdentityVerificationProvider Id.
+     * @param newProvider   Identity Verification Provider to be updated.
+     * @param currentUser   Currently logged-in user.
      * @return Updated Identity Verification Provider.
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
@@ -84,8 +84,8 @@ public interface IdVProviderMgtServiceClient {
     /**
      * Delete the Identity Verification Provider by id.
      *
-     * @param id IdentityVerificationProvider Id.
-     * @param currentUser Currently logged-in user.
+     * @param id            IdentityVerificationProvider Id.
+     * @param currentUser   Currently logged-in user.
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
     void deleteIdVProvider(String id, String currentUser) throws IdVProviderMgtUIException;

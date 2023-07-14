@@ -50,8 +50,8 @@ public class IdVProviderUIUtils {
     /**
      * This method is used to handle the user authorization.
      *
-     * @param permission permission string.
-     * @param loggedInUser Username of the logged-in user.
+     * @param permission    permission string.
+     * @param loggedInUser  Username of the logged-in user.
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
     public static void handleLoggedInUserAuthorization(String permission, String loggedInUser)
@@ -71,8 +71,8 @@ public class IdVProviderUIUtils {
     /**
      * This method is used to check if the user has a particular permission.
      *
-     * @param permission permission string.
-     * @param loggedInUser Username of the logged-in user.
+     * @param permission    permission string.
+     * @param loggedInUser  Username of the logged-in user.
      * @return True if user has the provided permission, false otherwise
      * @throws IdVProviderMgtUIException IdVProviderMgtUIException.
      */
@@ -129,9 +129,9 @@ public class IdVProviderUIUtils {
     /**
      * Populates the identity verification provider object from a JSON object.
      *
-     * @param idVProvider Identity verification provider that needs to be populated.
-     * @param request The HTTP request that contains Identity verification provider info.
-     * @param metadata UI metadata for the provider.
+     * @param idVProvider   Identity verification provider that needs to be populated.
+     * @param request       The HTTP request that contains Identity verification provider info.
+     * @param metadata      UI metadata for the provider.
      */
     public static void populateIdVPInfo(IdVProvider idVProvider, HttpServletRequest request, JSONArray metadata) {
 
