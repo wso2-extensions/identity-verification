@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.extension.identity.verification.mgt.listeners;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.extension.identity.verification.mgt.IdentityVerificationManagerImpl;
@@ -84,10 +85,16 @@ public class IdVUserOperationEventListener extends AbstractIdentityUserOperation
 
         try {
             String claimURI = (String) IdentityUtil.threadLocalProperties.get().get(IDV_CLAIM_URI_THREAD_LOCAL);
+            if (StringUtils.isBlank(claimURI)) {
+                return true;
+            }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             IdentityVerificationManagerImpl identityVerificationManager = IdentityVerificationManagerImpl.getInstance();
             IdVClaim[] idVClaims =
                     identityVerificationManager.getIdVClaims(userID, null, claimURI, tenantId);
+            if (ArrayUtils.isEmpty(idVClaims)) {
+                return true;
+            }
             for (IdVClaim claim : idVClaims) {
                 Map<String, Object> idVClaimMap = new HashMap<>();
                 claim.setMetadata(idVClaimMap);
@@ -128,6 +135,9 @@ public class IdVUserOperationEventListener extends AbstractIdentityUserOperation
             for (Map.Entry<String, String> claim : claims.entrySet()) {
                 IdVClaim[] idVClaims =
                         identityVerificationManager.getIdVClaims(userID, null, claim.getKey(), tenantId);
+                if (ArrayUtils.isEmpty(idVClaims)) {
+                    continue;
+                }
                 for (IdVClaim idVClaim : idVClaims) {
                     Map<String, Object> idVClaimMap = new HashMap<>();
                     idVClaim.setMetadata(idVClaimMap);
@@ -191,6 +201,9 @@ public class IdVUserOperationEventListener extends AbstractIdentityUserOperation
         }
         try {
             String[] claims = (String[]) IdentityUtil.threadLocalProperties.get().get(IDV_CLAIM_URI_THREAD_LOCAL);
+            if (ArrayUtils.isEmpty(claims)) {
+                return true;
+            }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             for (String claimURI : claims) {
                 IdentityVerificationManagerImpl.getInstance().
@@ -245,6 +258,9 @@ public class IdVUserOperationEventListener extends AbstractIdentityUserOperation
         }
         try {
             String claimURI = (String) IdentityUtil.threadLocalProperties.get().get(IDV_CLAIM_URI_THREAD_LOCAL);
+            if (StringUtils.isBlank(claimURI)) {
+                return true;
+            }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             IdentityVerificationManagerImpl.getInstance().deleteIDVClaims(userID, null, claimURI, tenantId);
         } catch (IdentityVerificationException e) {
