@@ -25,6 +25,7 @@ import org.wso2.carbon.extension.identity.verification.mgt.exception.IdentityVer
 import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
 import org.wso2.carbon.identity.core.AbstractIdentityUserOperationEventListener;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
@@ -126,6 +127,11 @@ public class IdVUserOperationEventListener extends AbstractIdentityUserOperation
                                                   UserStoreManager userStoreManager) throws UserStoreException {
 
         if (!isEnable() || userStoreManager == null) {
+            return true;
+        }
+
+        boolean isTenantCreationOperation = TenantMgtUtil.isTenantCreation();
+        if (isTenantCreationOperation) {
             return true;
         }
 
