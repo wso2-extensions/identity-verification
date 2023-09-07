@@ -75,9 +75,10 @@
             idVProvider = idVPMgtClient.getIdVProviderById(idVPId, currentUser);
             idVProviderUIMetadata = extensionMgtClient.getIdVProviderMetadata(idVProvider.getType());
         } else {
-            idVProviderUIMetadata = metadataPerIdVProvider.get(availableIdVPTypes.get(0));
+            if (!metadataPerIdVProvider.isEmpty()) {
+                idVProviderUIMetadata = metadataPerIdVProvider.get(availableIdVPTypes.get(0));
+            }
         }
-
         existingIdVProviderNames = new StringBuilder("[").append(idVPMgtClient.getIdVProviders(null, null, currentUser)
             .stream()
             .map(provider -> "\"" + provider.getIdVProviderName() + "\"")
@@ -89,8 +90,6 @@
         existingIdVProviderNames = new StringBuilder("[]");
         infoPerIdVProvider = new ArrayList<>();
         metadataPerIdVProvider = new HashMap<>();
-        String message = MessageFormat.format(resourceBundle.getString("error.loading.idvp.info"), e.getMessage());
-        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
     }
     request.setAttribute("infoPerIdVProvider", infoPerIdVProvider);
     request.setAttribute("idVProvider", idVProvider);
