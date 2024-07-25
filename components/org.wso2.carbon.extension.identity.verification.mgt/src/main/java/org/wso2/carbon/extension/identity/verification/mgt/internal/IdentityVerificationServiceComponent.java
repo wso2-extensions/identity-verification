@@ -67,9 +67,8 @@ public class IdentityVerificationServiceComponent {
             ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(),
                     idVUserOperationEventListener, null);
 
-            log.info("IdentityVerificationService bundle activated successfully.");
             if (log.isDebugEnabled()) {
-                log.debug("IdentityVerificationService bundle is activated");
+                log.debug("IdentityVerificationService bundle activated successfully.");
             }
         } catch (Throwable e) {
             log.fatal(" Error while activating IdentityVerificationService bundle ", e);
