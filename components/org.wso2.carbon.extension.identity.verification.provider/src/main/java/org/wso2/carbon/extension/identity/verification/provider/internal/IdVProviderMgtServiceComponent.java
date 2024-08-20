@@ -49,12 +49,19 @@ public class IdVProviderMgtServiceComponent {
     @Activate
     protected void activate(ComponentContext ctxt) {
 
-        IdVProviderDAO idVProviderDAO = new IdVProviderDAOImpl();
-        ctxt.getBundleContext().registerService(IdVProviderDAO.class.getName(),
-                new CachedBackedIdVProviderDAO(idVProviderDAO), null);
-        ctxt.getBundleContext().registerService(IdVProviderManager.class.getName(),
-                new IdVProviderManagerImpl(), null);
-        log.info("IdVProviderMgtService bundle activated successfully.");
+        try {
+            IdVProviderDAO idVProviderDAO = new IdVProviderDAOImpl();
+            ctxt.getBundleContext().registerService(IdVProviderDAO.class.getName(),
+                    new CachedBackedIdVProviderDAO(idVProviderDAO), null);
+            ctxt.getBundleContext().registerService(IdVProviderManager.class.getName(),
+                    new IdVProviderManagerImpl(), null);
+
+            if (log.isDebugEnabled()) {
+                log.debug("IdVProviderMgtService bundle activated successfully.");
+            }
+        } catch (Throwable e) {
+            log.fatal("Error while activating IdVProviderMgtService bundle", e);
+        }
     }
 
     @Deactivate
