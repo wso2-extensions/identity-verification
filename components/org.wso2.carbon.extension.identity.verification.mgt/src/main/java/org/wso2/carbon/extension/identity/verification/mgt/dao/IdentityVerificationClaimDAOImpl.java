@@ -223,7 +223,7 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
         List<IdVClaim> idVClaims = new ArrayList<>();
         try (Connection connection = IdentityDatabaseUtil.getDBConnection(false);
              PreparedStatement getIdVProviderStmt = connection.prepareStatement(GET_IDV_CLAIMS_BY_METADATA_SQL)) {
-            // Construct the metadata search pattern using the metadataKey and metadataValue variables
+            // Construct the metadata search pattern using the metadataKey and metadataValue variables.
             String metadataSearchPattern = "%\"" + metadataKey + "\":\"" + metadataValue + "\"%";
             getIdVProviderStmt.setString(1, idvProviderId);
             getIdVProviderStmt.setInt(2, tenantId);
