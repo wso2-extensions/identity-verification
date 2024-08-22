@@ -59,7 +59,7 @@ public class IdentityVerificationConstants {
 
         public static final String GET_IDV_CLAIMS_BY_METADATA_SQL =
                 "SELECT ID, UUID, USER_ID, CLAIM_URI, IS_VERIFIED, METADATA FROM IDV_CLAIM " +
-                        "WHERE IDVP_ID=? AND TENANT_ID=? AND METADATA LIKE '%?:?%'";
+                        "WHERE IDVP_ID=? AND TENANT_ID=? AND METADATA LIKE ?";
 
         public static final String UPDATE_IDV_CLAIM_SQL =
                 "UPDATE IDV_CLAIM SET IS_VERIFIED=?, METADATA=? WHERE USER_ID=? AND UUID=? AND TENANT_ID=?";
