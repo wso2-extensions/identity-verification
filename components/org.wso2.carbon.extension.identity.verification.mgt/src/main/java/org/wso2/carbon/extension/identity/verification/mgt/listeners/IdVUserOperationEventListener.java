@@ -22,7 +22,6 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.extension.identity.verification.mgt.IdentityVerificationManagerImpl;
 import org.wso2.carbon.extension.identity.verification.mgt.exception.IdentityVerificationException;
-import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
 import org.wso2.carbon.identity.core.AbstractIdentityUserOperationEventListener;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
@@ -30,13 +29,10 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_DELETING_IDV_CLAIMS;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_DELETING_IDV_DATA;
-import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_UPDATING_CLAIM_IDV_DATA;
-import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.ErrorMessage.ERROR_UPDATING_IDV_CLAIMS;
 
 /**
  * This listener is to handle IDV related user data.
@@ -90,21 +86,10 @@ public class IdVUserOperationEventListener extends AbstractIdentityUserOperation
                 return true;
             }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            IdentityVerificationManagerImpl identityVerificationManager = IdentityVerificationManagerImpl.getInstance();
-            IdVClaim[] idVClaims =
-                    identityVerificationManager.getIdVClaims(userID, null, claimURI, tenantId);
-            if (ArrayUtils.isEmpty(idVClaims)) {
-                return true;
-            }
-            for (IdVClaim claim : idVClaims) {
-                Map<String, Object> idVClaimMap = new HashMap<>();
-                claim.setMetadata(idVClaimMap);
-                claim.setIsVerified(false);
-                identityVerificationManager.updateIdVClaim(userID, claim, tenantId);
-            }
+            IdentityVerificationManagerImpl.getInstance().deleteIDVClaims(userID, null, claimURI, tenantId);
         } catch (IdentityVerificationException e) {
-            throw new UserStoreException(String.format(ERROR_UPDATING_CLAIM_IDV_DATA.getMessage(), userID),
-                    ERROR_UPDATING_CLAIM_IDV_DATA.getCode(), e);
+            throw new UserStoreException(String.format(ERROR_DELETING_IDV_DATA.getMessage(), userID),
+                    ERROR_DELETING_IDV_DATA.getCode(), e);
         } finally {
             IdentityUtil.threadLocalProperties.get().remove(IDV_CLAIM_URI_THREAD_LOCAL);
         }
@@ -139,21 +124,11 @@ public class IdVUserOperationEventListener extends AbstractIdentityUserOperation
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             IdentityVerificationManagerImpl identityVerificationManager = IdentityVerificationManagerImpl.getInstance();
             for (Map.Entry<String, String> claim : claims.entrySet()) {
-                IdVClaim[] idVClaims =
-                        identityVerificationManager.getIdVClaims(userID, null, claim.getKey(), tenantId);
-                if (ArrayUtils.isEmpty(idVClaims)) {
-                    continue;
-                }
-                for (IdVClaim idVClaim : idVClaims) {
-                    Map<String, Object> idVClaimMap = new HashMap<>();
-                    idVClaim.setMetadata(idVClaimMap);
-                    idVClaim.setIsVerified(false);
-                    identityVerificationManager.updateIdVClaim(userID, idVClaim, tenantId);
-                }
+                identityVerificationManager.deleteIDVClaims(userID, null, claim.getKey(), tenantId);
             }
         } catch (IdentityVerificationException e) {
-            throw new UserStoreException(String.format(ERROR_UPDATING_IDV_CLAIMS.getMessage(), userID),
-                    ERROR_UPDATING_IDV_CLAIMS.getCode(), e);
+            throw new UserStoreException(String.format(ERROR_DELETING_IDV_DATA.getMessage(), userID),
+                    ERROR_DELETING_IDV_DATA.getCode(), e);
         }
         return true;
     }
