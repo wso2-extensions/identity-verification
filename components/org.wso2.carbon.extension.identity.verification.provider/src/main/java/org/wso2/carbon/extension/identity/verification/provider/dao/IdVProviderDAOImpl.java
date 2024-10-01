@@ -17,18 +17,21 @@
  */
 package org.wso2.carbon.extension.identity.verification.provider.dao;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.extension.identity.verification.provider.IdVPSecretProcessor;
+import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtClientException;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdvProviderMgtServerException;
+import org.wso2.carbon.extension.identity.verification.provider.model.FilterQueryBuilder;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVConfigProperty;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtExceptionManagement;
+import org.wso2.carbon.identity.core.model.ExpressionNode;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
-import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
 
 import java.sql.Connection;
@@ -41,7 +44,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.CLAIM;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.CO;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.DESCRIPTION;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.EMPTY_STRING;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.EQ;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.EW;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_ADDING_IDV_PROVIDER;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_ADDING_IDV_PROVIDER_CLAIMS;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_ADDING_IDV_PROVIDER_CONFIGS;
@@ -49,6 +56,7 @@ import static org.wso2.carbon.extension.identity.verification.provider.util.IdVP
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_DELETING_IDV_PROVIDER_CLAIMS;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_DELETING_IDV_PROVIDER_CONFIGS;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_GETTING_IDV_PROVIDER_COUNT;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_RETRIEVING_FILTERED_IDV_PROVIDERS;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_RETRIEVING_IDV_PROVIDER;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_RETRIEVING_IDV_PROVIDERS;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_RETRIEVING_IDV_PROVIDER_CLAIMS;
@@ -57,6 +65,11 @@ import static org.wso2.carbon.extension.identity.verification.provider.util.IdVP
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_STORING_IDV_PROVIDER_SECRETS;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_UPDATING_IDV_PROVIDER;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ID;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_FILTER_DESCRIPTION;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_FILTER_IS_ENABLED;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_FILTER_NAME;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_FILTER_TYPE;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_FILTER_UUID;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_TYPE;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IS_ENABLED;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IS_SECRET;
@@ -70,10 +83,10 @@ import static org.wso2.carbon.extension.identity.verification.provider.util.IdVP
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.DELETE_IDVP_CLAIM_SQL;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.DELETE_IDVP_CONFIG_SQL;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.DELETE_IDV_SQL;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_COUNT_OF_IDVPS_SQL;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_MSSQL;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_MYSQL;
-import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_POSTGRESQL;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_COUNT_OF_IDVPS_SQL_WITH_FILTER;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_MSSQL_WITH_FILTER;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_MYSQL_WITH_FILTER;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVPS_SQL_BY_POSTGRESQL_WITH_FILTER;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVP_BY_NAME_SQL;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVP_CLAIMS_SQL;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.GET_IDVP_CONFIG_SQL;
@@ -82,6 +95,7 @@ import static org.wso2.carbon.extension.identity.verification.provider.util.IdVP
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.IS_IDVP_EXIST_SQL;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SQLQueries.UPDATE_IDVP_SQL;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_UUID;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.SW;
 
 /**
  * Data Access Layer functionality for Identity Verification Provider management.
@@ -205,12 +219,22 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
     public List<IdVProvider> getIdVProviders(Integer limit, Integer offset, int tenantId)
             throws IdVProviderMgtException {
 
+        return getIdVProviders(limit, offset, null, tenantId);
+    }
+
+    @Override
+    public List<IdVProvider> getIdVProviders(Integer limit, Integer offset, List<ExpressionNode> expressionNode,
+                                             int tenantId) throws IdVProviderMgtException {
+
         List<IdVProvider> idVProviders = new ArrayList<>();
+        FilterQueryBuilder filterQueryBuilder = new FilterQueryBuilder();
+        this.appendFilterQuery(expressionNode, filterQueryBuilder);
+
         try (Connection connection = IdentityDatabaseUtil.getDBConnection(false);
-             PreparedStatement getIdVProvidersStmt = generatePrepStmt(connection, tenantId, offset, limit)) {
-            getIdVProvidersStmt.setInt(1, tenantId);
-            getIdVProvidersStmt.setInt(2, offset);
-            getIdVProvidersStmt.setInt(3, limit);
+             PreparedStatement getIdVProvidersStmt = generateGetIdvProvidersPrepStmt(connection, filterQueryBuilder)) {
+            bindGetIdvProvidersPrepStmt(getIdVProvidersStmt, tenantId, offset, limit, filterQueryBuilder,
+                    connection.getMetaData().getDatabaseProductName());
+
             try (ResultSet idVProviderResultSet = getIdVProvidersStmt.executeQuery()) {
                 while (idVProviderResultSet.next()) {
                     IdVProvider idVProvider = new IdVProvider();
@@ -241,10 +265,27 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
     @Override
     public int getCountOfIdVProviders(int tenantId) throws IdVProviderMgtException {
 
+        return getCountOfIdVProviders(tenantId, null);
+    }
+
+    @Override
+    public int getCountOfIdVProviders(int tenantId, List<ExpressionNode> expressionNode)
+            throws IdVProviderMgtException {
+
         int count = 0;
+        FilterQueryBuilder filterQueryBuilder = new FilterQueryBuilder();
+        appendFilterQuery(expressionNode, filterQueryBuilder);
+        Map<Integer, String> filterAttributeValue = filterQueryBuilder.getFilterAttributeValue();
+        String getIdVProvidersCountSqlQuery =
+                String.format(GET_COUNT_OF_IDVPS_SQL_WITH_FILTER, filterQueryBuilder.getFilterQuery());
+
         try (Connection connection = IdentityDatabaseUtil.getDBConnection(false);
-             PreparedStatement getIdVProvidersStmt = connection.prepareStatement(GET_COUNT_OF_IDVPS_SQL)) {
-            getIdVProvidersStmt.setInt(1, tenantId);
+             PreparedStatement getIdVProvidersStmt = connection.prepareStatement(getIdVProvidersCountSqlQuery)) {
+
+            for (Map.Entry<Integer, String> prepareStatement : filterAttributeValue.entrySet()) {
+                getIdVProvidersStmt.setString(prepareStatement.getKey(), prepareStatement.getValue());
+            }
+            getIdVProvidersStmt.setInt(filterAttributeValue.entrySet().size() + 1, tenantId);
             try (ResultSet idVProviderResultSet = getIdVProvidersStmt.executeQuery()) {
                 while (idVProviderResultSet.next()) {
                     count = idVProviderResultSet.getInt(1);
@@ -489,40 +530,146 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
         }
     }
 
-    private String getSqlQuery(String databaseProductName) throws IdvProviderMgtServerException {
+    /**
+     * Get the SQL query for retrieving identity verification providers based on the database type.
+     *
+     * @param databaseProductName Name of the database product.
+     * @return SQL query string.
+     * @throws IdvProviderMgtServerException If an error occurs while retrieving the SQL query.
+     */
+    private String getIdvProvidersSqlQuery(String databaseProductName) throws IdvProviderMgtServerException {
 
         String sqlQuery;
         if (databaseProductName.contains("H2") || databaseProductName.contains("MySQL") ||
                 databaseProductName.contains("MariaDB") || databaseProductName.contains("DB2")) {
-            sqlQuery = GET_IDVPS_SQL_BY_MYSQL;
+            sqlQuery = GET_IDVPS_SQL_BY_MYSQL_WITH_FILTER;
         } else if (databaseProductName.contains("Oracle") || databaseProductName.contains("Microsoft")) {
-            sqlQuery = GET_IDVPS_SQL_BY_MSSQL;
+            sqlQuery = GET_IDVPS_SQL_BY_MSSQL_WITH_FILTER;
         } else if (databaseProductName.contains("PostgreSQL")) {
-            sqlQuery = GET_IDVPS_SQL_BY_POSTGRESQL;
+            sqlQuery = GET_IDVPS_SQL_BY_POSTGRESQL_WITH_FILTER;
         } else {
             throw IdVProviderMgtExceptionManagement.handleServerException(ERROR_RETRIEVING_IDV_PROVIDERS);
         }
         return sqlQuery;
     }
 
-    private PreparedStatement generatePrepStmt(Connection connection, int tenantId, int offset, int limit)
+    /**
+     * Generate a prepared statement for retrieving identity verification providers.
+     *
+     * @param connection         Database connection.
+     * @param filterQueryBuilder Filter query builder containing filter conditions.
+     * @return Prepared statement for retrieving identity verification providers.
+     * @throws SQLException                  If an SQL error occurs.
+     * @throws IdvProviderMgtServerException If an error occurs while generating the prepared statement.
+     */
+    private PreparedStatement generateGetIdvProvidersPrepStmt(Connection connection, FilterQueryBuilder filterQueryBuilder)
             throws SQLException, IdvProviderMgtServerException {
 
-        PreparedStatement prepStmt;
         String databaseProductName = connection.getMetaData().getDatabaseProductName();
-        String sqlQuery = getSqlQuery(databaseProductName);
-        if (databaseProductName.contains("PostgreSQL")) {
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setInt(1, tenantId);
-            prepStmt.setInt(2, limit);
-            prepStmt.setInt(3, offset);
-        } else {
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setInt(1, tenantId);
-            prepStmt.setInt(2, offset);
-            prepStmt.setInt(3, limit);
-        }
-        return prepStmt;
+        String sqlQuery = getIdvProvidersSqlQuery(databaseProductName);
+        sqlQuery = String.format(sqlQuery, filterQueryBuilder.getFilterQuery());
+
+        return connection.prepareStatement(sqlQuery);
     }
 
+    /**
+     * Bind parameters to the prepared statement for retrieving identity verification providers.
+     *
+     * @param prepStmt            Prepared statement.
+     * @param tenantId            Tenant ID.
+     * @param offset              Offset for pagination.
+     * @param limit               Limit for pagination.
+     * @param filterQueryBuilder  Filter query builder containing filter conditions.
+     * @param databaseProductName Name of the database product.
+     * @throws SQLException If an SQL error occurs.
+     */
+    private void bindGetIdvProvidersPrepStmt(PreparedStatement prepStmt, int tenantId, int offset, int limit, FilterQueryBuilder filterQueryBuilder, String databaseProductName)
+            throws SQLException {
+
+        Map<Integer, String> filterAttributeValue = filterQueryBuilder.getFilterAttributeValue();
+        int filterAttributeValueSize = filterAttributeValue.entrySet().size();
+
+        for (Map.Entry<Integer, String> prepareStatement : filterAttributeValue.entrySet()) {
+            prepStmt.setString(prepareStatement.getKey(), prepareStatement.getValue());
+        }
+
+        prepStmt.setInt(filterAttributeValueSize + 1, tenantId);
+
+        if (databaseProductName.contains("PostgreSQL")) {
+            prepStmt.setInt(filterAttributeValueSize + 2, limit);
+            prepStmt.setInt(filterAttributeValueSize + 3, offset);
+        } else {
+            prepStmt.setInt(filterAttributeValueSize + 2, offset);
+            prepStmt.setInt(filterAttributeValueSize + 3, limit);
+        }
+    }
+
+    /**
+     * Append filter query conditions to the filter query builder.
+     *
+     * @param expressionNodes    List of expression nodes containing filter conditions.
+     * @param filterQueryBuilder Filter query builder to append conditions to.
+     * @throws IdVProviderMgtClientException If an error occurs while appending filter conditions.
+     */
+    private void appendFilterQuery(List<ExpressionNode> expressionNodes, FilterQueryBuilder filterQueryBuilder)
+            throws IdVProviderMgtClientException {
+
+        StringBuilder filter = new StringBuilder();
+        if (CollectionUtils.isEmpty(expressionNodes)) {
+            filterQueryBuilder.setFilterQuery(EMPTY_STRING);
+        } else {
+            for (ExpressionNode expressionNode : expressionNodes) {
+                String operation = expressionNode.getOperation();
+                String value = expressionNode.getValue();
+                String attributeName = expressionNode.getAttributeValue();
+                if (StringUtils.isNotBlank(attributeName) && StringUtils.isNotBlank(value) && StringUtils
+                        .isNotBlank(operation)) {
+                    switch (attributeName) {
+                        case IDVP_FILTER_NAME:
+                            attributeName = NAME;
+                            break;
+                        case IDVP_FILTER_DESCRIPTION:
+                            attributeName = DESCRIPTION;
+                            break;
+                        case IDVP_FILTER_TYPE:
+                            attributeName = IDVP_TYPE;
+                            break;
+                        case IDVP_FILTER_IS_ENABLED:
+                            attributeName = IS_ENABLED;
+                            break;
+                        case IDVP_FILTER_UUID:
+                            attributeName = IDVP_UUID;
+                            break;
+                        default:
+                            String message = "Invalid filter attribute name. Filter attribute : " + attributeName;
+                            throw IdVProviderMgtExceptionManagement.
+                                    handleClientException(ERROR_RETRIEVING_FILTERED_IDV_PROVIDERS, message);
+                    }
+
+                    if (EQ.equals(operation)) {
+                        filter.append(attributeName).append(" = ? AND ");
+                        filterQueryBuilder.setFilterAttributeValue(value);
+                    } else if (SW.equals(operation)) {
+                        filter.append(attributeName).append(" like ? AND ");
+                        filterQueryBuilder.setFilterAttributeValue(value + "%");
+                    } else if (EW.equals(operation)) {
+                        filter.append(attributeName).append(" like ? AND ");
+                        filterQueryBuilder.setFilterAttributeValue("%" + value);
+                    } else if (CO.equals(operation)) {
+                        filter.append(attributeName).append(" like ? AND ");
+                        filterQueryBuilder.setFilterAttributeValue("%" + value + "%");
+                    } else {
+                        String message = "Invalid filter value. filter: " + operation;
+                        throw IdVProviderMgtExceptionManagement.
+                                handleClientException(ERROR_RETRIEVING_FILTERED_IDV_PROVIDERS, message);
+                    }
+                }
+            }
+            if (StringUtils.isBlank(filter.toString())) {
+                filterQueryBuilder.setFilterQuery(EMPTY_STRING);
+            } else {
+                filterQueryBuilder.setFilterQuery(filter.toString());
+            }
+        }
+    }
 }

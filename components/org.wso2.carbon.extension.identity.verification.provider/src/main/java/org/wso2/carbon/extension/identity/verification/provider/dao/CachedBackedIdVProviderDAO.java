@@ -26,6 +26,7 @@ import org.wso2.carbon.extension.identity.verification.provider.cache.IdVProvide
 import org.wso2.carbon.extension.identity.verification.provider.cache.IdVProviderCacheEntry;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
+import org.wso2.carbon.identity.core.model.ExpressionNode;
 
 import java.util.List;
 
@@ -124,9 +125,23 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
     }
 
     @Override
+    public List<IdVProvider> getIdVProviders(Integer limit, Integer offset, List<ExpressionNode> expressionNode,
+                                             int tenantId) throws IdVProviderMgtException {
+
+        return idVProviderManagerDAO.getIdVProviders(limit, offset, expressionNode, tenantId);
+    }
+
+    @Override
     public int getCountOfIdVProviders(int tenantId) throws IdVProviderMgtException {
 
         return idVProviderManagerDAO.getCountOfIdVProviders(tenantId);
+    }
+
+    @Override
+    public int getCountOfIdVProviders(int tenantId, List<ExpressionNode> expressionNode)
+            throws IdVProviderMgtException {
+
+        return idVProviderManagerDAO.getCountOfIdVProviders(tenantId, expressionNode);
     }
 
     @Override

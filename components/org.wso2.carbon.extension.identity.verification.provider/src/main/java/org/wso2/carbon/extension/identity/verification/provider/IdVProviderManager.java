@@ -83,6 +83,19 @@ public interface IdVProviderManager {
                                       int tenantId) throws IdVProviderMgtException;
 
     /**
+     * Get all the IdentityVerificationProviders with filtering conditions.
+     *
+     * @param limit    Limit per page.
+     * @param offset   Offset value.
+     * @param filter   Condition to filter.
+     * @param tenantId Tenant Id.
+     * @return List of IdentityVerificationProviders.
+     * @throws IdVProviderMgtException IdVProviderMgtException.
+     */
+    List<IdVProvider> getIdVProviders(Integer limit, Integer offset, String filter,
+                                      int tenantId) throws IdVProviderMgtException;
+
+    /**
      * Get the IdentityVerificationProvider by name.
      *
      * @param idPName  IdentityVerificationProvider name.
@@ -91,6 +104,16 @@ public interface IdVProviderManager {
      * @throws IdVProviderMgtException IdVProviderMgtException.
      */
     IdVProvider getIdVProviderByName(String idPName, int tenantId) throws IdVProviderMgtException;
+
+    /**
+     * Get the count of IdentityVerificationProviders with filtering conditions.
+     *
+     * @param tenantId Tenant Id.
+     * @param filter   Condition to filter.
+     * @return Count of IdentityVerificationProviders.
+     * @throws IdVProviderMgtException IdVProviderMgtException.
+     */
+    int getCountOfIdVProviders(int tenantId, String filter) throws IdVProviderMgtException;
 
     /**
      * Get the count of IdentityVerificationProviders.

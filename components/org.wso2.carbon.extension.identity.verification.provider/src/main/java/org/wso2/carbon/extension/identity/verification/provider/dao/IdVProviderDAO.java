@@ -19,6 +19,7 @@ package org.wso2.carbon.extension.identity.verification.provider.dao;
 
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
+import org.wso2.carbon.identity.core.model.ExpressionNode;
 
 import java.util.List;
 
@@ -94,12 +95,33 @@ public interface IdVProviderDAO {
             throws IdVProviderMgtException;
 
     /**
+     * Get Identity Verification Providers with filtering conditions.
+     *
+     * @param limit          Limit.
+     * @param offset         Offset.
+     * @param expressionNode Condition to filter.
+     * @param tenantId       Tenant ID.
+     * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
+     */
+    List<IdVProvider> getIdVProviders(Integer limit, Integer offset, List<ExpressionNode> expressionNode, int tenantId)
+            throws IdVProviderMgtException;
+
+    /**
      * Get Identity Verification Provider count in a given tenant.
      *
      * @param tenantId Tenant ID.
      * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
      */
     int getCountOfIdVProviders(int tenantId) throws IdVProviderMgtException;
+
+    /**
+     * Get Identity Verification Provider count in a given tenant with filtering conditions.
+     *
+     * @param tenantId Tenant ID.
+     * @param expressionNode Condition to filter.
+     * @throws IdVProviderMgtException Identity Verification Provider Management Exception.
+     */
+    int getCountOfIdVProviders(int tenantId, List<ExpressionNode> expressionNode) throws IdVProviderMgtException;
 
     /**
      * Get Identity Verification Provider by name.

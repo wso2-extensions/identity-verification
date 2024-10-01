@@ -27,15 +27,26 @@ import org.wso2.carbon.extension.identity.verification.provider.internal.IdVProv
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
 import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants;
 import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtExceptionManagement;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.core.model.ExpressionNode;
+import org.wso2.carbon.identity.core.model.FilterTreeBuilder;
+import org.wso2.carbon.identity.core.model.Node;
+import org.wso2.carbon.identity.core.model.OperationNode;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_CODE_GET_DAO;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_EMPTY_IDVP;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_IDVP_ALREADY_EXISTS;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_RETRIEVING_FILTERED_IDV_PROVIDERS;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_UPDATE_IDVP;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_FILTER_IS_ENABLED;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IS_FALSE_VALUE;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IS_TRUE_VALUE;
 
 /**
  * This class contains the implementation for the IdVProviderManager.
@@ -94,6 +105,13 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
     }
 
     @Override
+    public int getCountOfIdVProviders(int tenantId, String filter) throws IdVProviderMgtException {
+
+        List<ExpressionNode> expressionNodes = getExpressionNodes(filter);
+        return getIdVProviderDAO().getCountOfIdVProviders(tenantId, expressionNodes);
+    }
+
+    @Override
     public void deleteIdVProvider(String idVProviderId, int tenantId) throws IdVProviderMgtException {
 
         if (StringUtils.isEmpty(idVProviderId)) {
@@ -130,6 +148,71 @@ public class IdVProviderManagerImpl implements IdVProviderManager {
             throws IdVProviderMgtException {
 
         return getIdVProviderDAO().getIdVProviders(validateLimit(limit), validateOffset(offset), tenantId);
+    }
+
+    @Override
+    public List<IdVProvider> getIdVProviders(Integer limit, Integer offset, String filter, int tenantId)
+            throws IdVProviderMgtException {
+
+        List<ExpressionNode> expressionNodes = getExpressionNodes(filter);
+        return getIdVProviderDAO().getIdVProviders(validateLimit(limit), validateOffset(offset), expressionNodes,
+                tenantId);
+    }
+
+    /**
+     * Get the filter node as a list.
+     *
+     * @param filter Condition to filter.
+     * @return node tree.
+     * @throws IdVProviderMgtException Error when validating filters.
+     */
+    private List<ExpressionNode> getExpressionNodes(String filter) throws IdVProviderMgtException {
+        
+        List<ExpressionNode> expressionNodes = new ArrayList<>();
+        FilterTreeBuilder filterTreeBuilder;
+        try {
+            if (StringUtils.isNotBlank(filter)) {
+                filterTreeBuilder = new FilterTreeBuilder(filter);
+                Node rootNode = filterTreeBuilder.buildTree();
+                setExpressionNodeList(rootNode, expressionNodes);
+            }
+        } catch (IOException | IdentityException e) {
+            String message = "Error occurred while validate filter, filter: " + filter;
+            throw IdVProviderMgtExceptionManagement.handleClientException(ERROR_RETRIEVING_FILTERED_IDV_PROVIDERS,
+                    message);
+        }
+        return expressionNodes;
+    }
+
+    /**
+     * Set the node values as list of expression.
+     *
+     * @param node       filter node.
+     * @param expression list of expression.
+     * @throws IdVProviderMgtException Error when passing invalid filter.
+     */
+    private void setExpressionNodeList(Node node, List<ExpressionNode> expression) throws IdVProviderMgtException {
+
+        if (node instanceof ExpressionNode) {
+            if (StringUtils.isNotBlank(((ExpressionNode) node).getAttributeValue())) {
+                if (((ExpressionNode) node).getAttributeValue().contains(IDVP_FILTER_IS_ENABLED)) {
+                    if ("true".contains(((ExpressionNode) node).getValue())) {
+                        ((ExpressionNode) node).setValue(IS_TRUE_VALUE);
+                    } else if ("false".contains(((ExpressionNode) node).getValue())) {
+                        ((ExpressionNode) node).setValue(IS_FALSE_VALUE);
+                    } else {
+                        String message = "Invalid value: " + ((ExpressionNode) node).getValue() + "is passed for " +
+                                "'isEnabled' attribute in the filter. It should be 'true' or 'false'";
+                        throw IdVProviderMgtExceptionManagement.
+                                handleClientException(ERROR_RETRIEVING_FILTERED_IDV_PROVIDERS, message);
+                    }
+                }
+            }
+            expression.add((ExpressionNode) node);
+        } else if (node instanceof OperationNode) {
+            setExpressionNodeList(node.getLeftNode(), expression);
+            setExpressionNodeList(node.getRightNode(), expression);
+        }
     }
 
     @Override
