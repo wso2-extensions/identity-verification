@@ -22,11 +22,14 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVConfigProperty;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
+import org.wso2.carbon.identity.core.model.ExpressionNode;
 
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,19 +37,29 @@ import java.util.Map;
  */
 public class TestUtils {
 
-    public static final String IDV_PROVIDER_ID = "1c7ce08b-2ebc-4b9e-a107-3b129c019954";
     public static final int TENANT_ID = -1234;
-    public static final String IDV_PROVIDER_NAME = "IdVProviderName";
-    public static final String IDV_PROVIDER_TYPE = "IdVProviderType";
+    public static final String IDV_PROVIDER_1_UUID = "1c7ce08b-2ebc-4b9e-a107-3b129c019954";
+    public static final String IDV_PROVIDER_1_NAME = "IdVProviderName1";
+    public static final String IDV_PROVIDER_1_TYPE = "IdVProviderType1";
+    public static final String IDV_PROVIDER_2_UUID = "4567e08b-2ebc-1234-a107-3b129c019954";
+    public static final String IDV_PROVIDER_2_NAME = "IdVProviderName2";
+    public static final String IDV_PROVIDER_2_TYPE = "IdVProviderType2";
     public static final Map<String, BasicDataSource> dataSourceMap = new HashMap<>();
     public static final String DB_NAME = "test";
 
-    public static IdVProvider getTestIdVProvider() {
+    public static IdVProvider getTestIdVProvider(int id) {
 
         IdVProvider idVProvider = new IdVProvider();
-        idVProvider.setIdVProviderUUID(IDV_PROVIDER_ID);
-        idVProvider.setType(IDV_PROVIDER_TYPE);
-        idVProvider.setIdVProviderName(IDV_PROVIDER_NAME);
+
+        if(id == 1) {
+            idVProvider.setIdVProviderUUID(IDV_PROVIDER_1_UUID);
+            idVProvider.setType(IDV_PROVIDER_1_TYPE);
+            idVProvider.setIdVProviderName(IDV_PROVIDER_1_NAME);
+        } else {
+            idVProvider.setIdVProviderUUID(IDV_PROVIDER_2_UUID);
+            idVProvider.setType(IDV_PROVIDER_2_TYPE);
+            idVProvider.setIdVProviderName(IDV_PROVIDER_2_NAME);
+        }
         idVProvider.setIdVProviderDescription("ONFIDO identity verification provider");
         idVProvider.setEnabled(true);
 
@@ -76,9 +89,9 @@ public class TestUtils {
 
         IdVProvider idVProvider = new IdVProvider();
         idVProvider.setId("1");
-        idVProvider.setIdVProviderUUID(IDV_PROVIDER_ID);
-        idVProvider.setType(IDV_PROVIDER_TYPE);
-        idVProvider.setIdVProviderName(IDV_PROVIDER_NAME);
+        idVProvider.setIdVProviderUUID(IDV_PROVIDER_1_UUID);
+        idVProvider.setType(IDV_PROVIDER_1_TYPE);
+        idVProvider.setIdVProviderName(IDV_PROVIDER_1_NAME);
         idVProvider.setIdVProviderDescription("ONFIDO updated description");
         idVProvider.setEnabled(false);
 
@@ -102,6 +115,15 @@ public class TestUtils {
 
         idVProvider.setIdVConfigProperties(idVConfigProperties);
         return idVProvider;
+    }
+
+    public static List<ExpressionNode> createExpressionNodeList(String attributeValue, String operation, String value) {
+
+        ExpressionNode expressionNode = new ExpressionNode();
+        expressionNode.setAttributeValue(attributeValue);
+        expressionNode.setOperation(operation);
+        expressionNode.setValue(value);
+        return Collections.singletonList(expressionNode);
     }
 
     public static void closeH2Database() throws Exception {

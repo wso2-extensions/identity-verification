@@ -41,10 +41,12 @@ import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertThrows;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.getOldIdVProvider;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.getTestIdVProvider;
-import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.IDV_PROVIDER_ID;
-import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.IDV_PROVIDER_NAME;
+import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.IDV_PROVIDER_1_UUID;
+import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.IDV_PROVIDER_1_NAME;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.TENANT_ID;
 
 /**
@@ -70,11 +72,11 @@ public class IdVProviderManagerImplTest extends PowerMockTestCase {
     @Test
     public void testGetIdVProvider() throws Exception {
 
-        IdVProvider idvProvider = getTestIdVProvider();
+        IdVProvider idvProvider = getTestIdVProvider(1);
         when(idVProviderDAO.getIdVProvider(anyString(), anyInt())).thenReturn(idvProvider);
         IdVProvider identityVerificationProvider =
-                idVProviderManager.getIdVProvider(IDV_PROVIDER_ID, TENANT_ID);
-        Assert.assertEquals(identityVerificationProvider.getIdVProviderUuid(), IDV_PROVIDER_ID);
+                idVProviderManager.getIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
+        Assert.assertEquals(identityVerificationProvider.getIdVProviderUuid(), IDV_PROVIDER_1_UUID);
     }
 
     @Test(expectedExceptions = IdVProviderMgtClientException.class)
@@ -90,9 +92,9 @@ public class IdVProviderManagerImplTest extends PowerMockTestCase {
     @Test
     public void testAddIdVProvider() throws Exception {
 
-        IdVProvider idvProvider = getTestIdVProvider();
+        IdVProvider idvProvider = getTestIdVProvider(1);
         doNothing().when(idVProviderDAO).addIdVProvider(any(IdVProvider.class), anyInt());
-        IdVProvider identityVerificationProvider = idVProviderManager.addIdVProvider(idvProvider, -1234);
+        IdVProvider identityVerificationProvider = idVProviderManager.addIdVProvider(idvProvider, TENANT_ID);
         Assert.assertEquals(identityVerificationProvider.getIdVProviderName(), idvProvider.getIdVProviderName());
     }
 
@@ -101,7 +103,7 @@ public class IdVProviderManagerImplTest extends PowerMockTestCase {
 
         doReturn(true).when(idVProviderDAO).isIdVProviderExistsByName(anyString(), anyInt());
         boolean isIdVProviderExistsByName =
-                idVProviderManager.isIdVProviderExistsByName(IDV_PROVIDER_NAME, TENANT_ID);
+                idVProviderManager.isIdVProviderExistsByName(IDV_PROVIDER_1_NAME, TENANT_ID);
         Assert.assertTrue(isIdVProviderExistsByName);
     }
 
@@ -113,11 +115,35 @@ public class IdVProviderManagerImplTest extends PowerMockTestCase {
         Assert.assertEquals(countOfIdVProviders, 5);
     }
 
+    @DataProvider
+    public Object[][] getCountOfFilteredIdVProvidersData() {
+
+        return new Object[][]{
+                {"name sw IdV", 2},
+                {null, 4}};
+    }
+
+    @Test(dataProvider = "getCountOfFilteredIdVProvidersData")
+    public void testGetCountOfFilteredIdVProviders(String filter, int totalCount) throws IdVProviderMgtException {
+
+        doReturn(totalCount).when(idVProviderDAO).getCountOfIdVProviders(anyInt(), any());
+        int countOfIdVProviders = idVProviderManager.getCountOfIdVProviders(TENANT_ID, filter);
+        Assert.assertEquals(countOfIdVProviders, totalCount);
+    }
+
+    @Test
+    public void testGetCountOfFilteredIdVProvidersException() {
+
+        String filter = "Wrong_Filter";
+        assertThrows(IdVProviderMgtClientException.class,
+                () -> idVProviderManager.getCountOfIdVProviders(TENANT_ID, filter));
+    }
+
     @Test
     public void testUpdateIdVProvider() throws IdVProviderMgtException {
 
         IdVProvider oldIdVProvider = getOldIdVProvider();
-        IdVProvider updatedIdvProvider = getTestIdVProvider();
+        IdVProvider updatedIdvProvider = getTestIdVProvider(1);
         doNothing().when(idVProviderDAO).updateIdVProvider(any(IdVProvider.class), any(IdVProvider.class), anyInt());
         IdVProvider idvProviderList =
                 idVProviderManager.updateIdVProvider(oldIdVProvider, updatedIdvProvider, 1);
@@ -139,10 +165,60 @@ public class IdVProviderManagerImplTest extends PowerMockTestCase {
             throws IdVProviderMgtException {
 
         List<IdVProvider> idvProviders = new ArrayList<>();
-        idvProviders.add(getTestIdVProvider());
+        idvProviders.add(getTestIdVProvider(1));
         doReturn(idvProviders).when(idVProviderDAO).getIdVProviders(anyInt(), anyInt(), anyInt());
         List<IdVProvider> idvProviderList = idVProviderManager.getIdVProviders(limit, offset, 1);
         Assert.assertEquals(idvProviderList.size(), expected);
+    }
+
+    @DataProvider
+    public Object[][] getFilteredIdVProvidersData() {
+
+        String filter1 = "name sw IdV";
+        String filter2 = "type eq IdVProviderType1";
+        String filter3 = "isEnabled co true";
+        String filter4 = "isEnabled eq false";
+        String filter5 = "name ew 2";
+
+        List<IdVProvider> idvProvidersList1 = new ArrayList<>();
+        idvProvidersList1.add(getTestIdVProvider(1));
+        idvProvidersList1.add(getTestIdVProvider(2));
+
+        List<IdVProvider> idvProvidersList2 = new ArrayList<>();
+        idvProvidersList2.add(getTestIdVProvider(1));
+
+        List<IdVProvider> idvProvidersList3 = new ArrayList<>();
+        idvProvidersList3.add(getTestIdVProvider(2));
+
+        return new Object[][]{
+                {2, 0, filter1, 2, idvProvidersList1, "IdVProviderName1"},
+                {2, 1, filter1, 1, idvProvidersList3, "IdVProviderName2"},
+                {2, 0, filter2, 1, idvProvidersList2, "IdVProviderName1"},
+                {2, 1, filter3, 1, idvProvidersList3, "IdVProviderName2"},
+                {2, 0, filter4, 0, new ArrayList<>(), ""},
+                {2, 0, filter5, 1, idvProvidersList3, "IdVProviderName2"}
+        };
+    }
+
+    @Test(dataProvider = "getFilteredIdVProvidersData")
+    public void testGetFilteredIdVProviders(Integer limit, Integer offset, String filter, int count,
+                                            List<IdVProvider> idvProviders, String firstIdvProvider)
+            throws IdVProviderMgtException {
+
+        doReturn(idvProviders).when(idVProviderDAO).getIdVProviders(anyInt(), anyInt(), any(), anyInt());
+        List<IdVProvider> idvProviderList = idVProviderManager.getIdVProviders(limit, offset, filter, TENANT_ID);
+        Assert.assertEquals(idvProviderList.size(), count);
+        if (count > 0) {
+            assertEquals(idvProviderList.get(0).getIdVProviderName(), firstIdvProvider);
+        }
+    }
+
+    @Test
+    public void testGetFilteredIdVProvidersException() {
+
+        String filter = "Wrong_Filter";
+        assertThrows(IdVProviderMgtClientException.class,
+                () -> idVProviderManager.getIdVProviders(10, 0, filter, TENANT_ID));
     }
 
     @DataProvider(name = "getIdVProvidersDataWithInvalidInputs")
@@ -158,7 +234,7 @@ public class IdVProviderManagerImplTest extends PowerMockTestCase {
     public void testGetIdVProvidersInvalidInputs(Integer limit, Integer offset) throws IdVProviderMgtException {
 
         List<IdVProvider> idvProviders = new ArrayList<>();
-        idvProviders.add(getTestIdVProvider());
+        idvProviders.add(getTestIdVProvider(1));
         doReturn(idvProviders).when(idVProviderDAO).getIdVProviders(anyInt(), anyInt(), anyInt());
         idVProviderManager.getIdVProviders(limit, offset, 1);
     }
@@ -167,18 +243,18 @@ public class IdVProviderManagerImplTest extends PowerMockTestCase {
     public void testIsIdVProviderExists() throws IdVProviderMgtException {
 
         doReturn(true).when(idVProviderDAO).isIdVProviderExists(anyString(), anyInt());
-        boolean idVProviderExists = idVProviderManager.isIdVProviderExists(IDV_PROVIDER_ID, TENANT_ID);
+        boolean idVProviderExists = idVProviderManager.isIdVProviderExists(IDV_PROVIDER_1_UUID, TENANT_ID);
         Assert.assertTrue(idVProviderExists);
     }
 
     @Test
     public void testGetIdVPByName() throws IdVProviderMgtException {
 
-        IdVProvider idvProvider = getTestIdVProvider();
+        IdVProvider idvProvider = getTestIdVProvider(1);
         doReturn(idvProvider).when(idVProviderDAO).getIdVProviderByName(anyString(), anyInt());
         IdVProvider identityVerificationProvider =
-                idVProviderManager.getIdVProviderByName(IDV_PROVIDER_NAME, 1);
+                idVProviderManager.getIdVProviderByName(IDV_PROVIDER_1_NAME, 1);
         Assert.assertNotNull(identityVerificationProvider);
-        Assert.assertEquals(identityVerificationProvider.getIdVProviderName(), IDV_PROVIDER_NAME);
+        Assert.assertEquals(identityVerificationProvider.getIdVProviderName(), IDV_PROVIDER_1_NAME);
     }
 }
