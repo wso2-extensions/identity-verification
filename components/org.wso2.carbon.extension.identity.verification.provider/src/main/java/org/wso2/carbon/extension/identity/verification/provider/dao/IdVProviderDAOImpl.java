@@ -19,7 +19,6 @@ package org.wso2.carbon.extension.identity.verification.provider.dao;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.extension.identity.verification.provider.IdVPSecretProcessor;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdvProviderMgtServerException;
@@ -28,7 +27,6 @@ import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvide
 import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtExceptionManagement;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
-import org.wso2.carbon.identity.core.util.JdbcUtils;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
 
 import java.sql.Connection;
@@ -58,6 +56,7 @@ import static org.wso2.carbon.extension.identity.verification.provider.util.IdVP
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ErrorMessage.ERROR_UPDATING_IDV_PROVIDER;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.ID;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IDVP_TYPE;
+import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IMAGE_URL;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IS_ENABLED;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.IS_SECRET;
 import static org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.LOCAL_CLAIM;
@@ -160,6 +159,7 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
             addIdVProviderStmt.setString(4, idVProvider.getType());
             addIdVProviderStmt.setString(5, idVProvider.getIdVProviderDescription());
             addIdVProviderStmt.setString(6, idVProvider.isEnabled() ? "1" : "0");
+            addIdVProviderStmt.setString(7, idVProvider.getImageUrl());
             addIdVProviderStmt.executeUpdate();
 
             // Get the just added identity verification provider along with the id.
@@ -186,8 +186,9 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
             updateIdVProviderStmt.setString(2, newIdVProvider.getType());
             updateIdVProviderStmt.setString(3, newIdVProvider.getIdVProviderDescription());
             updateIdVProviderStmt.setString(4, newIdVProvider.isEnabled() ? "1" : "0");
-            updateIdVProviderStmt.setString(5, oldIdVProvider.getIdVProviderUuid());
-            updateIdVProviderStmt.setInt(6, tenantId);
+            updateIdVProviderStmt.setString(5, newIdVProvider.getImageUrl());
+            updateIdVProviderStmt.setString(6, oldIdVProvider.getIdVProviderUuid());
+            updateIdVProviderStmt.setInt(7, tenantId);
             updateIdVProviderStmt.executeUpdate();
 
             // Update configs of identity verification provider.
@@ -221,6 +222,7 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
                     idVProvider.
                             setIdVProviderDescription(idVProviderResultSet.getString(DESCRIPTION));
                     idVProvider.setEnabled(idVProviderResultSet.getBoolean(IS_ENABLED));
+                    idVProvider.setImageUrl(idVProviderResultSet.getString(IMAGE_URL));
 
                     // Get configs of identity verification provider.
                     idVProvider =
@@ -276,6 +278,7 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
                     idVProvider.setIdVProviderDescription(idVProviderResultSet.
                             getString(DESCRIPTION));
                     idVProvider.setEnabled(idVProviderResultSet.getBoolean(IS_ENABLED));
+                    idVProvider.setImageUrl(idVProviderResultSet.getString(IMAGE_URL));
                 }
             }
 
@@ -339,6 +342,7 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
                     idVProvider.setIdVProviderName(idVProviderResultSet.getString(NAME));
                     idVProvider.setIdVProviderDescription(idVProviderResultSet.getString(DESCRIPTION));
                     idVProvider.setEnabled(idVProviderResultSet.getBoolean(IS_ENABLED));
+                    idVProvider.setImageUrl(idVProviderResultSet.getString(IMAGE_URL));
                 }
             }
         } catch (SQLException e) {

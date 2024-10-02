@@ -30,6 +30,7 @@ public class IdVProviderMgtConstants {
     public static final String IDVP_TYPE = "IDVP_TYPE";
     public static final String DESCRIPTION = "DESCRIPTION";
     public static final String IS_ENABLED = "IS_ENABLED";
+    public static final String IMAGE_URL = "IMAGE_URL";
     public static final String PROPERTY_KEY = "PROPERTY_KEY";
     public static final String PROPERTY_VALUE = "PROPERTY_VALUE";
     public static final String IS_SECRET = "IS_SECRET";
@@ -42,32 +43,32 @@ public class IdVProviderMgtConstants {
      */
     public static class SQLQueries {
 
-        public static final String GET_IDVP_SQL = "SELECT ID, UUID, IDVP_TYPE, NAME, DESCRIPTION, IS_ENABLED" +
-                " FROM IDVP WHERE UUID=? AND TENANT_ID=?";
+        public static final String GET_IDVP_SQL = "SELECT ID, UUID, IDVP_TYPE, NAME, DESCRIPTION, IS_ENABLED, " +
+                "IMAGE_URL FROM IDVP WHERE UUID=? AND TENANT_ID=?";
         public static final String IS_IDVP_EXIST_SQL = "SELECT ID FROM IDVP WHERE UUID=? AND TENANT_ID=?";
         public static final String IS_IDVP_EXIST_BY_NAME_SQL = "SELECT ID FROM IDVP WHERE NAME=? AND TENANT_ID=?";
         public static final String GET_IDVP_BY_NAME_SQL = "SELECT ID, UUID, NAME, IDVP_TYPE, DESCRIPTION, " +
-                "IS_ENABLED FROM IDVP WHERE NAME=? AND TENANT_ID=?";
+                "IS_ENABLED, IMAGE_URL FROM IDVP WHERE NAME=? AND TENANT_ID=?";
         public static final String GET_IDVP_CONFIG_SQL = "SELECT PROPERTY_KEY, PROPERTY_VALUE, IS_SECRET FROM " +
                 "IDVP_CONFIG WHERE IDVP_ID=? AND TENANT_ID=?";
         public static final String GET_IDVP_CLAIMS_SQL = "SELECT CLAIM, LOCAL_CLAIM FROM " +
                 "IDVP_CLAIM_MAPPING WHERE IDVP_ID=? AND TENANT_ID=?";
-        public static final String GET_IDVPS_SQL_BY_MSSQL = "SELECT ID, UUID, NAME, IDVP_TYPE, DESCRIPTION, IS_ENABLED FROM " +
-                "IDVP WHERE TENANT_ID=? ORDER BY UUID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-        public static final String GET_IDVPS_SQL_BY_MYSQL = "SELECT ID, UUID, NAME, IDVP_TYPE, DESCRIPTION, IS_ENABLED FROM " +
-                "IDVP WHERE TENANT_ID=? ORDER BY UUID ASC LIMIT ?, ?";
-        public static final String GET_IDVPS_SQL_BY_POSTGRESQL = "SELECT ID, UUID, NAME, IDVP_TYPE, DESCRIPTION, IS_ENABLED FROM " +
-                "IDVP WHERE TENANT_ID=? ORDER BY UUID ASC LIMIT ? OFFSET ? ";
+        public static final String GET_IDVPS_SQL_BY_MSSQL = "SELECT ID, UUID, NAME, IDVP_TYPE, DESCRIPTION, " +
+                "IS_ENABLED, IMAGE_URL FROM IDVP WHERE TENANT_ID=? ORDER BY UUID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        public static final String GET_IDVPS_SQL_BY_MYSQL = "SELECT ID, UUID, NAME, IDVP_TYPE, DESCRIPTION, " +
+                "IS_ENABLED, IMAGE_URL FROM IDVP WHERE TENANT_ID=? ORDER BY UUID ASC LIMIT ?, ?";
+        public static final String GET_IDVPS_SQL_BY_POSTGRESQL = "SELECT ID, UUID, NAME, IDVP_TYPE, DESCRIPTION, " +
+                "IS_ENABLED, IMAGE_URL FROM IDVP WHERE TENANT_ID=? ORDER BY UUID ASC LIMIT ? OFFSET ? ";
         public static final String GET_COUNT_OF_IDVPS_SQL = "SELECT COUNT(*) FROM IDVP WHERE TENANT_ID=?";
         public static final String DELETE_IDV_SQL = "DELETE FROM IDVP WHERE UUID=? AND TENANT_ID=?";
         public static final String ADD_IDVP_SQL = "INSERT INTO IDVP(UUID, TENANT_ID, NAME, IDVP_TYPE, " +
-                "DESCRIPTION, IS_ENABLED) VALUES (?, ?, ?, ?, ?, ?)";
+                "DESCRIPTION, IS_ENABLED, IMAGE_URL) VALUES (?, ?, ?, ?, ?, ?, ?)";
         public static final String ADD_IDVP_CONFIG_SQL = "INSERT INTO IDVP_CONFIG " +
                 "(IDVP_ID, TENANT_ID, PROPERTY_KEY, PROPERTY_VALUE, IS_SECRET) VALUES (?, ?, ?, ?, ?)";
         public static final String ADD_IDVP_CLAIM_SQL = "INSERT INTO IDVP_CLAIM_MAPPING " +
                 "(IDVP_ID, TENANT_ID, CLAIM, LOCAL_CLAIM) VALUES (?, ?, ?, ?)";
         public static final String UPDATE_IDVP_SQL = "UPDATE IDVP SET NAME=?, IDVP_TYPE=?, DESCRIPTION=?, " +
-                "IS_ENABLED=? WHERE UUID=? AND TENANT_ID=?";
+                "IS_ENABLED=?, IMAGE_URL=? WHERE UUID=? AND TENANT_ID=?";
         public static final String DELETE_IDVP_CONFIG_SQL = "DELETE FROM IDVP_CONFIG " +
                 "WHERE IDVP_ID=? AND TENANT_ID=?";
         public static final String DELETE_IDVP_CLAIM_SQL = "DELETE FROM IDVP_CLAIM_MAPPING " +

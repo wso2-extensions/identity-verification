@@ -38,6 +38,7 @@ public class TestUtils {
     public static final int TENANT_ID = -1234;
     public static final String IDV_PROVIDER_NAME = "IdVProviderName";
     public static final String IDV_PROVIDER_TYPE = "IdVProviderType";
+    public static final String IDV_PROVIDER_IMAGE_URL = "idv-provider-logo-url";
     public static final Map<String, BasicDataSource> dataSourceMap = new HashMap<>();
     public static final String DB_NAME = "test";
 
@@ -48,6 +49,7 @@ public class TestUtils {
         idVProvider.setType(IDV_PROVIDER_TYPE);
         idVProvider.setIdVProviderName(IDV_PROVIDER_NAME);
         idVProvider.setIdVProviderDescription("ONFIDO identity verification provider");
+        idVProvider.setImageUrl(IDV_PROVIDER_IMAGE_URL);
         idVProvider.setEnabled(true);
 
         Map<String, String> claimMappings = new HashMap<>();
