@@ -305,7 +305,7 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
      */
     public void deleteIdVProvider(String idVProviderId, int tenantId) throws IdVProviderMgtException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
+        try (Connection connection = IdentityDatabaseUtil.getDBConnection(true)) {
             IdVProvider idVProvider = getIDVProviderByUUID(idVProviderId, tenantId, connection);
             if (idVProvider == null) {
                 return;
