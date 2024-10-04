@@ -25,8 +25,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.extension.identity.verification.provider.IdVPSecretProcessor;
+import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
 import org.wso2.carbon.extension.identity.verification.provider.internal.IdVProviderDataHolder;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
+import org.wso2.carbon.identity.core.model.ExpressionNode;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.secret.mgt.core.SecretManagerImpl;
 import org.wso2.carbon.identity.secret.mgt.core.SecretResolveManagerImpl;
@@ -47,11 +49,14 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertThrows;
+import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.createExpressionNodeList;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.dataSourceMap;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.getOldIdVProvider;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.getTestIdVProvider;
-import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.IDV_PROVIDER_ID;
-import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.IDV_PROVIDER_NAME;
+import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.IDV_PROVIDER_1_UUID;
+import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.IDV_PROVIDER_1_NAME;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.TENANT_ID;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.closeH2Database;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.getConnection;
@@ -102,19 +107,29 @@ public class IdVProviderDAOImplTest {
     @Test(priority = 1)
     public void testAddIdVProvider() throws Exception {
 
+        // Add the first IdVProvider
         try (Connection connection = getConnection(DB_NAME)) {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            IdVProvider identityVerificationProvider = getTestIdVProvider();
+            IdVProvider identityVerificationProvider1 = getTestIdVProvider(1);
             doReturn(false).when(secretManager).isSecretExist(anyString(), anyString());
-            idVProviderDAO.addIdVProvider(identityVerificationProvider, TENANT_ID);
+            idVProviderDAO.addIdVProvider(identityVerificationProvider1, TENANT_ID);
         }
 
+        // Add the second IdVProvider
+        try (Connection connection = getConnection(DB_NAME)) {
+            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            IdVProvider identityVerificationProvider2 = getTestIdVProvider(2);
+            doReturn(false).when(secretManager).isSecretExist(anyString(), anyString());
+            idVProviderDAO.addIdVProvider(identityVerificationProvider2, TENANT_ID);
+        }
+
+        // Verify the first IdVProvider was added correctly
         try (Connection connection = getConnection(DB_NAME)) {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
             setUpResolvedSecret();
-            IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_ID, TENANT_ID);
-            Assert.assertEquals(idVProvider.getIdVProviderName(), IDV_PROVIDER_NAME);
+            IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
+            Assert.assertEquals(idVProvider.getIdVProviderName(), IDV_PROVIDER_1_NAME);
         }
     }
 
@@ -150,7 +165,7 @@ public class IdVProviderDAOImplTest {
             setUpResolvedSecret();
             List<IdVProvider> identityVerificationProviders =
                     idVProviderDAO.getIdVProviders(2, 0, TENANT_ID);
-            Assert.assertEquals(identityVerificationProviders.size(), 1);
+            Assert.assertEquals(identityVerificationProviders.size(), 2);
         }
     }
 
@@ -158,7 +173,7 @@ public class IdVProviderDAOImplTest {
     public Object[][] getIdVProviderByNameData() {
 
         return new Object[][]{
-                {IDV_PROVIDER_NAME, true},
+                {IDV_PROVIDER_1_NAME, true},
                 {"non-existing-idvp", false},
                 {"", false},
                 {null, false}
@@ -185,29 +200,138 @@ public class IdVProviderDAOImplTest {
             doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
             setUpResolvedSecret();
             int countOfIdVProviders = idVProviderDAO.getCountOfIdVProviders(TENANT_ID);
-            Assert.assertEquals(countOfIdVProviders, 1);
+            Assert.assertEquals(countOfIdVProviders, 2);
         }
     }
 
-    @Test(priority = 6)
+    @DataProvider
+    public Object[][] getIdvProvidersSearchWithExpressionNodesData() {
+
+        List<ExpressionNode> expressionNodesList1 = createExpressionNodeList("name", "co", "IdV");
+        List<ExpressionNode> expressionNodesList2 = createExpressionNodeList("name", "eq", "IdVProviderName1");
+        List<ExpressionNode> expressionNodesList3 = createExpressionNodeList("name", "ew", "2");
+
+        return new Object[][]{
+                {expressionNodesList1, 2, 0, 2, "IdVProviderName1"},
+                {expressionNodesList1, 2, 1, 1, "IdVProviderName2"},
+                {expressionNodesList1, 1, 0, 1, "IdVProviderName1"},
+                {expressionNodesList1, 1, 1, 1, "IdVProviderName2"},
+                {expressionNodesList2, 1, 0, 1, "IdVProviderName1"},
+                {expressionNodesList3, 1, 0, 1, "IdVProviderName2"},
+        };
+    }
+
+    @Test(priority = 6, dataProvider = "getIdvProvidersSearchWithExpressionNodesData")
+    public void testGetIdvProvidersSearchWithExpressionNodes(List<ExpressionNode> expressionNodes, int limit,
+                                                             int offset, int count, String firstIdvProvider)
+            throws Exception {
+
+        try (Connection connection = getConnection(DB_NAME)) {
+            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
+            setUpResolvedSecret();
+            List<IdVProvider> identityVerificationProviders =
+                    idVProviderDAO.getIdVProviders(limit, offset, expressionNodes, TENANT_ID);
+            Assert.assertEquals(identityVerificationProviders.size(), count);
+            if (count > 0) {
+                assertEquals(identityVerificationProviders.get(0).getIdVProviderName(), firstIdvProvider);
+            }
+        }
+    }
+
+    @DataProvider
+    public Object[][] getIdvpsSearchWithExpressionNodesExceptionData() {
+
+        List<ExpressionNode> expressionNodesList1 =
+                createExpressionNodeList("InvalidAttribute", "eq", "IdVProviderName1");
+        List<ExpressionNode> expressionNodesList2 = createExpressionNodeList("description", "InvalidOperation", "IdV");
+
+        return new Object[][]{
+                {expressionNodesList1, 2, 0},
+                {expressionNodesList2, 2, 0},
+        };
+    }
+
+    @Test(priority = 7, dataProvider = "getIdvpsSearchWithExpressionNodesExceptionData")
+    public void testGetIdvpsSearchWithExpressionNodesException(List<ExpressionNode> expressionNodes,
+                                                               int limit, int offset) throws Exception {
+
+        try (Connection connection = getConnection(DB_NAME)) {
+            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
+            setUpResolvedSecret();
+            assertThrows(IdVProviderMgtException.class,
+                    () -> idVProviderDAO.getIdVProviders(limit, offset, expressionNodes, TENANT_ID));
+        }
+    }
+
+    @DataProvider
+    public Object[][] getCountOfFilteredIdVProvidersData() {
+
+        return new Object[][]{
+                {createExpressionNodeList("name", "co", "IdV"), 2},
+                {createExpressionNodeList("name", "eq", "IdVProviderName1"), 1},
+                {createExpressionNodeList("name", "ew", "2"), 1},
+        };
+    }
+
+    @Test(priority = 8)
+    public void testGetCountOfFilteredIdVProviders(List<ExpressionNode> expressionNodes, int totalCount)
+            throws Exception {
+
+        try (Connection connection = getConnection(DB_NAME)) {
+            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
+            setUpResolvedSecret();
+            int countOfIdVProviders = idVProviderDAO.getCountOfIdVProviders(TENANT_ID, expressionNodes);
+            Assert.assertEquals(countOfIdVProviders, totalCount);
+        }
+    }
+
+    @DataProvider
+    public Object[][] getCountOfFilteredIdVProvidersExceptionData() {
+
+        List<ExpressionNode> expressionNodesList1 =
+                createExpressionNodeList("InvalidAttribute", "eq", "IdVProviderName1");
+        List<ExpressionNode> expressionNodesList2 = createExpressionNodeList("description", "InvalidOperation", "IdV");
+
+        return new Object[][]{
+                {expressionNodesList1},
+                {expressionNodesList2},
+        };
+    }
+
+    @Test(priority = 9, dataProvider = "getCountOfFilteredIdVProvidersExceptionData")
+    public void testGetCountOfFilteredIdVProvidersException(List<ExpressionNode> expressionNodes) throws Exception {
+
+        try (Connection connection = getConnection(DB_NAME)) {
+            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
+            setUpResolvedSecret();
+            assertThrows(IdVProviderMgtException.class,
+                    () -> idVProviderDAO.getCountOfIdVProviders(TENANT_ID, expressionNodes));
+        }
+    }
+
+    @Test(priority = 10)
     public void testIsIdVProviderExists() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
             setUpResolvedSecret();
-            boolean isIdVProviderExists = idVProviderDAO.isIdVProviderExists(IDV_PROVIDER_ID, TENANT_ID);
+            boolean isIdVProviderExists = idVProviderDAO.isIdVProviderExists(IDV_PROVIDER_1_UUID, TENANT_ID);
             Assert.assertTrue(isIdVProviderExists);
         }
     }
 
-    @Test(priority = 7)
+    @Test(priority = 11)
     public void testUpdateIdVProviderExists() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             IdVProvider idVProvider = getOldIdVProvider();
-            IdVProvider updatedIdVProvider = getTestIdVProvider();
+            IdVProvider updatedIdVProvider = getTestIdVProvider(1);
             doReturn(false).when(secretManager).isSecretExist(anyString(), anyString());
             idVProviderDAO.updateIdVProvider(idVProvider, updatedIdVProvider, TENANT_ID);
         }
@@ -216,37 +340,37 @@ public class IdVProviderDAOImplTest {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
             setUpResolvedSecret();
-            IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_ID, TENANT_ID);
+            IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
             Assert.assertTrue(idVProvider.isEnabled());
         }
     }
 
-    @Test(priority = 8)
+    @Test(priority = 12)
     public void testIsIdVProviderExistsByName() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
             setUpResolvedSecret();
-            boolean isIdVProviderExists = idVProviderDAO.isIdVProviderExistsByName(IDV_PROVIDER_NAME, TENANT_ID);
+            boolean isIdVProviderExists = idVProviderDAO.isIdVProviderExistsByName(IDV_PROVIDER_1_NAME, TENANT_ID);
             Assert.assertTrue(isIdVProviderExists);
         }
     }
 
-    @Test(priority = 9)
+    @Test(priority = 13)
     public void testDeleteIdVProvider() throws Exception {
 
         setUpResolvedSecret();
         try (Connection connection = getConnection(DB_NAME)) {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            idVProviderDAO.deleteIdVProvider(IDV_PROVIDER_ID, TENANT_ID);
+            idVProviderDAO.deleteIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
             when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
             doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_ID, TENANT_ID);
+            IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
             Assert.assertNull(idVProvider);
         }
     }

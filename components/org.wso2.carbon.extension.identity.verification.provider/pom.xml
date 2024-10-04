@@ -149,6 +149,8 @@
                             org.wso2.carbon.identity.base; version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.core.util;
                             version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.core.model;
+                            version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.secret.mgt.core;
                             version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.secret.mgt.core.exception;

@@ -36,7 +36,19 @@ public class IdVProviderMgtConstants {
     public static final String IS_SECRET = "IS_SECRET";
     public static final String CLAIM = "CLAIM";
     public static final String LOCAL_CLAIM = "LOCAL_CLAIM";
+    public static final String IDVP_FILTER_NAME = "name";
+    public static final String IDVP_FILTER_DESCRIPTION = "description";
+    public static final String IDVP_FILTER_TYPE = "type";
+    public static final String IDVP_FILTER_IS_ENABLED = "isEnabled";
+    public static final String IDVP_FILTER_UUID = "id";
     public static final String SEPERATOR = ":";
+    public static final String EMPTY_STRING = "";
+    public static final String EQ = "eq";
+    public static final String SW = "sw";
+    public static final String EW = "ew";
+    public static final String CO = "co";
+    public static final String IS_TRUE_VALUE = "1";
+    public static final String IS_FALSE_VALUE = "0";
 
     /**
      * This class contains the constants used in the IdVProvider.
@@ -59,7 +71,15 @@ public class IdVProviderMgtConstants {
                 "IS_ENABLED, IMAGE_URL FROM IDVP WHERE TENANT_ID=? ORDER BY UUID ASC LIMIT ?, ?";
         public static final String GET_IDVPS_SQL_BY_POSTGRESQL = "SELECT ID, UUID, NAME, IDVP_TYPE, DESCRIPTION, " +
                 "IS_ENABLED, IMAGE_URL FROM IDVP WHERE TENANT_ID=? ORDER BY UUID ASC LIMIT ? OFFSET ? ";
+        public static final String GET_IDVPS_SQL_BY_MSSQL_WITH_FILTER = "SELECT ID, UUID, NAME, IDVP_TYPE, " +
+                "DESCRIPTION, IS_ENABLED, IMAGE_URL FROM IDVP WHERE %s TENANT_ID=? ORDER BY UUID OFFSET ? " +
+                "ROWS FETCH NEXT ? ROWS ONLY";
+        public static final String GET_IDVPS_SQL_BY_MYSQL_WITH_FILTER = "SELECT ID, UUID, NAME, IDVP_TYPE, " +
+                "DESCRIPTION, IS_ENABLED, IMAGE_URL FROM IDVP WHERE %s TENANT_ID=? ORDER BY UUID ASC LIMIT ?, ?";
+        public static final String GET_IDVPS_SQL_BY_POSTGRESQL_WITH_FILTER = "SELECT ID, UUID, NAME, IDVP_TYPE, " +
+                "DESCRIPTION, IS_ENABLED, IMAGE_URL FROM IDVP WHERE %s TENANT_ID=? ORDER BY UUID ASC LIMIT ? OFFSET ?";
         public static final String GET_COUNT_OF_IDVPS_SQL = "SELECT COUNT(*) FROM IDVP WHERE TENANT_ID=?";
+        public static final String GET_COUNT_OF_IDVPS_SQL_WITH_FILTER = "SELECT COUNT(*) FROM IDVP WHERE %s TENANT_ID=?";
         public static final String DELETE_IDV_SQL = "DELETE FROM IDVP WHERE UUID=? AND TENANT_ID=?";
         public static final String ADD_IDVP_SQL = "INSERT INTO IDVP(UUID, TENANT_ID, NAME, IDVP_TYPE, " +
                 "DESCRIPTION, IS_ENABLED, IMAGE_URL) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -86,6 +106,8 @@ public class IdVProviderMgtConstants {
         ERROR_EMPTY_IDVP_ID("60001", "Identity Verification Provider ID value is empty."),
         ERROR_EMPTY_IDVP("60002", "Identity Verification Provider Name is empty."),
         ERROR_UPDATE_IDVP("60003", "Updating Identity Verification Provider Type is not allowed."),
+        ERROR_RETRIEVING_FILTERED_IDV_PROVIDERS("60004",
+                "Error while retrieving Identity Verification Providers: %s."),
 
         // Server errors.
         ERROR_RETRIEVING_IDV_PROVIDERS("65000",
