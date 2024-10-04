@@ -388,7 +388,7 @@
         <springframework.version>5.3.19</springframework.version>
         <slf4j.version>1.7.22</slf4j.version>
         <commons-lang3.version>3.10</commons-lang3.version>
-        <carbon.identity.framework.version>5.25.215</carbon.identity.framework.version>
+        <carbon.identity.framework.version>7.5.43</carbon.identity.framework.version>
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
