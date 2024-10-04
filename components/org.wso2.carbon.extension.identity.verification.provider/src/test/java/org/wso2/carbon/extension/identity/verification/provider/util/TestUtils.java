@@ -44,6 +44,7 @@ public class TestUtils {
     public static final String IDV_PROVIDER_2_UUID = "4567e08b-2ebc-1234-a107-3b129c019954";
     public static final String IDV_PROVIDER_2_NAME = "IdVProviderName2";
     public static final String IDV_PROVIDER_2_TYPE = "IdVProviderType2";
+    public static final String IDV_PROVIDER_IMAGE_URL = "idv-provider-logo-url";
     public static final Map<String, BasicDataSource> dataSourceMap = new HashMap<>();
     public static final String DB_NAME = "test";
 
@@ -61,6 +62,7 @@ public class TestUtils {
             idVProvider.setIdVProviderName(IDV_PROVIDER_2_NAME);
         }
         idVProvider.setIdVProviderDescription("ONFIDO identity verification provider");
+        idVProvider.setImageUrl(IDV_PROVIDER_IMAGE_URL);
         idVProvider.setEnabled(true);
 
         Map<String, String> claimMappings = new HashMap<>();

@@ -31,6 +31,8 @@ public class IdVProvider {
     private String idVProviderName;
     private boolean isEnabled = false;
     private String idVProviderDescription;
+    private String imageUrl;
+
     private Map<String, String> claimMappings = new HashMap<>();
     private IdVConfigProperty[] idVConfigProperties = new IdVConfigProperty[0];
 
@@ -102,6 +104,16 @@ public class IdVProvider {
     public void setIdVProviderDescription(String idVProviderDescription) {
 
         this.idVProviderDescription = idVProviderDescription;
+    }
+
+    public String getImageUrl() {
+
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+
+        this.imageUrl = imageUrl;
     }
 
     public Map<String, String> getClaimMappings() {
