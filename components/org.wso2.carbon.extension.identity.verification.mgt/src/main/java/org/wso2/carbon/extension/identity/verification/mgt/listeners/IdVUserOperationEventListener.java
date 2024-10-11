@@ -23,6 +23,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.extension.identity.verification.mgt.IdentityVerificationManagerImpl;
 import org.wso2.carbon.extension.identity.verification.mgt.exception.IdentityVerificationException;
 import org.wso2.carbon.identity.core.AbstractIdentityUserOperationEventListener;
+import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -273,6 +274,11 @@ public class IdVUserOperationEventListener extends AbstractIdentityUserOperation
 
     @Override
     public int getExecutionOrderId() {
+
+        int orderId = getOrderId();
+        if (orderId != IdentityCoreConstants.EVENT_LISTENER_ORDER_ID) {
+            return orderId;
+        }
 
         return 150;
     }
