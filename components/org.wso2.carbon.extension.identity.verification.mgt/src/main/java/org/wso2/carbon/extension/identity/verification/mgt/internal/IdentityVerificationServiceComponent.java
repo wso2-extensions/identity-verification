@@ -34,6 +34,7 @@ import org.wso2.carbon.extension.identity.verification.mgt.dao.IdentityVerificat
 import org.wso2.carbon.extension.identity.verification.mgt.dao.IdentityVerificationClaimDAOImpl;
 import org.wso2.carbon.extension.identity.verification.mgt.listeners.IdVUserOperationEventListener;
 import org.wso2.carbon.extension.identity.verification.provider.IdVProviderManager;
+import org.wso2.carbon.identity.core.util.IdentityCoreInitializedEvent;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -98,6 +99,26 @@ public class IdentityVerificationServiceComponent {
     protected void unsetIdentityVerifierFactory(IdentityVerifierFactory identityVerifierFactory) {
 
         IdentityVerificationDataHolder.getInstance().unbindIdentityVerifierFactory(identityVerifierFactory);
+    }
+
+    @Reference(
+            name = "identity.core.init.event.service",
+            service = IdentityCoreInitializedEvent.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetIdentityCoreInitializedEventService"
+    )
+    protected void setIdentityCoreInitializedEventService(IdentityCoreInitializedEvent identityCoreInitializedEvent) {
+
+        /* reference IdentityCoreInitializedEvent service to guarantee that this component will wait
+         until identity core is started */
+    }
+
+    protected void unsetIdentityCoreInitializedEventService(
+            IdentityCoreInitializedEvent identityCoreInitializedEvent) {
+
+        /* reference IdentityCoreInitializedEvent service to guarantee that this component will wait
+         until identity core is started */
     }
 
     @Reference(
