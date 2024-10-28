@@ -487,7 +487,7 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
         IdVConfigProperty[] idVConfigProperties = new IdVConfigProperty[0];
         List<IdVConfigProperty> idVConfigPropertyList = new ArrayList<>();
         try (PreparedStatement getIdVProvidersStmt = connection.prepareStatement(GET_IDVP_CONFIG_SQL)) {
-            getIdVProvidersStmt.setString(1, idVProvider.getId());
+            getIdVProvidersStmt.setInt(1, Integer.parseInt(idVProvider.getId()));
             getIdVProvidersStmt.setInt(2, tenantId);
 
             try (ResultSet idVProviderResultSet = getIdVProvidersStmt.executeQuery()) {
@@ -515,7 +515,7 @@ public class IdVProviderDAOImpl implements IdVProviderDAO {
 
         Map<String, String> idVClaimMap = new HashMap<>();
         try (PreparedStatement getIdVProvidersStmt = connection.prepareStatement(GET_IDVP_CLAIMS_SQL)) {
-            getIdVProvidersStmt.setString(1, idVProvider.getId());
+            getIdVProvidersStmt.setInt(1, Integer.parseInt(idVProvider.getId()));
             getIdVProvidersStmt.setInt(2, tenantId);
 
             try (ResultSet idVProviderResultSet = getIdVProvidersStmt.executeQuery()) {
