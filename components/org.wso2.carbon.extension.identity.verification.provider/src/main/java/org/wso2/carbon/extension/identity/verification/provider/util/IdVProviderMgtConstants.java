@@ -17,6 +17,10 @@
  */
 package org.wso2.carbon.extension.identity.verification.provider.util;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This class contains the constants used in the IdVProvider.
  */
@@ -160,6 +164,30 @@ public class IdVProviderMgtConstants {
         public String toString() {
 
             return code + ":" + message;
+        }
+    }
+
+    /**
+     * This class contains the logo URLs for identity verification providers.
+     */
+    public static class LogoURLs {
+
+        public static final Map<String, String> LOGO_URLS;
+
+        static {
+            Map<String, String> logoUrls = new HashMap<>();
+            logoUrls.put("ONFIDO", "assets/images/logos/onfido.svg");
+            LOGO_URLS = Collections.unmodifiableMap(logoUrls);
+        }
+
+        /**
+         * Get the logo URL for a given identity verification provider type.
+         *
+         * @param providerType The type of the identity verification provider.
+         * @return The logo URL if available, otherwise null.
+         */
+        public static String getLogoUrl(String providerType) {
+            return LOGO_URLS.get(providerType);
         }
     }
 }

@@ -20,6 +20,8 @@ package org.wso2.carbon.extension.identity.verification.provider.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.wso2.carbon.extension.identity.verification.provider.util.IdVProviderMgtConstants.LogoURLs;
+
 /**
  * This class contains the properties of the Identity Verification Provider.
  */
@@ -31,6 +33,7 @@ public class IdVProvider {
     private String idVProviderName;
     private boolean isEnabled = false;
     private String idVProviderDescription;
+    private String imageUrl;
 
     private Map<String, String> claimMappings = new HashMap<>();
     private IdVConfigProperty[] idVConfigProperties = new IdVConfigProperty[0];
@@ -53,6 +56,7 @@ public class IdVProvider {
     public void setType(String type) {
 
         this.type = type;
+        this.imageUrl = LogoURLs.getLogoUrl(type);
     }
 
     public String getIdVProviderName() {
@@ -103,6 +107,11 @@ public class IdVProvider {
     public void setIdVProviderDescription(String idVProviderDescription) {
 
         this.idVProviderDescription = idVProviderDescription;
+    }
+
+    public String getImageUrl() {
+
+        return imageUrl;
     }
 
     public Map<String, String> getClaimMappings() {
