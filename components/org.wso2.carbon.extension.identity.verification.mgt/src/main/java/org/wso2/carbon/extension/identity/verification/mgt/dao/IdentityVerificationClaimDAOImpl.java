@@ -53,6 +53,7 @@ import static org.wso2.carbon.extension.identity.verification.mgt.utils.Identity
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.DELETE_IDV_CLAIMS_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.DELETE_IDV_CLAIM_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIMS_BY_METADATA_SQL;
+import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIMS_BY_METADATA_SQL_POSTGRESQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIMS_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIM_BY_CLAIM_URI_SQL;
 import static org.wso2.carbon.extension.identity.verification.mgt.utils.IdentityVerificationConstants.SQLQueries.GET_IDV_CLAIM_SQL;
@@ -99,7 +100,7 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
     @Override
     public void updateIdVClaim(IdVClaim idVClaim, int tenantId) throws IdentityVerificationException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
+        try (Connection connection = IdentityDatabaseUtil.getDBConnection(true)) {
             try (PreparedStatement updateIdVProviderStmt = connection.prepareStatement(UPDATE_IDV_CLAIM_SQL)) {
                 updateIdVProviderStmt.setString(1, idVClaim.isVerified() ? "1" : "0");
                 updateIdVProviderStmt.setObject(2, getMetadata(idVClaim));
@@ -221,24 +222,26 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
                                              int tenantId) throws IdentityVerificationException {
 
         List<IdVClaim> idVClaims = new ArrayList<>();
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false);
-             PreparedStatement getIdVProviderStmt = connection.prepareStatement(GET_IDV_CLAIMS_BY_METADATA_SQL)) {
-            // Construct the metadata search pattern using the metadataKey and metadataValue variables.
-            String metadataSearchPattern = "%\"" + metadataKey + "\":\"" + metadataValue + "\"%";
-            getIdVProviderStmt.setString(1, idvProviderId);
-            getIdVProviderStmt.setInt(2, tenantId);
-            getIdVProviderStmt.setString(3, metadataSearchPattern);
-            getIdVProviderStmt.execute();
-            try (ResultSet idVProviderResultSet = getIdVProviderStmt.executeQuery()) {
-                while (idVProviderResultSet.next()) {
-                    IdVClaim idVClaim = new IdVClaim();
-                    idVClaim.setId(idVProviderResultSet.getString(ID));
-                    idVClaim.setUuid(idVProviderResultSet.getString(IDV_CLAIM_UUID));
-                    idVClaim.setUserId(idVProviderResultSet.getString(USER_ID));
-                    idVClaim.setClaimUri(idVProviderResultSet.getString(CLAIM_URI));
-                    idVClaim.setIsVerified(idVProviderResultSet.getBoolean(IS_VERIFIED));
-                    idVClaim.setMetadata(getMetadataJsonObject(idVProviderResultSet.getBytes(METADATA)));
-                    idVClaims.add(idVClaim);
+        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
+            String query = getMetadataQueryBasedOnDBType(connection.getMetaData().getDatabaseProductName().toLowerCase());
+            try (PreparedStatement getIdVProviderStmt = connection.prepareStatement(query)) {
+                // Construct the metadata search pattern using the metadataKey and metadataValue variables.
+                String metadataSearchPattern = "%\"" + metadataKey + "\":\"" + metadataValue + "\"%";
+                getIdVProviderStmt.setString(1, idvProviderId);
+                getIdVProviderStmt.setInt(2, tenantId);
+                getIdVProviderStmt.setString(3, metadataSearchPattern);
+                getIdVProviderStmt.execute();
+                try (ResultSet idVProviderResultSet = getIdVProviderStmt.executeQuery()) {
+                    while (idVProviderResultSet.next()) {
+                        IdVClaim idVClaim = new IdVClaim();
+                        idVClaim.setId(idVProviderResultSet.getString(ID));
+                        idVClaim.setUuid(idVProviderResultSet.getString(IDV_CLAIM_UUID));
+                        idVClaim.setUserId(idVProviderResultSet.getString(USER_ID));
+                        idVClaim.setClaimUri(idVProviderResultSet.getString(CLAIM_URI));
+                        idVClaim.setIsVerified(idVProviderResultSet.getBoolean(IS_VERIFIED));
+                        idVClaim.setMetadata(getMetadataJsonObject(idVProviderResultSet.getBytes(METADATA)));
+                        idVClaims.add(idVClaim);
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -332,6 +335,16 @@ public class IdentityVerificationClaimDAOImpl implements IdentityVerificationCla
             throw IdentityVerificationExceptionMgt.handleServerException(ERROR_CHECKING_IDV_CLAIM_EXISTENCE, e);
         }
         return false;
+    }
+
+    private String getMetadataQueryBasedOnDBType(String databaseProductName) {
+        
+        switch (databaseProductName) {
+            case "postgresql":
+                return GET_IDV_CLAIMS_BY_METADATA_SQL_POSTGRESQL;
+            default:
+                return GET_IDV_CLAIMS_BY_METADATA_SQL;
+        }
     }
 
     private byte[] getMetadata(IdVClaim idVClaim) {
