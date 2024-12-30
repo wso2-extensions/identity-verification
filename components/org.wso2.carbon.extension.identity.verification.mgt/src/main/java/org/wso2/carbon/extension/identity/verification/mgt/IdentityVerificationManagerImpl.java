@@ -152,7 +152,8 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
             idVClaim.setUuid(UUID.randomUUID().toString());
 
             // Validate the identity verification claim.
-            validateIdVClaimInputs(userId, idVClaim, tenantId);
+            validateIdVClaimInputs(idVClaim, tenantId);
+            validateIdVClaimUniqueness(userId, idVClaim, tenantId);
         }
         getIdVClaimDAO().addIdVClaimList(idVClaims, tenantId);
         return idVClaims;
@@ -164,7 +165,8 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
 
         validateUserId(userId, tenantId);
         for (IdVClaim idVClaim : idVClaims) {
-            validateIdVClaimInputs(userId, idVClaim, tenantId);
+            validateIdVClaimInputs(idVClaim, tenantId);
+            idVClaim.setUuid(getIdVClaimID(userId, idVClaim.getIdVPId(), idVClaim.getClaimUri(), tenantId));
             getIdVClaimDAO().updateIdVClaim(idVClaim, tenantId);
         }
         return idVClaims;
@@ -222,7 +224,7 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
         }
     }
 
-    private void validateIdVClaimInputs(String userId, IdVClaim idVClaim, int tenantId)
+    private void validateIdVClaimInputs(IdVClaim idVClaim, int tenantId)
             throws IdentityVerificationException {
 
         String idvProviderId = idVClaim.getIdVPId();
@@ -234,7 +236,12 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
             throw IdentityVerificationExceptionMgt.handleClientException(
                     IdentityVerificationConstants.ErrorMessage.ERROR_INVALID_CLAIM_URI, claimUri);
         }
-        if (getIdVClaimDAO().isIdVClaimDataExist(userId, idvProviderId, claimUri, tenantId)) {
+    }
+
+    private void validateIdVClaimUniqueness(String userId, IdVClaim idVClaim, int tenantId)
+            throws IdentityVerificationException {
+
+        if (getIdVClaimDAO().isIdVClaimDataExist(userId, idVClaim.getIdVPId(), idVClaim.getClaimUri(), tenantId)) {
             throw IdentityVerificationExceptionMgt.handleClientException(
                     IdentityVerificationConstants.ErrorMessage.ERROR_IDV_CLAIM_DATA_ALREADY_EXISTS, userId);
         }
@@ -290,6 +297,18 @@ public class IdentityVerificationManagerImpl implements IdentityVerificationMana
     private boolean isIdVClaimExists(String idVClaimId, int tenantId) throws IdentityVerificationException {
 
         return getIdVClaimDAO().isIdVClaimExist(idVClaimId, tenantId);
+    }
+
+    private String getIdVClaimID(String userId, String idvProviderId, String claimUri, int tenantId)
+            throws IdentityVerificationException {
+
+        IdVClaim idVClaim = getIdVClaimDAO().getIDVClaim(userId, claimUri, idvProviderId, tenantId);
+        if (idVClaim == null) {
+            throw IdentityVerificationExceptionMgt.handleClientException(
+                    IdentityVerificationConstants.ErrorMessage.ERROR_IDV_CLAIM_NOT_FOUND,
+                    String.format("user ID: %s, provider ID: %s, claim URI: %s", userId, idvProviderId, claimUri));
+        }
+        return idVClaim.getUuid();
     }
 
     private UniqueIDUserStoreManager getUniqueIdEnabledUserStoreManager(RealmService realmService, String tenantDomain)

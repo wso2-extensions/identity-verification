@@ -99,6 +99,8 @@ public class IdentityVerificationConstants {
         ERROR_INVALID_IDV_CLAIM_ID("10005", "Identity verification claim cannot be found with the " +
                 "claim id: %s."),
         ERROR_INVALID_IDV_VERIFIER("10006", "Identity Verifier: %s is not registered."),
+        ERROR_IDV_CLAIM_NOT_FOUND("10007", 
+            "Identity Verification Claim data not found for %s."),
 
         // Server Errors.
         ERROR_CHECKING_IDV_CLAIM_EXISTENCE("15000",
