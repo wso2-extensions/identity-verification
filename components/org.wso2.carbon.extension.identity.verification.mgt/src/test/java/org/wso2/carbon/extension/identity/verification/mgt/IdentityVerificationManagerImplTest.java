@@ -195,6 +195,8 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
         doNothing().when(identityVerificationClaimDAO).updateIdVClaim(any(IdVClaim.class), anyInt());
         when(identityVerificationDataHolder.getIdVProviderManager()).thenReturn(mockIdVProviderManager);
         when(mockIdVProviderManager.isIdVProviderExists(anyString(), anyInt())).thenReturn(true);
+        when(identityVerificationClaimDAO.getIDVClaim(anyString(), anyString(), anyString(), anyInt())).
+                thenReturn(getIdVClaim());
 
         List<IdVClaim> idVClaims = new ArrayList<>();
         IdVClaim idVClaim = getIdVClaim();
