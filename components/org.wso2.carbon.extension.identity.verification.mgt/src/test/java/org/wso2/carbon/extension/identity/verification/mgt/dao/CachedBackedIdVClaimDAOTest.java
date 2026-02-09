@@ -18,10 +18,11 @@
 
 package org.wso2.carbon.extension.identity.verification.mgt.dao;
 
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,11 +44,11 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils.DB_NAME;
 import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils.ONFIDO;
@@ -59,7 +60,6 @@ import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils
 import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils.setUpCarbonHome;
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID;
 
-@PrepareForTest({PrivilegedCarbonContext.class, IdentityDatabaseUtil.class, IdVClaimByIdCache.class})
 public class CachedBackedIdVClaimDAOTest {
 
     private IdentityVerificationClaimDAO identityVerificationClaimDAO;
@@ -72,6 +72,10 @@ public class CachedBackedIdVClaimDAOTest {
     private final String USER_ID = "715558cb-d9c1-4a23-af09-3d95284d8e2b";
     private final String IDV_PROVIDER_ID = "1c7ce08b-2ebc-4b9e-a107-3b129c019954";
     private final int TENANT_ID = -1234;
+
+    private MockedStatic<PrivilegedCarbonContext> privilegedCarbonContextMockedStatic;
+    private MockedStatic<IdentityDatabaseUtil> identityDatabaseUtilMockedStatic;
+    private MockedStatic<IdVClaimByIdCache> idVClaimByIdCacheMockedStatic;
 
     @BeforeClass
     public void init() throws Exception {
@@ -93,9 +97,9 @@ public class CachedBackedIdVClaimDAOTest {
         IdentityVerificationDataHolder.getInstance().setIdVClaimDAOs(Collections.
                 singletonList(identityVerificationClaimDAO));
 
-        mockStatic(IdVClaimByIdCache.class);
+        idVClaimByIdCacheMockedStatic = mockStatic(IdVClaimByIdCache.class);
         idVClaimByIdCache = mock(IdVClaimByIdCache.class);
-        when(IdVClaimByIdCache.getInstance()).thenReturn(idVClaimByIdCache);
+        idVClaimByIdCacheMockedStatic.when(IdVClaimByIdCache::getInstance).thenReturn(idVClaimByIdCache);
 
         cachedBackedIdVClaimDAO = new CachedBackedIdVClaimDAO(identityVerificationClaimDAO);
         IdentityVerificationDataHolder.getInstance().setIdVClaimDAOs(Collections.
@@ -104,10 +108,25 @@ public class CachedBackedIdVClaimDAOTest {
         idVClaimByIdCacheKey = mock(IdVClaimByIdCacheKey.class);
         idVClaimCacheEntry = mock(IdVClaimCacheEntry.class);
 
-        mockStatic(IdentityDatabaseUtil.class);
-        when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+        identityDatabaseUtilMockedStatic = mockStatic(IdentityDatabaseUtil.class);
+        identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource).thenReturn(dataSourceMap.get(DB_NAME));
 
+        privilegedCarbonContextMockedStatic = mockStatic(PrivilegedCarbonContext.class);
         mockCarbonContextForTenant();
+    }
+
+    @AfterMethod
+    public void tearDownMethod() {
+
+        if (privilegedCarbonContextMockedStatic != null) {
+            privilegedCarbonContextMockedStatic.close();
+        }
+        if (identityDatabaseUtilMockedStatic != null) {
+            identityDatabaseUtilMockedStatic.close();
+        }
+        if (idVClaimByIdCacheMockedStatic != null) {
+            idVClaimByIdCacheMockedStatic.close();
+        }
     }
 
     @Test
@@ -115,14 +134,18 @@ public class CachedBackedIdVClaimDAOTest {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             cachedBackedIdVClaimDAO.addIdVClaimList(idVClaimList, TENANT_ID);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim identityVerificationClaim = cachedBackedIdVClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
             Assert.assertEquals(identityVerificationClaim.getClaimUri(), idVClaimList.get(0).getClaimUri());
@@ -133,14 +156,18 @@ public class CachedBackedIdVClaimDAOTest {
     public void testUpdateIdVClaim() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim updatedClaim = getIdVClaim2();
             cachedBackedIdVClaimDAO.updateIdVClaim(updatedClaim, TENANT_ID);
         }
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim identityVerificationClaim = identityVerificationClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
             Assert.assertFalse(identityVerificationClaim.isVerified());
@@ -152,8 +179,10 @@ public class CachedBackedIdVClaimDAOTest {
         List<IdVClaim> idVClaimList = getTestIdVClaims();
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim identityVerificationClaim = cachedBackedIdVClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
@@ -167,16 +196,20 @@ public class CachedBackedIdVClaimDAOTest {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim identityVerificationClaim = cachedBackedIdVClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
             Assert.assertEquals(identityVerificationClaim.getClaimUri(), idVClaimList.get(0).getClaimUri());
         }
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim identityVerificationClaim = identityVerificationClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
@@ -189,8 +222,10 @@ public class CachedBackedIdVClaimDAOTest {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim[] retrievedIdVClaimList = cachedBackedIdVClaimDAO.
                     getIDVClaims(USER_ID, IDV_PROVIDER_ID, null, TENANT_ID);
@@ -202,8 +237,10 @@ public class CachedBackedIdVClaimDAOTest {
     public void testIsIdVClaimDataExist() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             boolean isIdVClaimDataExist =
                     cachedBackedIdVClaimDAO.isIdVClaimDataExist(USER_ID, IDV_PROVIDER_ID,
@@ -216,8 +253,10 @@ public class CachedBackedIdVClaimDAOTest {
     public void testIsIdVClaimExist() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             boolean isIdVClaimDataExist = cachedBackedIdVClaimDAO.isIdVClaimExist(IDV_CLAIM_UUID, TENANT_ID);
             Assert.assertTrue(isIdVClaimDataExist);
@@ -228,13 +267,17 @@ public class CachedBackedIdVClaimDAOTest {
     public void testDeleteIdVClaim() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             cachedBackedIdVClaimDAO.deleteIdVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
         }
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim identityVerificationClaim = cachedBackedIdVClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
             Assert.assertNull(identityVerificationClaim);
@@ -261,7 +304,8 @@ public class CachedBackedIdVClaimDAOTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
 
         // Stub the necessary method calls to return the mocked connection and prepared statement
-        when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+        identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                .thenReturn(connection);
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
         // Call the deleteIdVClaims method
@@ -281,9 +325,9 @@ public class CachedBackedIdVClaimDAOTest {
 
     private void mockCarbonContextForTenant() {
 
-        mockStatic(PrivilegedCarbonContext.class);
         PrivilegedCarbonContext privilegedCarbonContext = mock(PrivilegedCarbonContext.class);
-        Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        privilegedCarbonContextMockedStatic.when(PrivilegedCarbonContext::getThreadLocalCarbonContext)
+                .thenReturn(privilegedCarbonContext);
         Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn(SUPER_TENANT_DOMAIN_NAME);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(SUPER_TENANT_ID);
         Mockito.when(privilegedCarbonContext.getUsername()).thenReturn("admin");

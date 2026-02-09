@@ -265,24 +265,8 @@
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
+                <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito2</artifactId>
-                <version>${powermock.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-testng-common</artifactId>
-                <version>${powermock.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-testng</artifactId>
-                <version>${powermock.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -290,12 +274,6 @@
                 <artifactId>h2</artifactId>
                 <scope>test</scope>
                 <version>${h2database.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -338,8 +316,8 @@
                 <inherited>true</inherited>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -370,7 +348,7 @@
         <commons-logging.version>1.2</commons-logging.version>
         <jackson-core.version>2.13.2</jackson-core.version>
         <maven.bundle.plugin.version>5.1.9</maven.bundle.plugin.version>
-        <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
         <maven.war.plugin.version>2.2</maven.war.plugin.version>
         <build.helper.maven.plugin.version>1.8</build.helper.maven.plugin.version>
         <spring-boot.version>2.6.8</spring-boot.version>
@@ -384,8 +362,6 @@
         <slf4j.version>1.7.22</slf4j.version>
         <commons-lang3.version>3.10</commons-lang3.version>
         <carbon.identity.framework.version>7.6.20</carbon.identity.framework.version>
-        <maven.compiler.source>14</maven.compiler.source>
-        <maven.compiler.target>14</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <json.wso2.version>3.0.0.wso2v1</json.wso2.version>
         <org.eclipse.osgi.services.version>3.12.0</org.eclipse.osgi.services.version>
@@ -424,8 +400,7 @@
 
         <h2database.version>2.1.210</h2database.version>
         <testng.version>6.9.10</testng.version>
-        <mockito.version>3.8.0</mockito.version>
-        <powermock.version>2.0.9</powermock.version>
+        <mockito.version>5.3.1</mockito.version>
         <maven.checkstyle.plugin.version>3.1.0</maven.checkstyle.plugin.version>
         <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
         <imp.pkg.version.javax.servlet>[3.1.0, 4.0.0)</imp.pkg.version.javax.servlet>

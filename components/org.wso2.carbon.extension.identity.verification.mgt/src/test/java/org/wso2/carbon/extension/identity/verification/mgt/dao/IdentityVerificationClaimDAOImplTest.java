@@ -20,8 +20,7 @@ package org.wso2.carbon.extension.identity.verification.mgt.dao;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.lang.StringUtils;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedStatic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -31,7 +30,6 @@ import org.wso2.carbon.extension.identity.verification.mgt.internal.IdentityVeri
 import org.wso2.carbon.extension.identity.verification.mgt.model.IdVClaim;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -44,17 +42,15 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID;
 import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils.ONFIDO;
 import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils.setUpCarbonHome;
 
-@PrepareForTest({PrivilegedCarbonContext.class, IdentityDatabaseUtil.class, IdentityUtil.class,
-        IdentityTenantUtil.class})
-public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
+public class IdentityVerificationClaimDAOImplTest {
 
     private IdentityVerificationClaimDAO identityVerificationClaimDAO;
     private static Map<String, BasicDataSource> dataSourceMap = new HashMap<>();
@@ -65,6 +61,10 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
     private final String IDV_PROVIDER_ID = "1c7ce08b-2ebc-4b9e-a107-3b129c019954";
     private final int TENANT_ID = -1234;
 
+    private MockedStatic<PrivilegedCarbonContext> privilegedCarbonContextMockedStatic;
+    private MockedStatic<IdentityDatabaseUtil> identityDatabaseUtilMockedStatic;
+    private MockedStatic<IdentityTenantUtil> identityTenantUtilMockedStatic;
+
     @BeforeMethod
     public void setUp() throws Exception {
 
@@ -73,14 +73,27 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
         IdentityVerificationDataHolder.getInstance().
                 setIdVClaimDAOs(Collections.singletonList(identityVerificationClaimDAO));
         initiateH2Database(getFilePath("h2.sql"));
+        
+        privilegedCarbonContextMockedStatic = mockStatic(PrivilegedCarbonContext.class);
+        identityTenantUtilMockedStatic = mockStatic(IdentityTenantUtil.class);
+        identityDatabaseUtilMockedStatic = mockStatic(IdentityDatabaseUtil.class);
+        
         mockCarbonContextForTenant(SUPER_TENANT_ID, SUPER_TENANT_DOMAIN_NAME);
         mockIdentityTenantUtility();
-        mockStatic(IdentityDatabaseUtil.class);
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
 
+        if (privilegedCarbonContextMockedStatic != null) {
+            privilegedCarbonContextMockedStatic.close();
+        }
+        if (identityDatabaseUtilMockedStatic != null) {
+            identityDatabaseUtilMockedStatic.close();
+        }
+        if (identityTenantUtilMockedStatic != null) {
+            identityTenantUtilMockedStatic.close();
+        }
         closeH2Database();
     }
 
@@ -89,14 +102,18 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, TENANT_ID);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim identityVerificationClaim = identityVerificationClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
             Assert.assertEquals(identityVerificationClaim.getClaimUri(), idVClaimList.get(0).getClaimUri());
@@ -108,21 +125,27 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, TENANT_ID);
         }
 
         IdVClaim updatedClaim = getIdVClaim();
         updatedClaim.setIsVerified(false);
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.updateIdVClaim(updatedClaim, TENANT_ID);
         }
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim identityVerificationClaim = identityVerificationClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
             Assert.assertFalse(identityVerificationClaim.isVerified());
@@ -134,14 +157,18 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, -1234);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim identityVerificationClaim = identityVerificationClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
@@ -154,14 +181,18 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, -1234);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim identityVerificationClaim = identityVerificationClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
@@ -174,14 +205,18 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, TENANT_ID);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             IdVClaim[] retrievedIdVClaimList = identityVerificationClaimDAO.
                     getIDVClaims(USER_ID, IDV_PROVIDER_ID, null, TENANT_ID);
@@ -194,14 +229,18 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, -1234);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             boolean isIdVClaimDataExist =
                     identityVerificationClaimDAO.isIdVClaimDataExist(USER_ID, IDV_PROVIDER_ID,
                             "http://wso2.org/claims/dob", TENANT_ID);
@@ -214,14 +253,18 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, -1234);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             boolean isIdVClaimDataExist = identityVerificationClaimDAO.isIdVClaimExist(IDV_CLAIM_UUID, TENANT_ID);
             Assert.assertTrue(isIdVClaimDataExist);
         }
@@ -232,19 +275,25 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, -1234);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.deleteIdVClaim(USER_ID, IDV_CLAIM_UUID, TENANT_ID);
         }
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim identityVerificationClaim = identityVerificationClaimDAO.
                     getIDVClaim(USER_ID, IDV_CLAIM_URI, IDV_PROVIDER_ID, TENANT_ID);
             Assert.assertNull(identityVerificationClaim);
@@ -256,20 +305,26 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
         List<IdVClaim> idVClaimList = getTestIdVClaims();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             identityVerificationClaimDAO.addIdVClaimList(idVClaimList, -1234);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
 
             identityVerificationClaimDAO.deleteIdVClaims(USER_ID, null, null, TENANT_ID);
         }
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource)
+                    .thenReturn(dataSourceMap.get(DB_NAME));
             IdVClaim[] retrievedIdVClaimList = identityVerificationClaimDAO.
                     getIDVClaims(USER_ID, IDV_PROVIDER_ID, null, TENANT_ID);
             Assert.assertEquals(retrievedIdVClaimList.length, 0);
@@ -285,9 +340,9 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
     private void mockCarbonContextForTenant(int tenantId, String tenantDomain) {
 
-        mockStatic(PrivilegedCarbonContext.class);
         PrivilegedCarbonContext privilegedCarbonContext = mock(PrivilegedCarbonContext.class);
-        when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        privilegedCarbonContextMockedStatic.when(PrivilegedCarbonContext::getThreadLocalCarbonContext)
+                .thenReturn(privilegedCarbonContext);
         when(privilegedCarbonContext.getTenantDomain()).thenReturn(tenantDomain);
         when(privilegedCarbonContext.getTenantId()).thenReturn(tenantId);
         when(privilegedCarbonContext.getUsername()).thenReturn("admin");
@@ -295,8 +350,8 @@ public class IdentityVerificationClaimDAOImplTest extends PowerMockTestCase {
 
     private void mockIdentityTenantUtility() {
 
-        mockStatic(IdentityTenantUtil.class);
-        when(IdentityTenantUtil.getTenantDomain(any(Integer.class))).thenReturn(SUPER_TENANT_DOMAIN_NAME);
+        identityTenantUtilMockedStatic.when(() -> IdentityTenantUtil.getTenantDomain(any(Integer.class)))
+                .thenReturn(SUPER_TENANT_DOMAIN_NAME);
     }
 
     private List<IdVClaim> getTestIdVClaims() {
