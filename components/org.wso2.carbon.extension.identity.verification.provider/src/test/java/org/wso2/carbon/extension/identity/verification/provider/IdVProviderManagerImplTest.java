@@ -17,9 +17,9 @@
  */
 package org.wso2.carbon.extension.identity.verification.provider;
 
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedStatic;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -36,11 +36,11 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.getOldIdVProvider;
@@ -52,21 +52,29 @@ import static org.wso2.carbon.extension.identity.verification.provider.util.Test
 /**
  * Test class for IdVProviderManagerImpl.
  */
-@PrepareForTest({IdVProviderDataHolder.class, IdVProvider.class})
-public class IdVProviderManagerImplTest extends PowerMockTestCase {
+public class IdVProviderManagerImplTest {
 
     private IdVProviderManager idVProviderManager;
     private IdVProviderDAO idVProviderDAO;
+    private MockedStatic<IdVProviderDataHolder> idVProviderDataHolderMockedStatic;
 
     @BeforeMethod
     public void setUp() {
 
         idVProviderDAO = mock(IdVProviderDAO.class);
         IdVProviderDataHolder idVProviderDataHolder = mock(IdVProviderDataHolder.class);
-        mockStatic(IdVProviderDataHolder.class);
-        when(IdVProviderDataHolder.getInstance()).thenReturn(idVProviderDataHolder);
+        idVProviderDataHolderMockedStatic = mockStatic(IdVProviderDataHolder.class);
+        idVProviderDataHolderMockedStatic.when(IdVProviderDataHolder::getInstance).thenReturn(idVProviderDataHolder);
         when(idVProviderDataHolder.getIdVProviderDAOs()).thenReturn(Collections.singletonList(idVProviderDAO));
         idVProviderManager = new IdVProviderManagerImpl();
+    }
+
+    @AfterMethod
+    public void tearDown() {
+
+        if (idVProviderDataHolderMockedStatic != null) {
+            idVProviderDataHolderMockedStatic.close();
+        }
     }
 
     @Test
@@ -80,13 +88,9 @@ public class IdVProviderManagerImplTest extends PowerMockTestCase {
     }
 
     @Test(expectedExceptions = IdVProviderMgtClientException.class)
-    public void testGetIdVProviderEmptyIdVProviderID() {
+    public void testGetIdVProviderEmptyIdVProviderID() throws IdVProviderMgtException {
 
-        try {
-            idVProviderManager.getIdVProvider(null, TENANT_ID);
-        } catch (IdVProviderMgtException e) {
-            Assert.assertEquals(e.getErrorCode(), "IdVProvider ID cannot be empty.");
-        }
+        idVProviderManager.getIdVProvider(null, TENANT_ID);
     }
 
     @Test

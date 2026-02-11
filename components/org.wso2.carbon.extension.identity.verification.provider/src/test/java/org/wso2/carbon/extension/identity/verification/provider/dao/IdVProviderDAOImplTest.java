@@ -17,9 +17,11 @@
  */
 package org.wso2.carbon.extension.identity.verification.provider.dao;
 
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -44,11 +46,11 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 import static org.wso2.carbon.extension.identity.verification.provider.util.TestUtils.createExpressionNodeList;
@@ -66,13 +68,17 @@ import static org.wso2.carbon.extension.identity.verification.provider.util.Test
 /**
  * Test class for IdVProviderDAOImpl.
  */
-@PrepareForTest({IdentityDatabaseUtil.class, IdVPSecretProcessor.class})
 public class IdVProviderDAOImplTest {
 
     private IdVProviderDAO idVProviderDAO;
     private SecretManagerImpl secretManager;
     private SecretResolveManagerImpl secretResolveManager;
     private static final String DB_NAME = "test";
+
+    private MockedStatic<IdentityDatabaseUtil> identityDatabaseUtilMockedStatic;
+    private MockedConstruction<IdVPSecretProcessor> idVPSecretProcessorMockedConstruction;
+    private MockedConstruction<SecretManagerImpl> secretManagerMockedConstruction;
+    private MockedConstruction<SecretResolveManagerImpl> secretResolveManagerMockedConstruction;
 
     @BeforeClass
     public void init() throws Exception {
@@ -85,17 +91,49 @@ public class IdVProviderDAOImplTest {
 
         idVProviderDAO = new IdVProviderDAOImpl();
         IdVProviderDataHolder.getInstance().setIdVProviderDAOs(Collections.singletonList(idVProviderDAO));
-        mockStatic(IdentityDatabaseUtil.class);
+        
+        identityDatabaseUtilMockedStatic = mockStatic(IdentityDatabaseUtil.class);
         secretManager = mock(SecretManagerImpl.class);
         secretResolveManager = mock(SecretResolveManagerImpl.class);
         IdVPSecretProcessor idVPSecretProcessor = mock(IdVPSecretProcessor.class);
 
-        when(IdentityDatabaseUtil.getDataSource()).thenReturn(dataSourceMap.get(DB_NAME));
-        whenNew(IdVPSecretProcessor.class).withNoArguments().thenReturn(idVPSecretProcessor);
-        whenNew(SecretManagerImpl.class).withNoArguments().thenReturn(secretManager);
-        whenNew(SecretResolveManagerImpl.class).withNoArguments().thenReturn(secretResolveManager);
+        identityDatabaseUtilMockedStatic.when(IdentityDatabaseUtil::getDataSource).thenReturn(dataSourceMap.get(DB_NAME));
+        
+        idVPSecretProcessorMockedConstruction = mockConstruction(IdVPSecretProcessor.class, (mock, context) -> {
+            // Return the input provider as-is for encrypt/decrypt operations
+            doAnswer(invocation -> invocation.getArgument(0)).when(mock).decryptAssociatedSecrets(any(IdVProvider.class));
+            doAnswer(invocation -> invocation.getArgument(0)).when(mock).encryptAssociatedSecrets(any(IdVProvider.class));
+        });
+        secretManagerMockedConstruction = mockConstruction(SecretManagerImpl.class, (mock, context) -> {
+            doReturn(new Secret()).when(mock).addSecret(anyString(), any(Secret.class));
+            SecretType secretType = new SecretType();
+            secretType.setId("433df096-62b7-4a36-b3eb-1bed9150ed35");
+            doReturn(secretType).when(mock).getSecretType(anyString());
+        });
+        secretResolveManagerMockedConstruction = mockConstruction(SecretResolveManagerImpl.class, (mock, context) -> {
+            ResolvedSecret resolvedSecret = new ResolvedSecret();
+            resolvedSecret.setResolvedSecretValue("1234-5678-91234-654246");
+            doReturn(resolvedSecret).when(mock).getResolvedSecret(anyString(), anyString());
+        });
 
         setUpSecret();
+    }
+
+    @AfterMethod
+    public void tearDownMethod() {
+
+        if (identityDatabaseUtilMockedStatic != null) {
+            identityDatabaseUtilMockedStatic.close();
+        }
+        if (idVPSecretProcessorMockedConstruction != null) {
+            idVPSecretProcessorMockedConstruction.close();
+        }
+        if (secretManagerMockedConstruction != null) {
+            secretManagerMockedConstruction.close();
+        }
+        if (secretResolveManagerMockedConstruction != null) {
+            secretResolveManagerMockedConstruction.close();
+        }
     }
 
     @AfterClass
@@ -109,25 +147,24 @@ public class IdVProviderDAOImplTest {
 
         // Add the first IdVProvider
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             IdVProvider identityVerificationProvider1 = getTestIdVProvider(1);
-            doReturn(false).when(secretManager).isSecretExist(anyString(), anyString());
             idVProviderDAO.addIdVProvider(identityVerificationProvider1, TENANT_ID);
         }
 
         // Add the second IdVProvider
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             IdVProvider identityVerificationProvider2 = getTestIdVProvider(2);
-            doReturn(false).when(secretManager).isSecretExist(anyString(), anyString());
             idVProviderDAO.addIdVProvider(identityVerificationProvider2, TENANT_ID);
         }
 
         // Verify the first IdVProvider was added correctly
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
             Assert.assertEquals(idVProvider.getIdVProviderName(), IDV_PROVIDER_1_NAME);
         }
@@ -148,9 +185,8 @@ public class IdVProviderDAOImplTest {
     public void testGetIdVProvider(String idVProviderId, boolean result) throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             IdVProvider idVProvider = idVProviderDAO.getIdVProvider(idVProviderId, TENANT_ID);
             Assert.assertEquals(idVProvider != null, result);
         }
@@ -160,9 +196,8 @@ public class IdVProviderDAOImplTest {
     public void testGetIdVProviders() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             List<IdVProvider> identityVerificationProviders =
                     idVProviderDAO.getIdVProviders(2, 0, TENANT_ID);
             Assert.assertEquals(identityVerificationProviders.size(), 2);
@@ -184,9 +219,8 @@ public class IdVProviderDAOImplTest {
     public void testGetIdVPByName(String idVProviderName, boolean result) throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             IdVProvider idVProvider = idVProviderDAO.getIdVProviderByName(idVProviderName,  TENANT_ID);
             Assert.assertEquals(idVProvider != null, result);
         }
@@ -196,9 +230,8 @@ public class IdVProviderDAOImplTest {
     public void testGetCountOfIdVProviders() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             int countOfIdVProviders = idVProviderDAO.getCountOfIdVProviders(TENANT_ID);
             Assert.assertEquals(countOfIdVProviders, 2);
         }
@@ -227,9 +260,8 @@ public class IdVProviderDAOImplTest {
             throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             List<IdVProvider> identityVerificationProviders =
                     idVProviderDAO.getIdVProviders(limit, offset, expressionNodes, TENANT_ID);
             Assert.assertEquals(identityVerificationProviders.size(), count);
@@ -257,9 +289,8 @@ public class IdVProviderDAOImplTest {
                                                                int limit, int offset) throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             assertThrows(IdVProviderMgtException.class,
                     () -> idVProviderDAO.getIdVProviders(limit, offset, expressionNodes, TENANT_ID));
         }
@@ -280,9 +311,8 @@ public class IdVProviderDAOImplTest {
             throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             int countOfIdVProviders = idVProviderDAO.getCountOfIdVProviders(TENANT_ID, expressionNodes);
             Assert.assertEquals(countOfIdVProviders, totalCount);
         }
@@ -305,9 +335,8 @@ public class IdVProviderDAOImplTest {
     public void testGetCountOfFilteredIdVProvidersException(List<ExpressionNode> expressionNodes) throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             assertThrows(IdVProviderMgtException.class,
                     () -> idVProviderDAO.getCountOfIdVProviders(TENANT_ID, expressionNodes));
         }
@@ -317,9 +346,8 @@ public class IdVProviderDAOImplTest {
     public void testIsIdVProviderExists() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             boolean isIdVProviderExists = idVProviderDAO.isIdVProviderExists(IDV_PROVIDER_1_UUID, TENANT_ID);
             Assert.assertTrue(isIdVProviderExists);
         }
@@ -329,17 +357,16 @@ public class IdVProviderDAOImplTest {
     public void testUpdateIdVProviderExists() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             IdVProvider idVProvider = getOldIdVProvider();
             IdVProvider updatedIdVProvider = getTestIdVProvider(1);
-            doReturn(false).when(secretManager).isSecretExist(anyString(), anyString());
             idVProviderDAO.updateIdVProvider(idVProvider, updatedIdVProvider, TENANT_ID);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
             Assert.assertTrue(idVProvider.isEnabled());
         }
@@ -349,9 +376,8 @@ public class IdVProviderDAOImplTest {
     public void testIsIdVProviderExistsByName() throws Exception {
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
-            setUpResolvedSecret();
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             boolean isIdVProviderExists = idVProviderDAO.isIdVProviderExistsByName(IDV_PROVIDER_1_NAME, TENANT_ID);
             Assert.assertTrue(isIdVProviderExists);
         }
@@ -360,16 +386,15 @@ public class IdVProviderDAOImplTest {
     @Test(priority = 13)
     public void testDeleteIdVProvider() throws Exception {
 
-        setUpResolvedSecret();
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             idVProviderDAO.deleteIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
         }
 
         try (Connection connection = getConnection(DB_NAME)) {
-            when(IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
-            doReturn(true).when(secretManager).isSecretExist(anyString(), anyString());
+            identityDatabaseUtilMockedStatic.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
             IdVProvider idVProvider = idVProviderDAO.getIdVProvider(IDV_PROVIDER_1_UUID, TENANT_ID);
             Assert.assertNull(idVProvider);
         }

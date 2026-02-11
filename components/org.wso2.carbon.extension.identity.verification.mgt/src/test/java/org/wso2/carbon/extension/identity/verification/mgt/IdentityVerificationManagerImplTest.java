@@ -22,12 +22,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils.IDV_CLAIM_URI;
 import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils.IDV_CLAIM_UUID;
@@ -41,10 +41,10 @@ import static org.wso2.carbon.extension.identity.verification.mgt.util.TestUtils
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID;
 
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
-import org.powermock.reflect.Whitebox;
+import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -57,23 +57,19 @@ import org.wso2.carbon.extension.identity.verification.mgt.model.IdVProperty;
 import org.wso2.carbon.extension.identity.verification.mgt.model.IdentityVerifierData;
 import org.wso2.carbon.extension.identity.verification.provider.IdVProviderManager;
 import org.wso2.carbon.extension.identity.verification.provider.model.IdVProvider;
-import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UniqueIDUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@PrepareForTest({PrivilegedCarbonContext.class, IdentityDatabaseUtil.class, IdentityUtil.class,
-        IdentityTenantUtil.class, IdentityVerificationDataHolder.class, IdVProviderManager.class})
-public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
+public class IdentityVerificationManagerImplTest {
 
     private IdentityVerificationManagerImpl identityVerificationManager;
     @Mock
@@ -95,21 +91,51 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
     @Mock
     IdVProvider idVProvider;
 
+    private MockedStatic<PrivilegedCarbonContext> privilegedCarbonContextMockedStatic;
+    private MockedStatic<IdentityTenantUtil> identityTenantUtilMockedStatic;
+    private MockedStatic<IdentityVerificationDataHolder> identityVerificationDataHolderMockedStatic;
+
     @BeforeMethod
     public void setUp() throws Exception {
 
+        MockitoAnnotations.openMocks(this);
         setUpCarbonHome();
+        
+        privilegedCarbonContextMockedStatic = mockStatic(PrivilegedCarbonContext.class);
+        identityTenantUtilMockedStatic = mockStatic(IdentityTenantUtil.class);
+        identityVerificationDataHolderMockedStatic = mockStatic(IdentityVerificationDataHolder.class);
+        
         mockCarbonContextForTenant();
         mockIdentityTenantUtility();
         mockIsExistingUserCheck();
 
-        mockStatic(IdentityVerificationDataHolder.class);
         when(IdentityVerificationDataHolder.getInstance()).thenReturn(identityVerificationDataHolder);
         List<IdentityVerificationClaimDAO> daoList = new ArrayList<>();
         daoList.add(identityVerificationClaimDAO);
         when(identityVerificationDataHolder.getIdVClaimDAOs()).thenReturn(daoList);
         identityVerificationManager = IdentityVerificationManagerImpl.getInstance();
-        Whitebox.setInternalState(identityVerificationManager, "idVClaimDAOs", daoList);
+        setInternalState(identityVerificationManager, "idVClaimDAOs", daoList);
+    }
+
+    @AfterMethod
+    public void tearDown() {
+
+        if (privilegedCarbonContextMockedStatic != null) {
+            privilegedCarbonContextMockedStatic.close();
+        }
+        if (identityTenantUtilMockedStatic != null) {
+            identityTenantUtilMockedStatic.close();
+        }
+        if (identityVerificationDataHolderMockedStatic != null) {
+            identityVerificationDataHolderMockedStatic.close();
+        }
+    }
+
+    private void setInternalState(Object target, String fieldName, Object value) throws Exception {
+
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
     }
 
     @Test
@@ -244,9 +270,9 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
 
     private void mockCarbonContextForTenant() {
 
-        mockStatic(PrivilegedCarbonContext.class);
         PrivilegedCarbonContext privilegedCarbonContext = mock(PrivilegedCarbonContext.class);
-        when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        privilegedCarbonContextMockedStatic.when(PrivilegedCarbonContext::getThreadLocalCarbonContext)
+                .thenReturn(privilegedCarbonContext);
         when(privilegedCarbonContext.getTenantDomain()).thenReturn(SUPER_TENANT_DOMAIN_NAME);
         when(privilegedCarbonContext.getTenantId()).thenReturn(SUPER_TENANT_ID);
         when(privilegedCarbonContext.getUsername()).thenReturn("admin");
@@ -254,8 +280,8 @@ public class IdentityVerificationManagerImplTest extends PowerMockTestCase {
 
     private void mockIdentityTenantUtility() {
 
-        mockStatic(IdentityTenantUtil.class);
-        when(IdentityTenantUtil.getTenantDomain(any(Integer.class))).thenReturn(SUPER_TENANT_DOMAIN_NAME);
+        identityTenantUtilMockedStatic.when(() -> IdentityTenantUtil.getTenantDomain(any(Integer.class)))
+                .thenReturn(SUPER_TENANT_DOMAIN_NAME);
     }
 
     private IdVClaim[] getIdVClaims() {

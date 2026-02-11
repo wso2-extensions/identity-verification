@@ -20,6 +20,7 @@ package org.wso2.carbon.extension.identity.verification.provider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.annotation.bundle.Capability;
 import org.wso2.carbon.extension.identity.verification.provider.dao.IdVProviderDAO;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtClientException;
 import org.wso2.carbon.extension.identity.verification.provider.exception.IdVProviderMgtException;
@@ -51,6 +52,13 @@ import static org.wso2.carbon.extension.identity.verification.provider.util.IdVP
 /**
  * This class contains the implementation for the IdVProviderManager.
  */
+@Capability(
+        namespace = "osgi.service",
+        attribute = {
+                "objectClass=org.wso2.carbon.extension.identity.verification.provider.IdVProviderManager",
+                "service.scope=singleton"
+        }
+)
 public class IdVProviderManagerImpl implements IdVProviderManager {
 
     private static final Log log = LogFactory.getLog(IdVProviderManagerImpl.class);
