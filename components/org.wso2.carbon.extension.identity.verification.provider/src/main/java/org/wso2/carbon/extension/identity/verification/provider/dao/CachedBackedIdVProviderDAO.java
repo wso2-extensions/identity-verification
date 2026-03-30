@@ -68,7 +68,7 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
                         idVProviderUuid, tenantId));
             }
             idVProvider = idVProviderManagerDAO.getIdVProvider(idVProviderUuid, tenantId);
-            addIdVPToCache(idVProvider, tenantId);
+            addIdVPToCacheOnRead(idVProvider, tenantId);
         }
         return idVProvider;
     }
@@ -159,7 +159,7 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
                         idVPName, tenantId));
             }
             idVProvider = idVProviderManagerDAO.getIdVProviderByName(idVPName, tenantId);
-            addIdVPToCache(idVProvider, tenantId);
+            addIdVPToCacheOnRead(idVProvider, tenantId);
         }
         return idVProvider;
     }
@@ -214,6 +214,21 @@ public class CachedBackedIdVProviderDAO implements IdVProviderDAO {
                     idVProvider.getIdVProviderUuid()));
         }
         idVProviderByIdCache.addToCache(idVProviderByIdCacheKey, idVProviderCacheEntry, tenantId);
+    }
+
+    private void addIdVPToCacheOnRead(IdVProvider idVProvider, int tenantId) {
+
+        if (idVProvider == null) {
+            return;
+        }
+        IdVProviderByIdCacheKey idVProviderByIdCacheKey =
+                new IdVProviderByIdCacheKey(idVProvider.getIdVProviderUuid());
+        IdVProviderCacheEntry idVProviderCacheEntry = new IdVProviderCacheEntry(idVProvider);
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("IdVProvider by id cache %s is populated on read",
+                    idVProvider.getIdVProviderUuid()));
+        }
+        idVProviderByIdCache.addToCacheOnRead(idVProviderByIdCacheKey, idVProviderCacheEntry, tenantId);
     }
 
     private void deleteIdVPFromCache(IdVProvider idVProvider, int tenantId) {
