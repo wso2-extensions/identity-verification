@@ -347,6 +347,25 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -441,6 +460,7 @@
         <encoder-jsp.version>1.2.2</encoder-jsp.version>
         <carbon.kernel.version>4.9.0</carbon.kernel.version>
         <encoder.wso2.version>1.2.0.wso2v1</encoder.wso2.version>
+        <jacoco.version>0.8.12</jacoco.version>
 
         <!--Carbon Multi Tenancy-->
         <carbon.multitenancy.version>4.11.8</carbon.multitenancy.version>
