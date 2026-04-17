@@ -67,7 +67,7 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
             throws IdentityVerificationException {
 
         IdVClaim idVClaim = identityVerificationClaimDAO.getIDVClaim(userId, idvClaimUri, idVProviderId, tenantId);
-        addIdVClaimToCache(idVClaim, tenantId);
+        addIdVClaimToCacheOnRead(idVClaim, tenantId);
         return idVClaim;
     }
 
@@ -88,7 +88,7 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
                 log.debug(message);
             }
             idVClaim = identityVerificationClaimDAO.getIDVClaim(userId, idVClaimId, tenantId);
-            addIdVClaimToCache(idVClaim, tenantId);
+            addIdVClaimToCacheOnRead(idVClaim, tenantId);
         }
         return idVClaim;
     }
@@ -175,6 +175,20 @@ public class CachedBackedIdVClaimDAO implements IdentityVerificationClaimDAO {
             log.debug(message);
         }
         idVClaimByIdCache.addToCache(idVClaimByIdCacheKey, idVClaimCacheEntry, tenantId);
+    }
+
+    private void addIdVClaimToCacheOnRead(IdVClaim idVClaim, int tenantId) {
+
+        if (idVClaim == null) {
+            return;
+        }
+        IdVClaimByIdCacheKey idVClaimByIdCacheKey = new IdVClaimByIdCacheKey(idVClaim.getUuid());
+        IdVClaimCacheEntry idVClaimCacheEntry = new IdVClaimCacheEntry(idVClaim);
+        if (log.isDebugEnabled()) {
+            String message = String.format("IdVClaim by id cache %s is populated on read", idVClaim.getUuid());
+            log.debug(message);
+        }
+        idVClaimByIdCache.addToCacheOnRead(idVClaimByIdCacheKey, idVClaimCacheEntry, tenantId);
     }
 
     private void deleteIdVPFromCache(IdVClaim idVClaim, int tenantId) {
